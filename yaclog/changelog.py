@@ -62,44 +62,43 @@ class Changelog:
                 if line.isspace():
                     # skip empty lines
                     pass
-                elif line.startswith('## '):
-                    # line is a version header
+                elif match := re.fullmatch(
+                        r'^##\s+(?P<name>\S*)(?:\s+-\s+(?P<date>\S+))?\s*?(?P<extra>.*?)\s*#*$', line):
+                    # this is a version header in the form '## Name (- date) (tags*) (#*)'
                     version = VersionEntry()
                     section = ''
-                    split = line.removeprefix('##').strip().split()
 
-                    version.name, version.link, version.link_id = _strip_link(split[0])
+                    version.name, version.link, version.link_id = _strip_link(match['name'])
 
-                    if len(split) > 1:
-                        if split[1] == '-':
-                            split.remove('-')
-
+                    if match['date']:
                         try:
-                            version.date = datetime.date.fromisoformat(split[1].strip(string.punctuation))
+                            version.date = datetime.date.fromisoformat(match['date'].strip(string.punctuation))
                         except ValueError:
                             version.date = None
 
-                        version.tags = [s.strip(brackets) for s in split[2:]]
+                    if match['extra']:
+                        version.tags = [s.strip('[]') for s in re.findall(r'\[.*?]', match['extra'])]
+
                     self.versions.append(version)
 
-                elif line.startswith('### '):
-                    # line is a version section header
-                    section = line.removeprefix('###').strip().title()
+                elif match := re.fullmatch(r'###\s+(\S*?)(\s+#*)?', line):
+                    # this is a version section header in the form '### Name' or '### Name ###'
+                    section = match[1].title()
                     if section not in version.sections.keys():
                         version.sections[section] = []
 
+                elif match := re.fullmatch(r'\[(\S*)]:\s*(\S*)\n', line):
+                    # this is a link definition in the form '[id]: link', so add it to the link table
+                    self.links[match[1].lower()] = match[2]
+
+                elif line[0] in bullets or last_line.isspace():
+                    # bullet point or new paragraph
+                    # bullet points are preserved since some people like to use '+', '-' or '*' for different things
+                    version.sections[section].append(line.strip())
+
                 else:
-                    # line is an entry
-                    if match := re.fullmatch(r'\[(.*)]:\s*(.*)\n', line):
-                        # this is a link, so a it to the link table
-                        self.links[match[1].lower()] = match[2]
-                    elif line[0] in bullets or last_line.isspace():
-                        # bullet point or new paragraph
-                        # bullet points are preserved since some people like to use '+', '-' or '*' for different things
-                        version.sections[section].append(line.strip())
-                    else:
-                        # not a bullet point, and no whitespace on last line, so append to the last entry
-                        version.sections[section][-1] += '\n' + line.strip()
+                    # not a bullet point, and no whitespace on last line, so append to the last entry
+                    version.sections[section][-1] += '\n' + line.strip()
 
                 last_line = line
                 line = fp.readline()
