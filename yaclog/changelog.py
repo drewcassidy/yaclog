@@ -45,15 +45,14 @@ class VersionEntry:
         self.link: str = ''
 
     def __str__(self) -> str:
-        if self.name.lower() == 'unreleased':
-            return f'## {self.name}'
+        segments = ['##', self.name]
 
-        date_str = self.date.isoformat() if self.date else 'UNKNOWN'
-        line = f'## {self.name} - {date_str}'
-        for tag in self.tags:
-            line += ' [' + tag.upper() + ']'
+        if self.date:
+            segments += ['-', self.date.isoformat()]
 
-        return line
+        segments += [f'[{t.upper()}]' for t in self.tags]
+
+        return ' '.join(segments)
 
 
 class Changelog:
