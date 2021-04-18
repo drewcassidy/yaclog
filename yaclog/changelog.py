@@ -71,12 +71,30 @@ class Changelog:
             self.lines = fp.readlines()
 
         section = ''
-        last_line = ''
         in_block = False
+        in_code = False
 
         # loop over lines in the file
         for line_no, line in enumerate(self.lines):
-            if match := re.fullmatch(
+            if in_code:
+                if re.match(r'^```', line):
+                    line = '```'
+                    in_code = False
+                    in_block = False
+
+                if len(self.versions) == 0:
+                    self.header += line
+                else:
+                    self.versions[-1].sections[section][-1] += line
+
+            elif re.match(r'^```', line):
+                in_code = True
+                if len(self.versions) == 0:
+                    self.header += line
+                else:
+                    self.versions[-1].sections[section].append(line)
+
+            elif match := re.fullmatch(
                     r'^##\s+(?P<name>\S*)(?:\s+-\s+(?P<date>\S+))?\s*?(?P<extra>.*?)\s*#*$', line):
                 # this is a version header in the form '## Name (- date) (tags*) (#*)'
                 section = ''
@@ -118,8 +136,6 @@ class Changelog:
                 # not a bullet point, header, etc, and not in a block, so this is the start of a new paragraph
                 self.versions[-1].sections[section].append(line.strip())
                 in_block = True
-
-            last_line = line
 
         # handle links
         for version in self.versions:
