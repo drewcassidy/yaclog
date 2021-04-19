@@ -66,7 +66,8 @@ class VersionEntry:
         self.date: Optional[datetime.date] = None
         self.tags: List[str] = []
         self.link: str = ''
-        self.line_no = -1
+        self.link_id: str = None
+        self.line_no: int = -1
 
     def __str__(self) -> str:
         if self.link:
@@ -74,8 +75,11 @@ class VersionEntry:
         else:
             segments = [self.name]
 
+        if self.date or len(self.tags) > 0:
+            segments.append('-')
+
         if self.date:
-            segments += ['-', self.date.isoformat()]
+            segments.append(self.date.isoformat())
 
         segments += [f'[{t.upper()}]' for t in self.tags]
 
@@ -159,24 +163,36 @@ class Changelog:
             if segment[2] == 'h2':
                 # start of a version
 
-                split = text.rstrip('-').strip('#').strip().split()
+                slug = text.rstrip('-').strip('#').strip()
+                split = slug.split()
                 if '-' in split:
                     split.remove('-')
 
                 version = VersionEntry()
                 section = ''
 
-                version.name, version.link, version.link_id = _strip_link(split[0])
+                version.name = slug
                 version.line_no = segment[0]
+                tags = []
+                date = []
 
-                if len(split) > 1:
-                    try:
-                        version.date = datetime.date.fromisoformat(split[1].strip(string.punctuation))
-                    except ValueError:
-                        version.date = None
+                for word in split[1:]:
+                    if match := re.match(r'\d{4}-\d{2}-\d{2}', word):
+                        # date
+                        try:
+                            date = datetime.date.fromisoformat(match[0])
+                        except ValueError:
+                            break
+                    elif match := re.match(r'^\[(?P<tag>\S*)]', word):
+                        tags.append(match['tag'])
+                    else:
+                        break
 
-                if len(split) > 2:
-                    version.tags = [s.strip('[]') for s in split[2:]]
+                else:
+                    # matches the schema
+                    version.name, version.link, version.link_id = _strip_link(split[0])
+                    version.date = date
+                    version.tags = tags
 
                 self.versions.append(version)
 
