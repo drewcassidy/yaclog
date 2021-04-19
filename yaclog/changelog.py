@@ -23,6 +23,13 @@ from typing import List, Tuple, Optional
 bullets = '+-*'
 brackets = '[]'
 
+code_regex = re.compile(r'^```')
+header_regex = re.compile(r'^(?P<hashes>#+)\s+(?P<contents>[^#]+)(?:\s+#+)?$')
+under1_regex = re.compile(r'^=+\s*$')
+under2_regex = re.compile(r'^-+\s*$')
+bullet_regex = re.compile(r'^[-+*]')
+linkid_regex = re.compile(r'^\[(?P<link_id>\S*)]:\s*(?P<link>.*)')
+
 
 def _strip_link(token):
     if link_literal := re.fullmatch(r'\[(.*?)]\((.*?)\)', token):
@@ -34,6 +41,22 @@ def _strip_link(token):
         return link_id[1], None, link_id[2].lower()
 
     return token, None, None
+
+
+def _join_markdown(segments: List[str]) -> str:
+    text: List[str] = []
+    last_bullet = False
+    for segment in segments:
+        is_bullet = bullet_regex.match(segment) and '\n' not in segment
+
+        if not is_bullet or not last_bullet:
+            text.append('')
+
+        text.append(segment)
+
+        last_bullet = is_bullet
+
+    return '\n'.join(text).strip()
 
 
 class VersionEntry:
@@ -64,7 +87,6 @@ class Changelog:
         self.path = path
         self.header = ''
         self.versions = []
-        self.links = {}
 
         # Read file
         with open(path, 'r') as fp:
@@ -74,69 +96,104 @@ class Changelog:
         in_block = False
         in_code = False
 
-        # loop over lines in the file
+        self.links = {}
+
+        links = {}
+        segments: List[Tuple[int, List[str], str]] = []
+        header_segments = []
+
         for line_no, line in enumerate(self.lines):
             if in_code:
-                if re.match(r'^```', line):
-                    line = '```'
+                # this is the contents of a code block
+                segments[-1][1].append(line)
+                if code_regex.match(line):
                     in_code = False
                     in_block = False
 
-                if len(self.versions) == 0:
-                    self.header += line
-                else:
-                    self.versions[-1].sections[section][-1] += line
-
-            elif re.match(r'^```', line):
+            elif code_regex.match(line):
+                # this is the start of a code block
                 in_code = True
-                if len(self.versions) == 0:
-                    self.header += line
-                else:
-                    self.versions[-1].sections[section].append(line)
+                segments.append((line_no, [line], 'code'))
 
-            elif match := re.fullmatch(
-                    r'^##\s+(?P<name>\S*)(?:\s+-\s+(?P<date>\S+))?\s*?(?P<extra>.*?)\s*#*$', line):
-                # this is a version header in the form '## Name (- date) (tags*) (#*)'
-                section = ''
+            elif under1_regex.match(line) and in_block and len(segments[-1][1]) == 1 and segments[-1][2] == 'p':
+                # this is an underline for a setext-style H1
+                # ugly but it works
+                last = segments.pop()
+                segments.append((last[0], last[1] + [line], 'h1'))
+
+            elif under2_regex.match(line) and in_block and len(segments[-1][1]) == 1 and segments[-1][2] == 'p':
+                # this is an underline for a setext-style H2
+                # ugly but it works
+                last = segments.pop()
+                segments.append((last[0], last[1] + [line], 'h2'))
+
+            elif bullet_regex.match(line):
+                in_block = True
+                segments.append((line_no, [line], 'li'))
+
+            elif match := header_regex.match(line):
+                # this is a header
+                kind = f'h{len(match["hashes"])}'
+                segments.append((line_no, [line], kind))
                 in_block = False
-                self._add_version_header(match['name'], match['date'], match['extra'], line_no)
 
-            elif match := re.fullmatch(r'\[(\S*)]:\s*(\S*)\n', line):
+            elif match := linkid_regex.match(line):
                 # this is a link definition in the form '[id]: link', so add it to the link table
-                self.links[match[1].lower()] = match[2]
-
-            elif len(self.versions) == 0:
-                # we haven't encountered any version headers yet,
-                # so its best to just add this line to the header string
-                self.header += line
+                links[match['link_id'].lower()] = match['link']
 
             elif line.isspace():
                 # skip empty lines
                 in_block = False
-                pass
-
-            elif match := re.fullmatch(r'###\s+(\S*?)(\s+#*)?', line):
-                # this is a version section header in the form '### Name' or '### Name ###'
-                section = match[1].title()
-                if section not in self.versions[-1].sections.keys():
-                    self.versions[-1].sections[section] = []
-                in_block = False
-
-            elif line[0] in '+-*#':
-                # bullet point or subheader
-                # subheaders are mostly preserved for round-trip accuracy, and are discouraged in favor of bullet points
-                # bullet points are preserved since some people like to use '+', '-' or '*' for different things
-                self.versions[-1].sections[section].append(line.strip())
-                in_block = True
 
             elif in_block:
-                # not a bullet point, header, etc, and in a block, so this line should be appended to the last
-                self.versions[-1].sections[section][-1] += '\n' + line.strip()
+                # this is a line to be added to a paragraph
+                segments[-1][1].append(line)
+            else:
+                # this is a new paragraph
+                in_block = True
+                segments.append((line_no, [line], 'p'))
+
+        for segment in segments:
+            text = ''.join(segment[1]).strip()
+
+            if segment[2] == 'h2':
+                # start of a version
+
+                split = text.rstrip('-').strip('#').strip().split()
+                if '-' in split:
+                    split.remove('-')
+
+                version = VersionEntry()
+                section = ''
+
+                version.name, version.link, version.link_id = _strip_link(split[0])
+                version.line_no = segment[0]
+
+                if len(split) > 1:
+                    try:
+                        version.date = datetime.date.fromisoformat(split[1].strip(string.punctuation))
+                    except ValueError:
+                        version.date = None
+
+                if len(split) > 2:
+                    version.tags = [s.strip('[]') for s in split[2:]]
+
+                self.versions.append(version)
+
+            elif len(self.versions) == 0:
+                # we haven't encountered any version headers yet,
+                # so its best to just add this line to the header string
+                header_segments.append(text)
+
+            elif segment[2] == 'h3':
+                # start of a version section
+                section = text.strip('#').strip()
+                if section not in self.versions[-1].sections.keys():
+                    self.versions[-1].sections[section] = []
 
             else:
-                # not a bullet point, header, etc, and not in a block, so this is the start of a new paragraph
-                self.versions[-1].sections[section].append(line.strip())
-                in_block = True
+                # change log entry
+                self.versions[-1].sections[section].append(text)
 
         # handle links
         for version in self.versions:
@@ -153,7 +210,7 @@ class Changelog:
                 version.link = self.links.pop(version.link_id)
 
         # strip whitespace from header
-        self.header = self.header.strip()
+        self.header = _join_markdown(header_segments)
 
     def write(self, path: os.PathLike = None):
         if path is None:
@@ -176,13 +233,9 @@ class Changelog:
                     if section:
                         fp.write(f'### {section}\n\n')
 
-                    for entry in version.sections[section]:
-                        fp.write(entry + '\n')
-                        if entry[0] not in '-+*':
-                            fp.write('\n')
-
                     if len(version.sections[section]) > 0:
-                        fp.write('\n')
+                        fp.write(_join_markdown(version.sections[section]))
+                        fp.write('\n\n')
 
             for link_id, link in v_links.items():
                 fp.write(f'[{link_id.lower()}]: {link}\n')
