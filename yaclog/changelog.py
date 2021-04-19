@@ -240,38 +240,3 @@ class Changelog:
 
             for link_id, link in v_links.items():
                 fp.write(f'[{link_id.lower()}]: {link}\n')
-
-    def _add_version_header(self, name, date, extra, line_no):
-        version = VersionEntry()
-
-        version.name, version.link, version.link_id = _strip_link(name)
-        version.line_no = line_no
-
-        if date:
-            try:
-                version.date = datetime.date.fromisoformat(date.strip(string.punctuation))
-            except ValueError:
-                version.date = None
-
-        if extra:
-            version.tags = [s.strip('[]') for s in re.findall(r'\[.*?]', extra)]
-
-        self.versions.append(version)
-
-
-def read_version_header(line: str) -> Tuple[str, datetime.date, List[str]]:
-    split = line.removeprefix('##').strip().split()
-    name = split[0]
-    date = datetime.date.fromisoformat(split[2]) if len(split) > 2 else None
-    tags = [s.removeprefix('[').removesuffix(']') for s in split[3:]]
-
-    return name, date, tags
-
-
-def write_version_header(name: str, date: datetime.date, tags=None) -> str:
-    line = f'## {name} - {date.isoformat()}'
-    if tags:
-        for tag in tags:
-            line += ' [' + tag.upper() + ']'
-
-    return line
