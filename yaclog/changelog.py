@@ -200,17 +200,18 @@ class Changelog:
             if match := re.fullmatch(r'\[(.*)]', version.name):
                 # ref-matched link
                 link_id = match[1].lower()
-                if link_id in self.links:
-                    version.link = self.links.pop(link_id)
+                if link_id in links:
+                    version.link = links.pop(link_id)
                     version.link_id = None
                     version.name = match[1]
 
-            elif version.link_id in self.links:
+            elif version.link_id in links:
                 # id-matched link
-                version.link = self.links.pop(version.link_id)
+                version.link = links.pop(version.link_id)
 
         # strip whitespace from header
         self.header = _join_markdown(header_segments)
+        self.links = links
 
     def write(self, path: os.PathLike = None):
         if path is None:
