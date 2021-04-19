@@ -112,6 +112,7 @@ class Changelog:
 
             elif line.isspace():
                 # skip empty lines
+                in_block = False
                 pass
 
             elif match := re.fullmatch(r'###\s+(\S*?)(\s+#*)?', line):
