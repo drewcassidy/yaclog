@@ -69,11 +69,32 @@ class VersionEntry:
         self.link_id: str = None
         self.line_no: int = -1
 
-    def __str__(self) -> str:
-        if self.link:
-            segments = [f'[{self.name}]']
+    def body(self, md: bool = True) -> str:
+        segments = []
+        text = ''
+
+        for section, entries in self.sections.items():
+            if section:
+                if md:
+                    segments.append(f'## {section.title()}')
+                else:
+                    segments.append(f'{section.upper()}:')
+
+            if len(entries) > 0:
+                segments.append(_join_markdown(entries))
+
+        return _join_markdown(segments)
+
+    def header(self, md: bool = True) -> str:
+        segments = []
+
+        if md:
+            segments.append('##')
+
+        if self.link and md:
+            segments.append(f'[{self.name}]')
         else:
-            segments = [self.name]
+            segments.append(self.name)
 
         if self.date or len(self.tags) > 0:
             segments.append('-')
@@ -84,6 +105,12 @@ class VersionEntry:
         segments += [f'[{t.upper()}]' for t in self.tags]
 
         return ' '.join(segments)
+
+    def text(self, md: bool = True) -> str:
+        return self.body(md) + '\n\n' + self.header(md)
+
+    def __str__(self) -> str:
+        return self.header(False)
 
 
 class Changelog:
@@ -241,18 +268,11 @@ class Changelog:
             fp.write('\n\n')
 
             for version in self.versions:
-                fp.write(f'## {version}\n\n')
-
                 if version.link:
                     v_links[version.name] = version.link
 
-                for section in version.sections:
-                    if section:
-                        fp.write(f'### {section}\n\n')
-
-                    if len(version.sections[section]) > 0:
-                        fp.write(_join_markdown(version.sections[section]))
-                        fp.write('\n\n')
+                fp.write(version.text())
+                fp.write('\n\n')
 
             for link_id, link in v_links.items():
                 fp.write(f'[{link_id.lower()}]: {link}\n')
