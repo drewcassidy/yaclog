@@ -17,7 +17,6 @@
 import datetime
 import os
 import re
-import string
 from typing import List, Tuple, Optional
 
 bullets = '+-*'
@@ -66,12 +65,11 @@ class VersionEntry:
         self.date: Optional[datetime.date] = None
         self.tags: List[str] = []
         self.link: str = ''
-        self.link_id: str = None
+        self.link_id: str = ''
         self.line_no: int = -1
 
     def body(self, md: bool = True) -> str:
         segments = []
-        text = ''
 
         for section, entries in self.sections.items():
             if section:
