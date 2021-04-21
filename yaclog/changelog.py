@@ -29,6 +29,8 @@ under2_regex = re.compile(r'^-+\s*$')
 bullet_regex = re.compile(r'^[-+*]')
 linkid_regex = re.compile(r'^\[(?P<link_id>\S*)]:\s*(?P<link>.*)')
 
+default_header = '# Changelog\n\nAll notable changes to this project will be documented in this file'
+
 
 def _strip_link(token):
     if link_literal := re.fullmatch(r'\[(.*?)]\((.*?)\)', token):
@@ -112,26 +114,28 @@ class VersionEntry:
 
 
 class Changelog:
-    def __init__(self, path: os.PathLike):
+    def __init__(self, path: os.PathLike = None):
         self.path = path
         self.header = ''
         self.versions = []
+        self.links = {}
+
+        if not os.path.exists(path):
+            self.header = default_header
+            return
 
         # Read file
         with open(path, 'r') as fp:
-            self.lines = fp.readlines()
+            lines = fp.readlines()
 
         section = ''
         in_block = False
         in_code = False
 
-        self.links = {}
-
-        links = {}
         segments: List[Tuple[int, List[str], str]] = []
         header_segments = []
 
-        for line_no, line in enumerate(self.lines):
+        for line_no, line in enumerate(lines):
             if in_code:
                 # this is the contents of a code block
                 segments[-1][1].append(line)
@@ -168,7 +172,7 @@ class Changelog:
 
             elif match := linkid_regex.match(line):
                 # this is a link definition in the form '[id]: link', so add it to the link table
-                links[match['link_id'].lower()] = match['link']
+                self.links[match['link_id'].lower()] = match['link']
 
             elif line.isspace():
                 # skip empty lines
@@ -241,18 +245,18 @@ class Changelog:
             if match := re.fullmatch(r'\[(.*)]', version.name):
                 # ref-matched link
                 link_id = match[1].lower()
-                if link_id in links:
-                    version.link = links.pop(link_id)
+                if link_id in self.links:
+                    version.link = self.links.pop(link_id)
                     version.link_id = None
                     version.name = match[1]
 
-            elif version.link_id in links:
+            elif version.link_id in self.links:
                 # id-matched link
-                version.link = links.pop(version.link_id)
+                version.link = self.links.pop(version.link_id)
 
         # strip whitespace from header
         self.header = _join_markdown(header_segments)
-        self.links = links
+        self.links = self.links
 
     def write(self, path: os.PathLike = None):
         if path is None:
