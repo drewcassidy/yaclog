@@ -73,13 +73,86 @@ def show(obj: Changelog, all_versions, versions):
             for v_name in versions:
                 matches = [v for v in obj.versions if v.name == v_name]
                 if len(matches) == 0:
-                    raise click.BadArgumentUsage(f'Version "{v_name}" not found in changelog')
+                    raise click.BadArgumentUsage(f'Version "{v_name}" not found in changelog.')
                 v_list += matches
         else:
             v_list = [obj.versions[0]]
 
         for v in v_list:
             click.echo(v.text(False))
+
+
+@cli.command(short_help='Modify version tags')
+@click.option('--add/--delete', '-a/-d', default=True, is_flag=True, help='Add or delete tags')
+@click.argument('tag_name', metavar='tag', type=str)
+@click.argument('version_name', metavar='version', type=str, required=False)
+@click.pass_obj
+def tag(obj: Changelog, add, tag_name: str, version_name: str):
+    """Modify TAG on VERSION.
+
+    VERSION is the name of a version to add tags to. If not given, the most recent version is used.
+    """
+    tag_name = tag_name.upper()
+    if version_name:
+        matches = [v for v in obj.versions if v.name == version_name]
+        if len(matches) == 0:
+            raise click.BadArgumentUsage(f'Version "{version_name}" not found in changelog.')
+        version = matches[0]
+    else:
+        version = obj.versions[0]
+
+    if add:
+        version.tags.append(tag_name)
+    else:
+        try:
+            version.tags.remove(tag_name)
+        except ValueError:
+            raise click.BadArgumentUsage(f'Tag "{tag_name}" not found in version "{version.name}".')
+
+    obj.write()
+
+
+@cli.command()
+@click.option('--bullet', '-b', 'bullets', multiple=True, type=str,
+              help='Bullet points to add. '
+                   'When multiple bullet points are provided, additional points are added as sub-points.')
+@click.option('--paragraph', '-p', 'paragraphs', multiple=True, type=str,
+              help='Paragraphs to add')
+@click.argument('section_name', metavar='section', type=str)
+@click.argument('version_name', metavar='version', type=str, required=False)
+@click.pass_obj
+def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
+    """Add entries to the changelog"""
+
+    section_name = section_name.title()
+    if version_name:
+        matches = [v for v in obj.versions if v.name == version_name]
+        if len(matches) == 0:
+            raise click.BadArgumentUsage(f'Version "{version_name}" not found in changelog.')
+        version = matches[0]
+    else:
+        version = obj.versions[0]
+
+    if section_name not in version.sections.keys():
+        version.sections[section_name] = []
+
+    section = version.sections[section_name]
+    section += paragraphs
+
+    sub_bullet = False
+    for bullet in bullets:
+        bullet = bullet.strip()
+        if bullet[0] not in ['-+*']:
+            bullet = '- ' + bullet
+
+        if sub_bullet:
+            bullet = '    ' + bullet
+
+        section.append(bullet)
+
+        sub_bullet = True
+
+    obj.write()
 
 
 if __name__ == '__main__':

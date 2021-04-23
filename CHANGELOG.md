@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file
     - `init` command to make a new changelog
     - `format` command to reformat the changelog
     - `show` command to show changes from the changelog
+    - `entry` command for manipulating entries in the changelog
+    - `tag` command for manipulating tags in the changelog
 
 ## 0.2.0 - 2021-04-19
 
