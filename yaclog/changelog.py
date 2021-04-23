@@ -48,7 +48,7 @@ def _join_markdown(segments: List[str]) -> str:
     text: List[str] = []
     last_bullet = False
     for segment in segments:
-        is_bullet = bullet_regex.match(segment) and '\n' not in segment
+        is_bullet = bullet_regex.match(segment)
 
         if not is_bullet or not last_bullet:
             text.append('')
@@ -76,7 +76,7 @@ class VersionEntry:
         for section, entries in self.sections.items():
             if section:
                 if md:
-                    segments.append(f'## {section.title()}')
+                    segments.append(f'### {section.title()}')
                 else:
                     segments.append(f'{section.upper()}:')
 
@@ -107,7 +107,7 @@ class VersionEntry:
         return ' '.join(segments)
 
     def text(self, md: bool = True) -> str:
-        return self.body(md) + '\n\n' + self.header(md)
+        return self.header(md) + '\n\n' + self.body(md)
 
     def __str__(self) -> str:
         return self.header(False)
@@ -115,9 +115,9 @@ class VersionEntry:
 
 class Changelog:
     def __init__(self, path: os.PathLike = None):
-        self.path = path
-        self.header = ''
-        self.versions = []
+        self.path: os.PathLike = path
+        self.header: str = ''
+        self.versions: List[VersionEntry] = []
         self.links = {}
 
         if not os.path.exists(path):
@@ -256,7 +256,6 @@ class Changelog:
 
         # strip whitespace from header
         self.header = _join_markdown(header_segments)
-        self.links = self.links
 
     def write(self, path: os.PathLike = None):
         if path is None:
@@ -274,7 +273,10 @@ class Changelog:
                     v_links[version.name] = version.link
 
                 fp.write(version.text())
-                fp.write('\n\n')
+                fp.write('\n')
+
+                if version != self.versions[-1] or len(v_links) > 0:
+                    fp.write('\n')
 
             for link_id, link in v_links.items():
                 fp.write(f'[{link_id.lower()}]: {link}\n')
