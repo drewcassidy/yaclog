@@ -63,7 +63,7 @@ def _join_markdown(segments: List[str]) -> str:
 class VersionEntry:
     def __init__(self):
         self.sections = {'': []}
-        self.name: str = ''
+        self.name: str = 'Unreleased'
         self.date: Optional[datetime.date] = None
         self.tags: List[str] = []
         self.link: str = ''

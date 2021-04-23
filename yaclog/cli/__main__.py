@@ -15,8 +15,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import click
-import yaclog
 import os.path
+import datetime
+import yaclog.cli.version_util
 from yaclog import Changelog
 
 
@@ -112,17 +113,23 @@ def tag(obj: Changelog, add, tag_name: str, version_name: str):
     obj.write()
 
 
-@cli.command()
+@cli.command(short_help='Add entries to the changelog.')
 @click.option('--bullet', '-b', 'bullets', multiple=True, type=str,
               help='Bullet points to add. '
                    'When multiple bullet points are provided, additional points are added as sub-points.')
 @click.option('--paragraph', '-p', 'paragraphs', multiple=True, type=str,
               help='Paragraphs to add')
-@click.argument('section_name', metavar='section', type=str)
-@click.argument('version_name', metavar='version', type=str, required=False)
+@click.argument('section_name', metavar='SECTION', type=str, default='', required=False)
+@click.argument('version_name', metavar='VERSION', type=str, default=None, required=False)
 @click.pass_obj
 def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
-    """Add entries to the changelog"""
+    """Add entries to SECTION in VERSION
+
+    SECTION is the name of the section to append to. If not given, entries will be uncategorized.
+
+    VERSION is the name of the version to append to. If not given, the most recent version will be used,
+    or a new 'Unreleased' version will be added if the most recent version has been released.
+    """
 
     section_name = section_name.title()
     if version_name:
@@ -132,6 +139,9 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
         version = matches[0]
     else:
         version = obj.versions[0]
+        if version.name.lower() != 'unreleased':
+            version = yaclog.changelog.VersionEntry()
+            obj.versions.insert(0, version)
 
     if section_name not in version.sections.keys():
         version.sections[section_name] = []
@@ -140,17 +150,45 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     section += paragraphs
 
     sub_bullet = False
+    bullet_str = ''
     for bullet in bullets:
         bullet = bullet.strip()
         if bullet[0] not in ['-+*']:
             bullet = '- ' + bullet
 
         if sub_bullet:
-            bullet = '    ' + bullet
+            bullet = '\n    ' + bullet
 
-        section.append(bullet)
-
+        bullet_str += bullet
         sub_bullet = True
+    section.append(bullet_str)
+
+    obj.write()
+
+
+@cli.command()
+@click.option('-v', '--version', 'v_flag', type=str, help='The full version string to release.')
+@click.option('-M', '--major', 'v_flag', flag_value='+M', help='Increment major version number.')
+@click.option('-m', '--minor', 'v_flag', flag_value='+m', help='Increment minor version number.')
+@click.option('-p', '--patch', 'v_flag', flag_value='+p', help='Increment patch number.')
+@click.option('-a', '--alpha', 'v_flag', flag_value='+a', help='Increment alpha version number.')
+@click.option('-b', '--beta', 'v_flag', flag_value='+b', help='Increment beta version number.')
+@click.option('-r', '--rc', 'v_flag', flag_value='+rc', help='Increment release candidate version number.')
+@click.option('-c', '--commit', help='Create a git commit tagged with the new version number.')
+@click.pass_obj
+def release(obj: Changelog, v_flag, commit):
+    version = [v for v in obj.versions if v.name.lower() != 'unreleased'][0]
+    cur_version = obj.versions[0]
+
+    if v_flag[0] == '+':
+        new_name = yaclog.cli.version_util.increment_version(version.name, v_flag)
+    else:
+        new_name = v_flag
+
+    if yaclog.cli.version_util.is_release(cur_version.name):
+        click.confirm(f'Rename release version "{cur_version.name}" to "{new_name}"?', abort=True)
+
+    cur_version.date = datetime.datetime.utcnow().date()
 
     obj.write()
 
