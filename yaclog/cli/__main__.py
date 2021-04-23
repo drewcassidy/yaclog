@@ -17,53 +17,52 @@
 import click
 import yaclog
 import os.path
+from yaclog import Changelog
 
 
 @click.group()
 @click.option('--path', envvar='YACLOG_PATH', default='CHANGELOG.md', show_default=True,
               type=click.Path(dir_okay=False, writable=True, readable=True),
-              help='Location for the changelog file')
+              help='Location of the changelog file.')
 @click.version_option()
 @click.pass_context
 def cli(ctx, path):
-    """Manipulate markdown changelog files"""
-    if not (ctx.invoked_subcommand == 'init' or os.path.exists(path)):
-        # if the path doesnt exist, then ask if we can create it
-        if click.confirm(f'Changelog file {path} does not exist. Would you like to create it?', abort=True):
-            ctx.invoke('init')
+    """Manipulate markdown changelog files."""
+    if not (ctx.invoked_subcommand == 'init') and not os.path.exists(path):
+        # file does not exist and this isn't the init command
+        raise click.FileError(f'Changelog file {path} does not exist. Create it by running `yaclog init`.')
 
     ctx.obj = yaclog.read(path)
 
 
 @cli.command()
-@click.pass_context
-def init(ctx):
-    """Create a new changelog file"""
-    path = ctx.parent.params['path']
-
-    if os.path.exists(path):
-        click.confirm(f'Changelog file {path} already exists. Would you like to overwrite it?', abort=True)
-
-    yaclog.Changelog(path).write()
-    print(f'Created new changelog file at {path}')
-
-
-@cli.command('format')
 @click.pass_obj
-def reformat(obj: yaclog.Changelog):
-    """Reformat the changelog file"""
+def init(obj: Changelog):
+    """Create a new changelog file."""
+    if os.path.exists(obj.path):
+        click.confirm(f'Changelog file {obj.path} already exists. Would you like to overwrite it?', abort=True)
+        os.remove(obj.path)
+
+    yaclog.Changelog(obj.path).write()
+    print(f'Created new changelog file at {obj.path}')
+
+
+@cli.command('format')  # dont accidentally hide the `format` python builtin
+@click.pass_obj
+def reformat(obj: Changelog):
+    """Reformat the changelog file."""
     obj.write()
     print(f'Reformatted changelog file at {obj.path}')
 
 
 @cli.command(short_help='Show changes from the changelog file')
-@click.option('--all', '-a', 'all_versions', is_flag=True, help='show all versions')
+@click.option('--all', '-a', 'all_versions', is_flag=True, help='Show the entire changelog.')
 @click.argument('versions', type=str, nargs=-1)
 @click.pass_obj
-def show(obj: yaclog.Changelog, all_versions, versions):
-    """Show the changes for VERSIONS
+def show(obj: Changelog, all_versions, versions):
+    """Show the changes for VERSIONS.
 
-    VERSIONS is a list of versions to print. If not given, the most recent version is used
+    VERSIONS is a list of versions to print. If not given, the most recent version is used.
     """
     if all_versions:
         with open(obj.path, 'r') as fp:
@@ -74,13 +73,13 @@ def show(obj: yaclog.Changelog, all_versions, versions):
             for v_name in versions:
                 matches = [v for v in obj.versions if v.name == v_name]
                 if len(matches) == 0:
-                    raise click.BadArgumentUsage(f'version "{v_name}" not found in changelog')
+                    raise click.BadArgumentUsage(f'Version "{v_name}" not found in changelog')
                 v_list += matches
         else:
             v_list = [obj.versions[0]]
 
         for v in v_list:
-            click.echo(v.text())
+            click.echo(v.text(False))
 
 
 if __name__ == '__main__':
