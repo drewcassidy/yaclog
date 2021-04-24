@@ -17,6 +17,7 @@
 import click
 import os.path
 import datetime
+import git
 import yaclog.cli.version_util
 from yaclog import Changelog
 
@@ -167,30 +168,58 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 
 
 @cli.command()
-@click.option('-v', '--version', 'v_flag', type=str, help='The full version string to release.')
+@click.option('-v', '--version', 'v_flag', type=str, default=None, help='The new version number to use.')
 @click.option('-M', '--major', 'v_flag', flag_value='+M', help='Increment major version number.')
 @click.option('-m', '--minor', 'v_flag', flag_value='+m', help='Increment minor version number.')
 @click.option('-p', '--patch', 'v_flag', flag_value='+p', help='Increment patch number.')
 @click.option('-a', '--alpha', 'v_flag', flag_value='+a', help='Increment alpha version number.')
 @click.option('-b', '--beta', 'v_flag', flag_value='+b', help='Increment beta version number.')
 @click.option('-r', '--rc', 'v_flag', flag_value='+rc', help='Increment release candidate version number.')
-@click.option('-c', '--commit', help='Create a git commit tagged with the new version number.')
+@click.option('-c', '--commit', is_flag=True, help='Create a git commit tagged with the new version number.')
 @click.pass_obj
 def release(obj: Changelog, v_flag, commit):
+    """Release versions in the changelog and increment their version numbers"""
     version = [v for v in obj.versions if v.name.lower() != 'unreleased'][0]
     cur_version = obj.versions[0]
+    old_name = cur_version.name
 
-    if v_flag[0] == '+':
-        new_name = yaclog.cli.version_util.increment_version(version.name, v_flag)
-    else:
-        new_name = v_flag
+    if v_flag:
+        if v_flag[0] == '+':
+            new_name = yaclog.cli.version_util.increment_version(version.name, v_flag)
+        else:
+            new_name = v_flag
 
-    if yaclog.cli.version_util.is_release(cur_version.name):
-        click.confirm(f'Rename release version "{cur_version.name}" to "{new_name}"?', abort=True)
+        if yaclog.cli.version_util.is_release(cur_version.name):
+            click.confirm(f'Rename release version "{cur_version.name}" to "{new_name}"?', abort=True)
 
-    cur_version.date = datetime.datetime.utcnow().date()
+        cur_version.name = new_name
+        cur_version.date = datetime.datetime.utcnow().date()
 
-    obj.write()
+        obj.write()
+        print(f'Renamed version "{old_name}" to "{cur_version.name}".')
+
+    if commit:
+        repo = git.Repo(os.curdir)
+
+        if repo.bare:
+            raise click.BadOptionUsage('commit', f'Directory {os.path.abspath(os.curdir)} is not a git repo.')
+
+        version_type = '' if yaclog.cli.version_util.is_release(cur_version.name) else 'non-release '
+
+        untracked = len(repo.index.diff(None))
+        untracked_warning = ''
+        if untracked > 0:
+            untracked_warning = click.style(f' You have {untracked} untracked files that will not be committed.',
+                                            fg='red', bold=True)
+
+        click.confirm(f'Commit and create tag for {version_type}version {cur_version.name}?{untracked_warning}',
+                      abort=True)
+
+        repo.index.add(obj.path)
+        repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
+        repo.create_tag(cur_version.name, message=cur_version.body(False))
+
+        print(f'Created tag "{cur_version.name}".')
 
 
 if __name__ == '__main__':

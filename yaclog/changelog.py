@@ -264,19 +264,18 @@ class Changelog:
         v_links = {}
         v_links.update(self.links)
 
+        segments = [self.header]
+
+        for version in self.versions:
+            if version.link:
+                v_links[version.name] = version.link
+
+            segments.append(version.text())
+
+        for link_id, link in v_links.items():
+            segments.append(f'[{link_id.lower()}]: {link}')
+
+        text = _join_markdown(segments)
+
         with open(path, 'w') as fp:
-            fp.write(self.header)
-            fp.write('\n\n')
-
-            for version in self.versions:
-                if version.link:
-                    v_links[version.name] = version.link
-
-                fp.write(version.text())
-                fp.write('\n')
-
-                if version != self.versions[-1] or len(v_links) > 0:
-                    fp.write('\n')
-
-            for link_id, link in v_links.items():
-                fp.write(f'[{link_id.lower()}]: {link}\n')
+            fp.write(text)

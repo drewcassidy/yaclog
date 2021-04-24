@@ -14,17 +14,19 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from packaging.version import Version, parse
+from packaging.version import Version, InvalidVersion
 
 
 def is_release(version: str) -> bool:
-    v = parse(version)
-
-    return not (v.is_devrelease or v.is_prerelease)
+    try:
+        v = Version(version)
+        return not (v.is_devrelease or v.is_prerelease)
+    except InvalidVersion:
+        return False
 
 
 def increment_version(version: str, mode: str) -> str:
-    v = parse(version)
+    v = Version(version)
     epoch = v.epoch
     release = v.release
     pre = v.pre

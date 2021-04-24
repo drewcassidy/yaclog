@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file
     - `show` command to show changes from the changelog
     - `entry` command for manipulating entries in the changelog
     - `tag` command for manipulating tags in the changelog
+    - `release` command for creating releases
 
 ## 0.2.0 - 2021-04-19
 
