@@ -4,9 +4,18 @@ All notable changes to this project will be documented in this file
 
 ## Unreleased
 
+### Added
+
+- Readme file now has installation and usage instructions
+- yaclog command entry point added to setup.cfg
+
 ### Changed
 
 - `release -c` will no longer create empty commits, and will use the current commit instead
+
+### Fixed
+
+- `release` and `entry` commands now work using empty changelogs
 
 ## 0.3.1 - 2021-04-24
 

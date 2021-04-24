@@ -139,10 +139,12 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
             raise click.BadArgumentUsage(f'Version "{version_name}" not found in changelog.')
         version = matches[0]
     else:
-        version = obj.versions[0]
-        if version.name.lower() != 'unreleased':
+        matches = [v for v in obj.versions if v.name.lower() == 'unreleased']
+        if len(matches) == 0:
             version = yaclog.changelog.VersionEntry()
             obj.versions.insert(0, version)
+        else:
+            version = matches[0]
 
     if section_name not in version.sections.keys():
         version.sections[section_name] = []
@@ -167,7 +169,7 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     obj.write()
 
 
-@cli.command()
+@cli.command(short_help='Release versions.')
 @click.option('-v', '--version', 'v_flag', type=str, default=None, help='The new version number to use.')
 @click.option('-M', '--major', 'v_flag', flag_value='+M', help='Increment major version number.')
 @click.option('-m', '--minor', 'v_flag', flag_value='+m', help='Increment minor version number.')
