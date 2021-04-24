@@ -204,18 +204,20 @@ def release(obj: Changelog, v_flag, commit):
         if repo.bare:
             raise click.BadOptionUsage('commit', f'Directory {os.path.abspath(os.curdir)} is not a git repo.')
 
-        version_type = '' if yaclog.cli.version_util.is_release(cur_version.name) else 'non-release '
+        repo.index.add(obj.path)
 
+        version_type = '' if yaclog.cli.version_util.is_release(cur_version.name) else 'non-release '
         untracked = len(repo.index.diff(None))
         untracked_warning = ''
+        untracked_plural = 's' if untracked > 1 else ''
         if untracked > 0:
-            untracked_warning = click.style(f' You have {untracked} untracked files that will not be committed.',
-                                            fg='red', bold=True)
+            untracked_warning = click.style(
+                f' You have {untracked} untracked file{untracked_plural} that will not be committed.',
+                fg='red', bold=True)
 
         click.confirm(f'Commit and create tag for {version_type}version {cur_version.name}?{untracked_warning}',
                       abort=True)
 
-        repo.index.add(obj.path)
         repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
         repo.create_tag(cur_version.name, message=cur_version.body(False))
 
