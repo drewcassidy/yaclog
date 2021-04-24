@@ -207,20 +207,27 @@ def release(obj: Changelog, v_flag, commit):
         repo.index.add(obj.path)
 
         version_type = '' if yaclog.cli.version_util.is_release(cur_version.name) else 'non-release '
+        tracked = len(repo.index.diff(repo.head.commit))
+        tracked_warning = 'Create tag'
         untracked = len(repo.index.diff(None))
         untracked_warning = ''
         untracked_plural = 's' if untracked > 1 else ''
         if untracked > 0:
             untracked_warning = click.style(
-                f' You have {untracked} untracked file{untracked_plural} that will not be committed.',
+                f' You have {untracked} untracked file{untracked_plural} that will not be included.',
                 fg='red', bold=True)
 
-        click.confirm(f'Commit and create tag for {version_type}version {cur_version.name}?{untracked_warning}',
+        if tracked > 0:
+            tracked_warning = 'Commit and create tag'
+
+        click.confirm(f'{tracked_warning} for {version_type}version {cur_version.name}?{untracked_warning}',
                       abort=True)
 
-        repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
-        repo.create_tag(cur_version.name, message=cur_version.body(False))
+        if tracked > 0:
+            repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
+            print(f'Created commit {repo.head.commit.hexsha[0:7]}')
 
+        repo.create_tag(cur_version.name, message=cur_version.body(False))
         print(f'Created tag "{cur_version.name}".')
 
 

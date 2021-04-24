@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Changed
+
+- `release -c` will no longer create empty commits, and will use the current commit instead
+
 ## 0.3.1 - 2021-04-24
 
 ### Added
