@@ -8,6 +8,11 @@ All notable changes to this project will be documented in this file
 
 - Unit tests in the `tests` folder
 
+### Changed
+
+- Default links and dates in VersionEntry are not consistently `None`
+- Changelog links dict now contains version links. Modified version links will overwrite those in the table when writing to a file
+
 ## 0.3.2 - 2021-04-24
 
 ### Added
