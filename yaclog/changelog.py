@@ -66,8 +66,8 @@ class VersionEntry:
         self.name: str = 'Unreleased'
         self.date: Optional[datetime.date] = None
         self.tags: List[str] = []
-        self.link: str = ''
-        self.link_id: str = ''
+        self.link: Optional[str] = None
+        self.link_id: Optional[str] = None
         self.line_no: int = -1
 
     def body(self, md: bool = True) -> str:
@@ -203,7 +203,7 @@ class Changelog:
                 version.name = slug
                 version.line_no = segment[0]
                 tags = []
-                date = []
+                date = None
 
                 for word in split[1:]:
                     if match := re.match(r'\d{4}-\d{2}-\d{2}', word):
@@ -246,13 +246,13 @@ class Changelog:
                 # ref-matched link
                 link_id = match[1].lower()
                 if link_id in self.links:
-                    version.link = self.links.pop(link_id)
+                    version.link = self.links[link_id]
                     version.link_id = None
                     version.name = match[1]
 
             elif version.link_id in self.links:
                 # id-matched link
-                version.link = self.links.pop(version.link_id)
+                version.link = self.links[version.link_id]
 
         # strip whitespace from header
         self.header = _join_markdown(header_segments)
@@ -261,10 +261,8 @@ class Changelog:
         if path is None:
             path = self.path
 
-        v_links = {}
-        v_links.update(self.links)
-
         segments = [self.header]
+        v_links = {**self.links}
 
         for version in self.versions:
             if version.link:
@@ -272,8 +270,7 @@ class Changelog:
 
             segments.append(version.text())
 
-        for link_id, link in v_links.items():
-            segments.append(f'[{link_id.lower()}]: {link}')
+        segments += [f'[{link_id.lower()}]: {link}' for link_id, link in v_links.items()]
 
         text = _join_markdown(segments)
 

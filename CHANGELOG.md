@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Added
+
+- Unit tests in the `tests` folder
+
 ## 0.3.2 - 2021-04-24
 
 ### Added
