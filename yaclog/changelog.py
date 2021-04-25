@@ -120,7 +120,7 @@ class Changelog:
         self.versions: List[VersionEntry] = []
         self.links = {}
 
-        if not os.path.exists(path):
+        if not path or not os.path.exists(path):
             self.header = default_header
             return
 
@@ -266,11 +266,11 @@ class Changelog:
 
         for version in self.versions:
             if version.link:
-                v_links[version.name] = version.link
+                v_links[version.name.lower()] = version.link
 
             segments.append(version.text())
 
-        segments += [f'[{link_id.lower()}]: {link}' for link_id, link in v_links.items()]
+        segments += [f'[{link_id}]: {link}' for link_id, link in v_links.items()]
 
         text = _join_markdown(segments)
 

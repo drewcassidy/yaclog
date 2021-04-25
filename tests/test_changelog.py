@@ -1,61 +1,40 @@
 import unittest
-import yaclog
+import yaclog.changelog
 import os.path
 import datetime
-
-test_dir = os.path.dirname(os.path.realpath(__file__))
+import textwrap
+import tempfile
+from tests.common import log, log_segments, log_text
 
 
 class TestParser(unittest.TestCase):
-    def setUp(self):
-        self.log = yaclog.read(os.path.join(test_dir, 'Test-Changelog.md'))
+
+    @classmethod
+    def setUpClass(cls):
+        with tempfile.TemporaryDirectory() as td:
+            cls.path = os.path.join(td, 'changelog.md')
+            with open(cls.path, 'w') as fd:
+                fd.write(log_text)
+            cls.log = yaclog.read(cls.path)
 
     def test_header(self):
-        self.assertEqual(self.log.header,
-                         '# Changelog\n\n'
-                         'This changelog is for testing the parser, and has many things in it that might trip it up.')
+        self.assertEqual(log.header, self.log.header)
 
     def test_path(self):
-        self.assertEqual(self.log.path, os.path.join(test_dir, 'Test-Changelog.md'))
+        self.assertEqual(self.path, self.log.path)
 
     def test_links(self):
-        self.assertEqual(self.log.links, {'unreleased': 'http://beesbeesbees.com',
-                                          '1.1.0': 'http://endless.horse',
-                                          'id': 'http://www.koalastothemax.com'})
+        self.assertEqual({'fullversion': 'http://endless.horse', **log.links}, self.log.links)
 
     def test_versions(self):
-        v = self.log.versions
-        self.assertEqual(v[0].name, 'Unreleased')
-        self.assertEqual(v[0].link, 'http://beesbeesbees.com')
-        self.assertEqual(v[0].date, None)
-        self.assertEqual(v[0].tags, [])
+        for i in range(len(self.log.versions)):
+            self.assertEqual(log.versions[i].name, self.log.versions[i].name)
+            self.assertEqual(log.versions[i].link, self.log.versions[i].link)
+            self.assertEqual(log.versions[i].date, self.log.versions[i].date)
+            self.assertEqual(log.versions[i].tags, self.log.versions[i].tags)
 
-        self.assertEqual(v[1].name, '1.1.0')
-        self.assertEqual(v[1].link, 'http://endless.horse')
-        self.assertEqual(v[1].date, datetime.date.fromisoformat('1969-07-20'))
-        self.assertEqual(v[1].tags, ['PRERELEASE'])
-
-        self.assertEqual(v[2].name, 'Not a version number')
-        self.assertEqual(v[2].link, None)
-        self.assertEqual(v[2].date, None)
-        self.assertEqual(v[2].tags, [])
-
-    def test_unreleased(self):
-        v = self.log.versions[0]
-
-        self.assertEqual(v.sections[''], ['- bullet point with no section'])
-        self.assertEqual(v.sections['Added'],
-                         ['- bullet point dash', '* bullet point star',
-                          '+ bullet point plus\n  - sub point 1\n  - sub point 2\n  - sub point 3'])
-        self.assertEqual(v.sections['Fixed'],
-                         ['- this is a bullet point\n  it spans many lines',
-                          'This is\na paragraph\nit spans many lines',
-                          'this line has an [id] link',
-                          '#### This is an H4',
-                          '##### This is an H5',
-                          '###### This is an H6',
-                          '```markdown\nthis is some example code\nit spans many lines\n```',
-                          '> this is a block quote\nit spans many lines'])
+    def test_Entries(self):
+        self.assertEqual(log.versions[0].sections, self.log.versions[0].sections)
 
 
 if __name__ == '__main__':
