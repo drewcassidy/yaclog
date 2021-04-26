@@ -35,11 +35,14 @@ def increment_version(version: str, mode: str) -> str:
     local = v.local
 
     if mode == '+M':
-        release = (release[0] + 1,) + release[1:]
+        release = (release[0] + 1,) + ((0,) * len(release[1:]))
+        pre = post = dev = None
     elif mode == '+m':
-        release = (release[0], release[1] + 1) + release[2:]
+        release = (release[0], release[1] + 1) + ((0,) * len(release[2:]))
+        pre = post = dev = None
     elif mode == '+p':
-        release = (release[0], release[1], release[2] + 1) + release[3:]
+        release = (release[0], release[1], release[2] + 1) + ((0,) * len(release[3:]))
+        pre = post = dev = None
     elif mode in ['+a', '+b', '+rc']:
         if pre[0] == mode[1:]:
             pre = (mode[1:], pre[1] + 1)
