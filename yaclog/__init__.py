@@ -2,7 +2,7 @@ import os
 from yaclog.changelog import Changelog
 
 
-def read(path: os.PathLike):
+def read(path):
     """
     Create a new Changelog object from the given path
     :param path: a path to a markdown changelog file

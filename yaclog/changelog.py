@@ -114,7 +114,7 @@ class VersionEntry:
 
 
 class Changelog:
-    def __init__(self, path: os.PathLike = None):
+    def __init__(self, path=None):
         self.path: os.PathLike = path
         self.header: str = ''
         self.versions: List[VersionEntry] = []
