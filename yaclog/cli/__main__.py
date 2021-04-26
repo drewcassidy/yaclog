@@ -231,11 +231,13 @@ def release(obj: Changelog, v_flag, commit):
                       abort=True)
 
         if tracked > 0:
-            repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
+            commit = repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
             print(f'Created commit {repo.head.commit.hexsha[0:7]}')
+        else:
+            commit = repo.head.commit
 
-        repo.create_tag(cur_version.name, message=cur_version.body(False))
-        print(f'Created tag "{cur_version.name}".')
+        repo_tag = repo.create_tag(cur_version.name, ref=commit, message=cur_version.body(False))
+        print(f'Created tag "{repo_tag.name}".')
 
 
 if __name__ == '__main__':
