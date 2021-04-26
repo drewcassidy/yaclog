@@ -181,13 +181,18 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 @click.pass_obj
 def release(obj: Changelog, v_flag, commit):
     """Release versions in the changelog and increment their version numbers"""
-    version = [v for v in obj.versions if v.name.lower() != 'unreleased'][0]
+    matches = [v for v in obj.versions if v.name.lower() != 'unreleased']
+    if len(matches) == 0:
+        version = '0.0.0'
+    else:
+        version = matches[0].name
+
     cur_version = obj.versions[0]
     old_name = cur_version.name
 
     if v_flag:
         if v_flag[0] == '+':
-            new_name = yaclog.cli.version_util.increment_version(version.name, v_flag)
+            new_name = yaclog.cli.version_util.increment_version(version, v_flag)
         else:
             new_name = v_flag
 

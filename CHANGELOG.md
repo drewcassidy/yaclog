@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file
 - Changelog links dict now contains version links. Modified version links will overwrite those in the table when writing to a file
 - Changelog object no longer errors when creating without a path.
 - `release` now resets lesser version values when incrementing
+- `release` now works with logs that have only unreleased changes
 
 ## 0.3.2 - 2021-04-24
 
