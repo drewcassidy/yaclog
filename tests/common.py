@@ -39,7 +39,7 @@ log_segments = [
     '[FullVersion] - 1969-07-20 [TAG1] [TAG2]\n-----',  # 14
     '## Long Version Name',  # 15
 
-    '[FullVersion]: http://endless.horse\n[id]: http://www.koalastothemax.com'
+    '[fullVersion]: http://endless.horse\n[id]: http://www.koalastothemax.com'
 ]
 
 log_text = '\n\n'.join(log_segments)
