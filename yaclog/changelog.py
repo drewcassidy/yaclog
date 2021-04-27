@@ -17,7 +17,7 @@
 import datetime
 import os
 import re
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 
 bullets = '+-*'
 brackets = '[]'
@@ -61,16 +61,51 @@ def _join_markdown(segments: List[str]) -> str:
 
 
 class VersionEntry:
-    def __init__(self):
-        self.sections = {'': []}
-        self.name: str = 'Unreleased'
-        self.date: Optional[datetime.date] = None
-        self.tags: List[str] = []
-        self.link: Optional[str] = None
-        self.link_id: Optional[str] = None
+    """Holds a single version entry in a :py:class:`Changelog`"""
+
+    def __init__(self, name: str = 'Unreleased',
+                 date: Optional[datetime.date] = None, tags: Optional[List[str]] = None,
+                 link: Optional[str] = None, link_id: Optional[str] = None):
+        """
+        Create a new version entry
+
+        :param str name: The version's name
+        :param date: When the version was released
+        :param tags: The version's tags
+        :param link: The version's URL
+        :param link_id: The version's link ID, uses the version name by default when writing
+        """
+
+        self.name: str = name
+        self.date: Optional[datetime.date] = date
+        self.tags: List[str] = tags if tags else []
+        self.link: Optional[str] = link
+        self.link_id: Optional[str] = link_id
         self.line_no: int = -1
+        self.sections: Dict[str, List[str]] = {'': []}
+
+    def add_entry(self, contents: str, section: str = '') -> None:
+        """
+        Add a new entry to the version
+
+        :param contents: The contents string to add
+        :param section: Which section to add to.
+        """
+
+        section = section.title()
+        if section not in self.sections.keys():
+            self.sections[section] = []
+
+        self.sections[section].append(contents)
 
     def body(self, md: bool = True) -> str:
+        """
+        Get the version's body as a string
+
+        :param md: Whether or not to use markdown syntax in headings
+        :return: The formatted version body, without the version header
+        """
+
         segments = []
 
         for section, entries in self.sections.items():
@@ -81,11 +116,18 @@ class VersionEntry:
                     segments.append(f'{section.upper()}:')
 
             if len(entries) > 0:
-                segments.append(_join_markdown(entries))
+                segments += entries
 
         return _join_markdown(segments)
 
     def header(self, md: bool = True) -> str:
+        """
+        Get the version's header as a string
+
+        :param md: Whether or not to use markdown syntax in headings
+        :return: The formatted version header
+        """
+
         segments = []
 
         if md:
@@ -107,22 +149,49 @@ class VersionEntry:
         return ' '.join(segments)
 
     def text(self, md: bool = True) -> str:
-        return self.header(md) + '\n\n' + self.body(md)
+        """
+        Get the version's contents as a string
+
+        :param md: Whether or not to use markdown syntax in headings
+        :return: The formatted version header and body
+        """
+
+        contents = self.header(md)
+        body = self.body(md)
+        if body:
+            contents += '\n\n' + body
+        return contents
 
     def __str__(self) -> str:
         return self.header(False)
 
 
 class Changelog:
-    def __init__(self, path=None):
-        self.path: os.PathLike = path
-        self.header: str = ''
+    def __init__(self, path=None, header: str = default_header):
+        """
+        Create a new changelog object. Contents will be automatically read from disk if the file exists
+
+        :param path: The changelog's path on disk
+        :param header: The header at the top of the changelog to use if the file does not exist
+        """
+        self.path = path
+        self.header: str = header
         self.versions: List[VersionEntry] = []
         self.links = {}
 
-        if not path or not os.path.exists(path):
-            self.header = default_header
-            return
+        if path and os.path.exists(path):
+            self.read()
+
+    def read(self, path=None) -> None:
+        """
+        Read a markdown changelog file from disk
+
+        :param path: The changelog's path on disk. By default, :py:attr:`~Changelog.path` is used.
+        """
+
+        if not path:
+            # use the object path if none was provided
+            path = self.path
 
         # Read file
         with open(path, 'r') as fp:
@@ -257,8 +326,15 @@ class Changelog:
         # strip whitespace from header
         self.header = _join_markdown(header_segments)
 
-    def write(self, path: os.PathLike = None):
+    def write(self, path: os.PathLike = None) -> None:
+        """
+        Write a markdown changelog to a file.
+
+        :param path: The changelog's path on disk. By default, :py:attr:`~Changelog.path` is used.
+        """
+
         if path is None:
+            # use the object path if none was provided
             path = self.path
 
         segments = [self.header]
