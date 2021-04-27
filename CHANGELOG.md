@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file
 
 - Unit tests in the `tests` folder
 
-### Changed
+### Fixed
 
 - Default links and dates in VersionEntry are now consistently `None`
 - Changelog links dict now contains version links. 
