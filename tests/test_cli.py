@@ -58,6 +58,7 @@ class TestCreation(unittest.TestCase):
 
 class TestTagging(unittest.TestCase):
     def test_tag_addition(self):
+        """Test adding tags to versions"""
         runner = CliRunner()
         location = 'CHANGELOG.md'
 
@@ -84,6 +85,7 @@ class TestTagging(unittest.TestCase):
             self.assertIn('not found in changelog', result.output)
 
     def test_tag_deletion(self):
+        """Test deleting tags from versions"""
         runner = CliRunner()
         location = 'CHANGELOG.md'
 
@@ -126,6 +128,7 @@ class TestTagging(unittest.TestCase):
 
 class TestRelease(unittest.TestCase):
     def test_increment(self):
+        """Test version incrementing on release"""
         runner = CliRunner()
         location = 'CHANGELOG.md'
 
@@ -164,6 +167,7 @@ class TestRelease(unittest.TestCase):
             self.assertIn('2.0.0', result.output)
 
     def test_commit(self):
+        """Test committing and tagging releases"""
         runner = CliRunner()
 
         with runner.isolated_filesystem():
@@ -184,7 +188,6 @@ class TestRelease(unittest.TestCase):
             self.assertIn('Created tag', result.output)
             self.assertIn(repo.head.commit.hexsha[0:7], result.output)
             self.assertEqual(repo.tags[0].name, '1.0.0')
-
 
 
 if __name__ == '__main__':
