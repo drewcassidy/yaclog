@@ -18,7 +18,9 @@ import click
 import os.path
 import datetime
 import git
-import yaclog.cli.version_util
+
+import changelog
+import yaclog.version
 from yaclog import Changelog
 
 
@@ -141,7 +143,7 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     else:
         matches = [v for v in obj.versions if v.name.lower() == 'unreleased']
         if len(matches) == 0:
-            version = yaclog.changelog.VersionEntry()
+            version = changelog.VersionEntry()
             obj.versions.insert(0, version)
         else:
             version = matches[0]
@@ -192,11 +194,11 @@ def release(obj: Changelog, v_flag, commit):
 
     if v_flag:
         if v_flag[0] == '+':
-            new_name = yaclog.cli.version_util.increment_version(version, v_flag)
+            new_name = yaclog.version.increment_version(version, v_flag)
         else:
             new_name = v_flag
 
-        if yaclog.cli.version_util.is_release(cur_version.name):
+        if yaclog.version.is_release(cur_version.name):
             click.confirm(f'Rename release version "{cur_version.name}" to "{new_name}"?', abort=True)
 
         cur_version.name = new_name
@@ -213,7 +215,7 @@ def release(obj: Changelog, v_flag, commit):
 
         repo.index.add(obj.path)
 
-        version_type = '' if yaclog.cli.version_util.is_release(cur_version.name) else 'non-release '
+        version_type = '' if yaclog.version.is_release(cur_version.name) else 'non-release '
         tracked = len(repo.index.diff(repo.head.commit))
         tracked_warning = 'Create tag'
         untracked = len(repo.index.diff(None))

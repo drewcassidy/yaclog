@@ -17,47 +17,11 @@
 import datetime
 import os
 import re
-from typing import List, Tuple, Optional, Dict
+from typing import List, Optional, Dict
 
-bullets = '+-*'
-brackets = '[]'
-
-code_regex = re.compile(r'^```')
-header_regex = re.compile(r'^(?P<hashes>#+)\s+(?P<contents>[^#]+)(?:\s+#+)?$')
-under1_regex = re.compile(r'^=+\s*$')
-under2_regex = re.compile(r'^-+\s*$')
-bullet_regex = re.compile(r'^[-+*]')
-linkid_regex = re.compile(r'^\[(?P<link_id>\S*)]:\s*(?P<link>.*)')
+import markdown
 
 default_header = '# Changelog\n\nAll notable changes to this project will be documented in this file'
-
-
-def _strip_link(token):
-    if link_literal := re.fullmatch(r'\[(.*?)]\((.*?)\)', token):
-        # in the form [name](link)
-        return link_literal[1], link_literal[2], None
-
-    if link_id := re.fullmatch(r'\[(.*?)]\[(.*?)]', token):
-        # in the form [name][id] where id is hopefully linked somewhere else in the document
-        return link_id[1], None, link_id[2].lower()
-
-    return token, None, None
-
-
-def _join_markdown(segments: List[str]) -> str:
-    text: List[str] = []
-    last_bullet = False
-    for segment in segments:
-        is_bullet = bullet_regex.match(segment)
-
-        if not is_bullet or not last_bullet:
-            text.append('')
-
-        text.append(segment)
-
-        last_bullet = is_bullet
-
-    return '\n'.join(text).strip()
 
 
 class VersionEntry:
@@ -73,16 +37,32 @@ class VersionEntry:
         :param date: When the version was released
         :param tags: The version's tags
         :param link: The version's URL
-        :param link_id: The version's link ID, uses the version name by default when writing
+        :param link_id: The version's link ID
         """
 
         self.name: str = name
+        """The version's name"""
+
         self.date: Optional[datetime.date] = date
+        """WHen the version was released"""
+
         self.tags: List[str] = tags if tags else []
+        """The version's tags"""
+
         self.link: Optional[str] = link
+        """The version's URL"""
+
         self.link_id: Optional[str] = link_id
-        self.line_no: int = -1
+        """The version's link ID, uses the version name by default when writing"""
+
+        self.line_no: Optional[int] = None
+        """What line the version occurs at in the file, or None if the version was not read from a file. 
+        This is not guaranteed to be correct after the changelog has been modified, 
+        and it has no effect on the written file"""
+
         self.sections: Dict[str, List[str]] = {'': []}
+        """The dictionary of change entries in the version, organized by section. 
+        Uncategorized changes have a section of an empty string."""
 
     def add_entry(self, contents: str, section: str = '') -> None:
         """
@@ -118,7 +98,7 @@ class VersionEntry:
             if len(entries) > 0:
                 segments += entries
 
-        return _join_markdown(segments)
+        return markdown.join(segments)
 
     def header(self, md: bool = True) -> str:
         """
@@ -167,6 +147,8 @@ class VersionEntry:
 
 
 class Changelog:
+    """A changelog made up of a header, several versions, and a link table"""
+
     def __init__(self, path=None, header: str = default_header):
         """
         Create a new changelog object. Contents will be automatically read from disk if the file exists
@@ -174,10 +156,17 @@ class Changelog:
         :param path: The changelog's path on disk
         :param header: The header at the top of the changelog to use if the file does not exist
         """
-        self.path = path
+        self.path = os.path.abspath(path) if path else None
+        """The path of the changelog's file on disk"""
+
         self.header: str = header
+        """Any text at the top of the changelog before any H2s"""
+
         self.versions: List[VersionEntry] = []
+        """A list of versions in the changelog"""
+
         self.links = {}
+        """Link IDs at the end of the changelog"""
 
         if path and os.path.exists(path):
             self.read()
@@ -195,70 +184,15 @@ class Changelog:
 
         # Read file
         with open(path, 'r') as fp:
-            lines = fp.readlines()
+            tokens, self.links = markdown.tokenize(fp.read())
 
         section = ''
-        in_block = False
-        in_code = False
-
-        segments: List[Tuple[int, List[str], str]] = []
         header_segments = []
 
-        for line_no, line in enumerate(lines):
-            if in_code:
-                # this is the contents of a code block
-                segments[-1][1].append(line)
-                if code_regex.match(line):
-                    in_code = False
-                    in_block = False
+        for token in tokens:
+            text = '\n'.join(token.lines)
 
-            elif code_regex.match(line):
-                # this is the start of a code block
-                in_code = True
-                segments.append((line_no, [line], 'code'))
-
-            elif under1_regex.match(line) and in_block and len(segments[-1][1]) == 1 and segments[-1][2] == 'p':
-                # this is an underline for a setext-style H1
-                # ugly but it works
-                last = segments.pop()
-                segments.append((last[0], last[1] + [line], 'h1'))
-
-            elif under2_regex.match(line) and in_block and len(segments[-1][1]) == 1 and segments[-1][2] == 'p':
-                # this is an underline for a setext-style H2
-                # ugly but it works
-                last = segments.pop()
-                segments.append((last[0], last[1] + [line], 'h2'))
-
-            elif bullet_regex.match(line):
-                in_block = True
-                segments.append((line_no, [line], 'li'))
-
-            elif match := header_regex.match(line):
-                # this is a header
-                kind = f'h{len(match["hashes"])}'
-                segments.append((line_no, [line], kind))
-                in_block = False
-
-            elif match := linkid_regex.match(line):
-                # this is a link definition in the form '[id]: link', so add it to the link table
-                self.links[match['link_id'].lower()] = match['link']
-
-            elif line.isspace():
-                # skip empty lines
-                in_block = False
-
-            elif in_block:
-                # this is a line to be added to a paragraph
-                segments[-1][1].append(line)
-            else:
-                # this is a new paragraph
-                in_block = True
-                segments.append((line_no, [line], 'p'))
-
-        for segment in segments:
-            text = ''.join(segment[1]).strip()
-
-            if segment[2] == 'h2':
+            if token.kind == 'h2':
                 # start of a version
 
                 slug = text.rstrip('-').strip('#').strip()
@@ -270,7 +204,7 @@ class Changelog:
                 section = ''
 
                 version.name = slug
-                version.line_no = segment[0]
+                version.line_no = token.line_no
                 tags = []
                 date = None
 
@@ -288,7 +222,7 @@ class Changelog:
 
                 else:
                     # matches the schema
-                    version.name, version.link, version.link_id = _strip_link(split[0])
+                    version.name, version.link, version.link_id = markdown.strip_link(split[0])
                     version.date = date
                     version.tags = tags
 
@@ -299,7 +233,7 @@ class Changelog:
                 # so its best to just add this line to the header string
                 header_segments.append(text)
 
-            elif segment[2] == 'h3':
+            elif token.kind == 'h3':
                 # start of a version section
                 section = text.strip('#').strip()
                 if section not in self.versions[-1].sections.keys():
@@ -324,7 +258,7 @@ class Changelog:
                 version.link = self.links[version.link_id]
 
         # strip whitespace from header
-        self.header = _join_markdown(header_segments)
+        self.header = markdown.join(header_segments)
 
     def write(self, path: os.PathLike = None) -> None:
         """
@@ -348,7 +282,19 @@ class Changelog:
 
         segments += [f'[{link_id}]: {link}' for link_id, link in v_links.items()]
 
-        text = _join_markdown(segments)
+        text = markdown.join(segments)
 
         with open(path, 'w') as fp:
             fp.write(text)
+
+    def add_version(self, index: int = 0, *args, **kwargs) -> VersionEntry:
+        version = VersionEntry(*args, **kwargs)
+        self.versions.insert(index, version)
+
+        return version
+
+    def current(self, new_version_name='Unreleased') -> VersionEntry:
+        if len(self.versions) == 0:
+            return self.add_version(name=new_version_name)
+
+        return self.versions[0]

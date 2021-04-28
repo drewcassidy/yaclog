@@ -1,6 +1,9 @@
 import datetime
 import os.path
 import textwrap
+
+import changelog
+import version
 import yaclog.changelog
 
 log_segments = [
@@ -47,7 +50,7 @@ log_text = '\n\n'.join(log_segments)
 log = yaclog.Changelog()
 log.header = '# Changelog\n\nThis changelog is for testing the parser, and has many things in it that might trip it up.'
 log.links = {'id': 'http://www.koalastothemax.com'}
-log.versions = [yaclog.changelog.VersionEntry(), yaclog.changelog.VersionEntry(), yaclog.changelog.VersionEntry()]
+log.versions = [changelog.VersionEntry(), changelog.VersionEntry(), changelog.VersionEntry()]
 
 log.versions[0].name = '[Tests]'
 log.versions[0].sections = {

@@ -81,3 +81,5 @@ def join_version(epoch, release, pre, post, dev, local) -> str:
         parts.append(f"+{local}")
 
     return "".join(parts)
+
+

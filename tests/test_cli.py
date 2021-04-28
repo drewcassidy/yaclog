@@ -2,6 +2,8 @@ import unittest
 import os.path
 import git
 
+import changelog
+import version
 import yaclog
 from yaclog.cli.__main__ import cli
 from click.testing import CliRunner
@@ -64,7 +66,7 @@ class TestTagging(unittest.TestCase):
 
         with runner.isolated_filesystem():
             in_log = yaclog.Changelog(location)
-            in_log.versions = [yaclog.changelog.VersionEntry(), yaclog.changelog.VersionEntry()]
+            in_log.versions = [changelog.VersionEntry(), changelog.VersionEntry()]
 
             in_log.versions[0].name = '1.0.0'
             in_log.versions[1].name = '0.9.0'
@@ -92,7 +94,7 @@ class TestTagging(unittest.TestCase):
         with runner.isolated_filesystem():
             in_log = yaclog.Changelog(location)
             in_log.versions = [None, None]
-            in_log.versions = [yaclog.changelog.VersionEntry(), yaclog.changelog.VersionEntry()]
+            in_log.versions = [changelog.VersionEntry(), changelog.VersionEntry()]
 
             in_log.versions[0].name = '1.0.0'
             in_log.versions[0].tags = ['TAG1']
