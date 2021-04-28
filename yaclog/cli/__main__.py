@@ -19,8 +19,8 @@ import os.path
 import datetime
 import git
 
-import changelog
 import yaclog.version
+import yaclog.changelog
 from yaclog import Changelog
 
 
@@ -143,7 +143,7 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     else:
         matches = [v for v in obj.versions if v.name.lower() == 'unreleased']
         if len(matches) == 0:
-            version = changelog.VersionEntry()
+            version = yaclog.changelog.VersionEntry()
             obj.versions.insert(0, version)
         else:
             version = matches[0]
