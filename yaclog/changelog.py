@@ -19,7 +19,8 @@ import os
 import re
 from typing import List, Optional, Dict
 
-import markdown
+import yaclog.markdown as markdown
+import yaclog.version
 
 default_header = '# Changelog\n\nAll notable changes to this project will be documented in this file'
 
@@ -141,6 +142,10 @@ class VersionEntry:
         if body:
             contents += '\n\n' + body
         return contents
+
+    @property
+    def released(self):
+        return yaclog.version.is_release(self.name)
 
     def __str__(self) -> str:
         return self.header(False)
@@ -288,13 +293,61 @@ class Changelog:
             fp.write(text)
 
     def add_version(self, index: int = 0, *args, **kwargs) -> VersionEntry:
-        version = VersionEntry(*args, **kwargs)
-        self.versions.insert(index, version)
+        """
+        Add a new version to the changelog
 
+        :param index: Where to add the new version in the log. Defaults to the top
+        :param args: args to forward to the :py:class:`VersionEntry` constructor
+        :param kwargs: kwargs to forward to the :py:class:`VersionEntry` constructor
+        :return: The created entry
+        """
+        self.versions.insert(index, version := VersionEntry(*args, **kwargs))
         return version
 
-    def current(self, new_version_name='Unreleased') -> VersionEntry:
-        if len(self.versions) == 0:
+    def current_version(self, released: Optional[bool] = None,
+                        new_version_name: str = 'Unreleased') -> Optional[VersionEntry]:
+        """
+        Get the current version entry from the changelog
+
+        :param released: if the returned version should be a released version,
+            an unreleased version, or ``None`` to return the most recent
+        :param new_version_name: if unreleased versions are allowed, the name of
+            the version to create if there are no matches
+        :return: The current version matching the criteria, or None if only
+            release versions are allowed and none are found.
+        """
+
+        if released is None:
+            # return the first version, we dont care about release status
+            if len(self.versions) > 0:
+                return self.versions[0]
+        else:
+            # return the first version that matches `released`
+            for version in self.versions:
+                if version.released == released:
+                    return version
+
+        # fallback if none are found
+        if released:
+            return None
+        else:
             return self.add_version(name=new_version_name)
 
-        return self.versions[0]
+    def get_version(self, name: Optional[str] = None) -> VersionEntry:
+        """
+        Get a version from the changelog
+
+        :param name: The name of the version to get, or ``None`` to return the most recent
+        :return: The first version with the selected name
+        """
+
+        for version in self.versions:
+            if version.name == name or name is None:
+                return version
+        raise IndexError()
+
+    def __getitem__(self, item: str) -> VersionEntry:
+        return self.get_version(item)
+
+    def __len__(self) -> int:
+        return len(self.versions)

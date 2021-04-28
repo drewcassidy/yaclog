@@ -1,12 +1,12 @@
-import unittest
 import os.path
+import unittest
+
 import git
+from click.testing import CliRunner
 
 import changelog
-import version
 import yaclog
 from yaclog.cli.__main__ import cli
-from click.testing import CliRunner
 
 
 def check_result(runner, result, expected=0):
