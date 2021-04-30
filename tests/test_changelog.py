@@ -1,7 +1,9 @@
+import datetime
 import os.path
 import tempfile
 import unittest
 
+import changelog
 import yaclog.changelog
 from tests.common import log, log_segments, log_text
 
@@ -75,6 +77,89 @@ class TestWriter(unittest.TestCase):
         self.assertEqual(log_segments[5], self.log_segments[5])
         self.assertEqual('### Blocks', self.log_segments[6])
         self.assertEqual(log_segments[7:14], self.log_segments[7:14])
+
+
+class TestVersionEntry(unittest.TestCase):
+    def test_header_name(self):
+        """Test reading version names from headers"""
+        headers = {
+            'short': ('## Test', 'Test'),
+            'with dash': ('## Test - ', 'Test'),
+            'multi word': ('## Very long version name 1.0.0', 'Very long version name 1.0.0'),
+            'with brackets': ('## [Test]', '[Test]'),
+        }
+
+        for c, t in headers.items():
+            h = t[0]
+            with self.subTest(c, h=h):
+                version = changelog.VersionEntry.from_header(h)
+                self.assertEqual(version.name, t[1])
+                self.assertEqual(version.tags, [])
+                self.assertIsNone(version.date)
+                self.assertIsNone(version.link)
+                self.assertIsNone(version.link_id)
+
+    def test_header_tags(self):
+        """Test reading version tags from headers"""
+        headers = {
+            'no dash': ('## Test [Foo] [Bar]', 'Test', ['FOO', 'BAR']),
+            'with dash': ('## Test - [Foo] [Bar]', 'Test', ['FOO', 'BAR']),
+            'with brackets': ('## [Test] [Foo] [Bar]', '[Test]', ['FOO', 'BAR']),
+            'with brackets & dash': ('## [Test] - [Foo] [Bar]', '[Test]', ['FOO', 'BAR']),
+        }
+
+        for c, t in headers.items():
+            h = t[0]
+            with self.subTest(c, h=h):
+                version = changelog.VersionEntry.from_header(h)
+                self.assertEqual(version.name, t[1])
+                self.assertEqual(version.tags, t[2])
+                self.assertIsNone(version.date)
+                self.assertIsNone(version.link)
+                self.assertIsNone(version.link_id)
+
+    def test_header_date(self):
+        """Test reading version dates from headers"""
+
+        headers = {
+            'no dash': ('## Test 1961-04-12', 'Test',
+                        datetime.date.fromisoformat('1961-04-12'), []),
+            'with dash': ('## Test 1969-07-20', 'Test',
+                          datetime.date.fromisoformat('1969-07-20'), []),
+            'two dates': ('## 1981-07-20 1988-11-15', '1981-07-20',
+                          datetime.date.fromisoformat('1988-11-15'), []),
+            'single date': ('## 2020-05-30', '2020-05-30', None, []),
+            'with tags': ('## 1.0.0 - 2021-04-19 [Foo] [Bar]', '1.0.0',
+                          datetime.date.fromisoformat('2021-04-19'), ['FOO', 'BAR']),
+        }
+
+        for c, t in headers.items():
+            h = t[0]
+            with self.subTest(c, h=h):
+                version = changelog.VersionEntry.from_header(h)
+                self.assertEqual(version.name, t[1])
+                self.assertEqual(version.date, t[2])
+                self.assertEqual(version.tags, t[3])
+                self.assertIsNone(version.link)
+                self.assertIsNone(version.link_id)
+
+    def test_header_noncompliant(self):
+        """Test reading version that dont fit the schema, and should just be read as literals"""
+
+        headers = {
+            'no space between tags': 'Test [Foo][Bar]',
+            'text at end': 'Test [Foo] [Bar] Test',
+            'invalid date': 'Test - 9999-99-99',
+        }
+
+        for c, h in headers.items():
+            with self.subTest(c, h=h):
+                version = changelog.VersionEntry.from_header('## ' + h)
+                self.assertEqual(version.name, h)
+                self.assertEqual(version.tags, [])
+                self.assertIsNone(version.date)
+                self.assertIsNone(version.link)
+                self.assertIsNone(version.link_id)
 
 
 if __name__ == '__main__':
