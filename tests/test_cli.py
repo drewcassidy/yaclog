@@ -8,8 +8,8 @@ import yaclog.changelog
 from yaclog.cli.__main__ import cli
 
 
-def check_result(runner, result, expected=0):
-    runner.assertEqual(result.exit_code, expected, f'output: {result.output}\ntraceback: {result.exc_info}')
+def check_result(runner, result, success: bool = True):
+    runner.assertEqual((result.exit_code == 0), success, f'output: {result.output}\ntraceback: {result.exc_info}')
 
 
 class TestCreation(unittest.TestCase):
@@ -53,7 +53,7 @@ class TestCreation(unittest.TestCase):
 
         with runner.isolated_filesystem():
             result = runner.invoke(cli, ['show'])
-            check_result(self, result, 1)
+            check_result(self, result, False)
             self.assertIn('does not exist', result.output)
 
 
@@ -82,8 +82,7 @@ class TestTagging(unittest.TestCase):
             self.assertEqual(out_log.versions[1].tags, ['TAG2'])
 
             result = runner.invoke(cli, ['tag', 'tag3', '0.8.0'])
-            check_result(self, result, 2)
-            self.assertIn('not found in changelog', result.output)
+            check_result(self, result, False)
 
     def test_tag_deletion(self):
         """Test deleting tags from versions"""
@@ -103,15 +102,12 @@ class TestTagging(unittest.TestCase):
             in_log.write()
 
             result = runner.invoke(cli, ['tag', '-d', 'tag2', '0.8.0'])
-            check_result(self, result, 2)
-            self.assertIn('not found in changelog', result.output)
+            check_result(self, result, False)
 
             result = runner.invoke(cli, ['tag', '-d', 'tag3', '0.9.0'])
-            check_result(self, result, 2)
-            self.assertIn('not found in version', result.output)
+            check_result(self, result, False)
 
             result = runner.invoke(cli, ['tag', '-d', 'tag1'])
-            self.assertNotIn('not found in version', result.output)
             check_result(self, result)
 
             out_log = yaclog.read(location)
@@ -119,7 +115,6 @@ class TestTagging(unittest.TestCase):
             self.assertEqual(out_log.versions[1].tags, ['TAG2'])
 
             result = runner.invoke(cli, ['tag', '-d', 'tag2', '0.9.0'])
-            self.assertNotIn('not found in version', result.output)
             check_result(self, result)
 
             out_log = yaclog.read(location)

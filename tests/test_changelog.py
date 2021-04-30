@@ -4,8 +4,8 @@ import tempfile
 import unittest
 
 import yaclog
-from yaclog.changelog import Changelog, VersionEntry
 from tests.common import log, log_segments, log_text
+from yaclog.changelog import VersionEntry
 
 
 class TestParser(unittest.TestCase):

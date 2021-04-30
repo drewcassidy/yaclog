@@ -298,17 +298,18 @@ class Changelog:
         self.versions.insert(index, version := VersionEntry(*args, **kwargs))
         return version
 
-    def current_version(self, released: Optional[bool] = None,
-                        new_version_name: str = 'Unreleased') -> Optional[VersionEntry]:
+    def current_version(self, released: Optional[bool] = None, new_version: bool = False,
+                        new_version_name: str = 'Unreleased') -> VersionEntry:
         """
         Get the current version entry from the changelog
 
         :param released: if the returned version should be a released version,
             an unreleased version, or ``None`` to return the most recent
-        :param new_version_name: if unreleased versions are allowed, the name of
-            the version to create if there are no matches
-        :return: The current version matching the criteria, or None if only
-            release versions are allowed and none are found.
+        :param new_version: if a new version should be created if none exist.
+        :param new_version_name: The name of the version to create if there
+            are no matches and ``new_version`` is True.
+        :return: The current version matching the criteria,
+            or None if ``new_version`` is disabled and none are found.
         """
 
         # return the first version that matches `released`
@@ -317,10 +318,13 @@ class Changelog:
                 return version
 
         # fallback if none are found
-        if released:
-            return None
-        else:
+        if new_version:
             return self.add_version(name=new_version_name)
+        else:
+            if released is not None:
+                raise ValueError(f'Changelog has no current version matching released={released}')
+            else:
+                raise ValueError('Changelog has no current version')
 
     def get_version(self, name: Optional[str] = None) -> VersionEntry:
         """
@@ -333,7 +337,7 @@ class Changelog:
         for version in self.versions:
             if version.name == name or name is None:
                 return version
-        raise IndexError()
+        raise KeyError(f'Version {name} not found in changelog')
 
     def __getitem__(self, item: str) -> VersionEntry:
         return self.get_version(item)

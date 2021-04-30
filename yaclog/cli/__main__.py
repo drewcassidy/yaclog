@@ -14,14 +14,14 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import click
-import os.path
 import datetime
+import os.path
+
+import click
 import git
 
 import yaclog.version
-import yaclog.changelog
-from yaclog import Changelog
+from yaclog.changelog import Changelog
 
 
 @click.group()
@@ -61,35 +61,44 @@ def reformat(obj: Changelog):
 
 @cli.command(short_help='Show changes from the changelog file')
 @click.option('--all', '-a', 'all_versions', is_flag=True, help='Show the entire changelog.')
-@click.argument('versions', type=str, nargs=-1)
+@click.option('--markdown/--txt', '-m/-t', default=False, help='Display as markdown or plain text.')
+@click.option('--full', '-f', 'str_func', flag_value=lambda v, k: v.text(**k), default=True,
+              help='Show version header and body.')
+@click.option('--name', '-n', 'str_func', flag_value=lambda v, k: v.name, help='Show only the version name')
+@click.option('--body', '-b', 'str_func', flag_value=lambda v, k: v.body(**k), help='Show only the version body.')
+@click.option('--header', '-h', 'str_func', flag_value=lambda v, k: v.header(**k), help='Show only the version header.')
+@click.argument('version_names', metavar='VERSIONS', type=str, nargs=-1)
 @click.pass_obj
-def show(obj: Changelog, all_versions, versions):
+def show(obj: Changelog, all_versions, markdown, str_func, version_names):
     """Show the changes for VERSIONS.
 
     VERSIONS is a list of versions to print. If not given, the most recent version is used.
     """
-    if all_versions:
-        with open(obj.path, 'r') as fp:
-            click.echo_via_pager(fp.read())
-    else:
-        if len(versions):
-            v_list = []
-            for v_name in versions:
-                matches = [v for v in obj.versions if v.name == v_name]
-                if len(matches) == 0:
-                    raise click.BadArgumentUsage(f'Version "{v_name}" not found in changelog.')
-                v_list += matches
-        else:
-            v_list = [obj.versions[0]]
 
-        for v in v_list:
-            click.echo(v.text(False))
+    try:
+        if all_versions:
+            versions = obj.versions
+        elif len(version_names) == 0:
+            versions = [obj.current_version()]
+        else:
+            versions = [obj.get_version(name) for name in version_names]
+    except KeyError as k:
+        raise click.BadArgumentUsage(k)
+    except ValueError as v:
+        raise click.ClickException(v)
+
+    kwargs = {'md': markdown}
+
+    for v in versions:
+        text = str_func(v, kwargs)
+        click.echo(text)
+        click.echo('\n')
 
 
 @cli.command(short_help='Modify version tags')
 @click.option('--add/--delete', '-a/-d', default=True, is_flag=True, help='Add or delete tags')
 @click.argument('tag_name', metavar='tag', type=str)
-@click.argument('version_name', metavar='version', type=str, required=False)
+@click.argument('version_name', metavar='VERSION', type=str, required=False)
 @click.pass_obj
 def tag(obj: Changelog, add, tag_name: str, version_name: str):
     """Modify TAG on VERSION.
@@ -97,13 +106,15 @@ def tag(obj: Changelog, add, tag_name: str, version_name: str):
     VERSION is the name of a version to add tags to. If not given, the most recent version is used.
     """
     tag_name = tag_name.upper()
-    if version_name:
-        matches = [v for v in obj.versions if v.name == version_name]
-        if len(matches) == 0:
-            raise click.BadArgumentUsage(f'Version "{version_name}" not found in changelog.')
-        version = matches[0]
-    else:
-        version = obj.versions[0]
+    try:
+        if version_name:
+            version = obj.get_version(version_name)
+        else:
+            version = obj.current_version()
+    except KeyError as k:
+        raise click.BadArgumentUsage(k)
+    except ValueError as v:
+        raise click.ClickException(v)
 
     if add:
         version.tags.append(tag_name)
@@ -111,7 +122,7 @@ def tag(obj: Changelog, add, tag_name: str, version_name: str):
         try:
             version.tags.remove(tag_name)
         except ValueError:
-            raise click.BadArgumentUsage(f'Tag "{tag_name}" not found in version "{version.name}".')
+            raise click.BadArgumentUsage(f'Tag {tag_name} not found in version {version.name}.')
 
     obj.write()
 
@@ -135,24 +146,19 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     """
 
     section_name = section_name.title()
-    if version_name:
-        matches = [v for v in obj.versions if v.name == version_name]
-        if len(matches) == 0:
-            raise click.BadArgumentUsage(f'Version "{version_name}" not found in changelog.')
-        version = matches[0]
-    else:
-        matches = [v for v in obj.versions if v.name.lower() == 'unreleased']
-        if len(matches) == 0:
-            version = yaclog.changelog.VersionEntry()
-            obj.versions.insert(0, version)
+    try:
+        if version_name:
+            version = obj.get_version(version_name)
         else:
-            version = matches[0]
+            version = obj.current_version(released=False, new_version=True)
+    except KeyError as k:
+        raise click.BadArgumentUsage(k)
 
     if section_name not in version.sections.keys():
         version.sections[section_name] = []
 
-    section = version.sections[section_name]
-    section += paragraphs
+    for p in paragraphs:
+        version.add_entry(p, section_name)
 
     sub_bullet = False
     bullet_str = ''
@@ -166,7 +172,8 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 
         bullet_str += bullet
         sub_bullet = True
-    section.append(bullet_str)
+
+    version.add_entry(bullet_str, section_name)
 
     obj.write()
 
