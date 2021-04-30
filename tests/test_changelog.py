@@ -3,8 +3,8 @@ import os.path
 import tempfile
 import unittest
 
-import changelog
-import yaclog.changelog
+import yaclog
+from yaclog.changelog import Changelog, VersionEntry
 from tests.common import log, log_segments, log_text
 
 
@@ -92,7 +92,7 @@ class TestVersionEntry(unittest.TestCase):
         for c, t in headers.items():
             h = t[0]
             with self.subTest(c, h=h):
-                version = changelog.VersionEntry.from_header(h)
+                version = VersionEntry.from_header(h)
                 self.assertEqual(version.name, t[1])
                 self.assertEqual(version.tags, [])
                 self.assertIsNone(version.date)
@@ -111,7 +111,7 @@ class TestVersionEntry(unittest.TestCase):
         for c, t in headers.items():
             h = t[0]
             with self.subTest(c, h=h):
-                version = changelog.VersionEntry.from_header(h)
+                version = VersionEntry.from_header(h)
                 self.assertEqual(version.name, t[1])
                 self.assertEqual(version.tags, t[2])
                 self.assertIsNone(version.date)
@@ -136,7 +136,7 @@ class TestVersionEntry(unittest.TestCase):
         for c, t in headers.items():
             h = t[0]
             with self.subTest(c, h=h):
-                version = changelog.VersionEntry.from_header(h)
+                version = VersionEntry.from_header(h)
                 self.assertEqual(version.name, t[1])
                 self.assertEqual(version.date, t[2])
                 self.assertEqual(version.tags, t[3])
@@ -154,7 +154,7 @@ class TestVersionEntry(unittest.TestCase):
 
         for c, h in headers.items():
             with self.subTest(c, h=h):
-                version = changelog.VersionEntry.from_header('## ' + h)
+                version = VersionEntry.from_header('## ' + h)
                 self.assertEqual(version.name, h)
                 self.assertEqual(version.tags, [])
                 self.assertIsNone(version.date)
