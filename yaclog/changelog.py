@@ -28,6 +28,11 @@ default_header = '# Changelog\n\nAll notable changes to this project will be doc
 class VersionEntry:
     """Holds a single version entry in a :py:class:`Changelog`"""
 
+    header_regex = re.compile(  # THE LANGUAGE OF THE GODS
+        r"##\s+(?P<name>.*?)(?:\s+-)?(?:\s+(?P<date>\d{4}-\d{2}-\d{2}))?(?P<tags>(?:\s+\[[^]]*?])*)\s*$")
+
+    tag_regex = re.compile(r'\[(?P<tag>[^]]*?)]')
+
     def __init__(self, name: str = 'Unreleased',
                  date: Optional[datetime.date] = None, tags: Optional[List[str]] = None,
                  link: Optional[str] = None, link_id: Optional[str] = None):
@@ -45,7 +50,7 @@ class VersionEntry:
         """The version's name"""
 
         self.date: Optional[datetime.date] = date
-        """WHen the version was released"""
+        """When the version was released"""
 
         self.tags: List[str] = tags if tags else []
         """The version's tags"""
@@ -64,6 +69,26 @@ class VersionEntry:
         self.sections: Dict[str, List[str]] = {'': []}
         """The dictionary of change entries in the version, organized by section. 
         Uncategorized changes have a section of an empty string."""
+
+    @classmethod
+    def from_header(cls, header: str):
+        version = cls()
+
+        match = cls.header_regex.match(header)
+        assert match, f'failed to parse version header: "{header}"'
+
+        version.name, version.link, version.link_id = markdown.strip_link(match['name'])
+
+        if match['date']:
+            try:
+                version.date = datetime.date.fromisoformat(match['date'])
+            except ValueError:
+                return cls(name=header.lstrip('#').strip())
+
+        if match['tags']:
+            version.tags = [m['tag'].upper() for m in cls.tag_regex.finditer(match['tags'])]
+
+        return version
 
     def add_entry(self, contents: str, section: str = '') -> None:
         """
@@ -199,39 +224,8 @@ class Changelog:
 
             if token.kind == 'h2':
                 # start of a version
-
-                slug = text.rstrip('-').strip('#').strip()
-                split = slug.split()
-                if '-' in split:
-                    split.remove('-')
-
-                version = VersionEntry()
+                self.versions.append(VersionEntry.from_header(text))
                 section = ''
-
-                version.name = slug
-                version.line_no = token.line_no
-                tags = []
-                date = None
-
-                for word in split[1:]:
-                    if match := re.match(r'\d{4}-\d{2}-\d{2}', word):
-                        # date
-                        try:
-                            date = datetime.date.fromisoformat(match[0])
-                        except ValueError:
-                            break
-                    elif match := re.match(r'^\[(?P<tag>\S*)]', word):
-                        tags.append(match['tag'])
-                    else:
-                        break
-
-                else:
-                    # matches the schema
-                    version.name, version.link, version.link_id = markdown.strip_link(split[0])
-                    version.date = date
-                    version.tags = tags
-
-                self.versions.append(version)
 
             elif len(self.versions) == 0:
                 # we haven't encountered any version headers yet,
@@ -317,15 +311,10 @@ class Changelog:
             release versions are allowed and none are found.
         """
 
-        if released is None:
-            # return the first version, we dont care about release status
-            if len(self.versions) > 0:
-                return self.versions[0]
-        else:
-            # return the first version that matches `released`
-            for version in self.versions:
-                if version.released == released:
-                    return version
+        # return the first version that matches `released`
+        for version in self.versions:
+            if version.released == released or released is None:
+                return version
 
         # fallback if none are found
         if released:

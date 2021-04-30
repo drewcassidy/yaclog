@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Changed
+
+- improved version header parsing
+
 ## 0.3.3 - 2021-04-27
 
 ### Added
