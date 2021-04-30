@@ -35,7 +35,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: Run unit tests
-        run:  python -m unittest -v
+        run: python -m unittest -v
 
   deploy:
     needs: test
@@ -53,7 +53,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools wheel twine
+          python -m pip install setuptools wheel twine
+          python -m pip install . # Self hosting!
 
       - name: Install pypa/build
         run: python -m pip install build --user
@@ -61,7 +62,21 @@ jobs:
       - name: Build a binary wheel and source tarball
         run: python -m build --sdist --wheel --outdir dist/
 
+      - name: Get version name and body
+        run: |
+          echo "VERSION_TILE=Version $(yaclog show -n)" >> $GITHUB_ENV
+          echo "$(yaclog show -mb)" >> RELEASE.md
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Publish to Github
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          name: ${{ env.VERSION_TITLE }}
+          body_path: RELEASE.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
