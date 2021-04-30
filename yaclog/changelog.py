@@ -269,7 +269,7 @@ class Changelog:
         # strip whitespace from header
         self.header = markdown.join(header_segments)
 
-    def write(self, path: os.PathLike = None) -> None:
+    def write(self, path=None) -> None:
         """
         Write a markdown changelog to a file.
 
@@ -311,7 +311,7 @@ class Changelog:
     def current_version(self, released: Optional[bool] = None, new_version: bool = False,
                         new_version_name: str = 'Unreleased') -> VersionEntry:
         """
-        Get the current version entry from the changelog
+        Get the current version from the changelog
 
         :param released: if the returned version should be a released version,
             an unreleased version, or ``None`` to return the most recent

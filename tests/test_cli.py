@@ -1,5 +1,6 @@
 import os.path
 import unittest
+import traceback
 
 import git
 from click.testing import CliRunner
@@ -9,7 +10,9 @@ from yaclog.cli.__main__ import cli
 
 
 def check_result(runner, result, success: bool = True):
-    runner.assertEqual((result.exit_code == 0), success, f'output: {result.output}\ntraceback: {result.exc_info}')
+    runner.assertEqual((result.exit_code == 0), success,
+                       f'\noutput: {result.output}\ntraceback: ' + ''.join(
+                           traceback.format_exception(*result.exc_info)))
 
 
 class TestCreation(unittest.TestCase):

@@ -14,19 +14,37 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from packaging.version import Version, InvalidVersion
+import re
+from typing import Optional, Tuple
+
+from packaging.version import Version, VERSION_PATTERN
+
+version_regex = re.compile(VERSION_PATTERN, re.VERBOSE | re.IGNORECASE)
 
 
-def is_release(version: str) -> bool:
-    try:
-        v = Version(version)
-        return not (v.is_devrelease or v.is_prerelease)
-    except InvalidVersion:
-        return False
+def extract_version(version_str: str) -> Tuple[Optional[Version], int, int]:
+    """
+    Extracts a PEP440 version object from a string which may have other text
+
+    :param version_str: The input string to extract from
+    :return: A tuple of (version, start, end), where start and end are the span of the version in the original string
+    """
+    match = version_regex.search(version_str)
+    if not match:
+        return None, -1, -1
+    return (Version(match[0]),) + match.span()
 
 
-def increment_version(version: str, mode: str) -> str:
-    v = Version(version)
+def increment_version(version_str: str, rel_seg: int = None, pre_seg: str = None) -> str:
+    """
+    Increment the PEP440 version number in a string
+
+    :param version_str: The input string to manipulate
+    :param rel_seg: Which segment of the "release" value to increment, if any
+    :param pre_seg: Which kind of prerelease to use, if any
+    :return: The original string with the version number incremented
+    """
+    v, *span = extract_version(version_str)
     epoch = v.epoch
     release = v.release
     pre = v.pre
@@ -34,27 +52,23 @@ def increment_version(version: str, mode: str) -> str:
     dev = v.dev
     local = v.local
 
-    if mode == '+M':
-        release = (release[0] + 1,) + ((0,) * len(release[1:]))
-        pre = post = dev = None
-    elif mode == '+m':
-        release = (release[0], release[1] + 1) + ((0,) * len(release[2:]))
-        pre = post = dev = None
-    elif mode == '+p':
-        release = (release[0], release[1], release[2] + 1) + ((0,) * len(release[3:]))
-        pre = post = dev = None
-    elif mode in ['+a', '+b', '+rc']:
-        if pre[0] == mode[1:]:
-            pre = (mode[1:], pre[1] + 1)
-        else:
-            pre = (mode[1:], 0)
-    else:
-        raise IndexError(f'Unknown mode {mode}')
+    if rel_seg is not None:
+        if len(release) <= rel_seg:
+            release += (0,) * (1 + rel_seg - len(release))
+        release = release[0:rel_seg] + (release[rel_seg] + 1,) + (0,) * (len(release) - rel_seg - 1)
 
-    return join_version(epoch, release, pre, post, dev, local)
+    if pre_seg is not None:
+        if pre and pre[0] == pre_seg:
+            pre = (pre_seg, pre[1] + 1)
+        else:
+            pre = (pre_seg, 1)
+
+    new_v = join_version(epoch, release, pre, post, dev, local)
+    return version_str[0:span[0]] + new_v + version_str[span[1]:]
 
 
 def join_version(epoch, release, pre, post, dev, local) -> str:
+    """Join multiple segments of a PEP440 version"""
     parts = []
 
     # Epoch
@@ -83,3 +97,10 @@ def join_version(epoch, release, pre, post, dev, local) -> str:
     return "".join(parts)
 
 
+def is_release(version_str: str) -> bool:
+    """Check if a version string is a release version or not. Returns false if a PEP440 version could not be found"""
+    v, *span = extract_version(version_str)
+    if v:
+        return not (v.is_devrelease or v.is_prerelease)
+    else:
+        return False

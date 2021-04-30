@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file
 ### Changed
 
 - improved version header parsing
+- improved version number incrementing. It can now handle other text surrounding a pep440-compliant version number, which will not be modified
 
 ## 0.3.3 - 2021-04-27
 

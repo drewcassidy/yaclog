@@ -179,33 +179,34 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 
 
 @cli.command(short_help='Release versions.')
-@click.option('-v', '--version', 'v_flag', type=str, default=None, help='The new version number to use.')
-@click.option('-M', '--major', 'v_flag', flag_value='+M', help='Increment major version number.')
-@click.option('-m', '--minor', 'v_flag', flag_value='+m', help='Increment minor version number.')
-@click.option('-p', '--patch', 'v_flag', flag_value='+p', help='Increment patch number.')
-@click.option('-a', '--alpha', 'v_flag', flag_value='+a', help='Increment alpha version number.')
-@click.option('-b', '--beta', 'v_flag', flag_value='+b', help='Increment beta version number.')
-@click.option('-r', '--rc', 'v_flag', flag_value='+rc', help='Increment release candidate version number.')
+@click.option('-v', '--version', 'version_name', type=str, default=None, help='The new version number to use.')
+@click.option('-M', '--major', 'rel_seg', flag_value=0, default=None, help='Increment major version number.')
+@click.option('-m', '--minor', 'rel_seg', flag_value=1, help='Increment minor version number.')
+@click.option('-p', '--patch', 'rel_seg', flag_value=2, help='Increment patch number.')
+@click.option('-a', '--alpha', 'pre_seg', flag_value='a', default=None, help='Increment alpha version number.')
+@click.option('-b', '--beta', 'pre_seg', flag_value='b', help='Increment beta version number.')
+@click.option('-r', '--rc', 'pre_seg', flag_value='rc', help='Increment release candidate version number.')
 @click.option('-c', '--commit', is_flag=True, help='Create a git commit tagged with the new version number.')
 @click.pass_obj
-def release(obj: Changelog, v_flag, commit):
+def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
     """Release versions in the changelog and increment their version numbers"""
-    matches = [v for v in obj.versions if v.name.lower() != 'unreleased']
-    if len(matches) == 0:
+    try:
+        version = obj.current_version(released=True).name
+    except ValueError:
         version = '0.0.0'
-    else:
-        version = matches[0].name
 
-    cur_version = obj.versions[0]
+    cur_version = obj.current_version()
+    new_name = version
     old_name = cur_version.name
 
-    if v_flag:
-        if v_flag[0] == '+':
-            new_name = yaclog.version.increment_version(version, v_flag)
-        else:
-            new_name = v_flag
+    if version_name:
+        new_name = version_name
 
-        if yaclog.version.is_release(cur_version.name):
+    if rel_seg is not None or pre_seg is not None:
+        new_name = yaclog.version.increment_version(new_name, rel_seg, pre_seg)
+
+    if new_name != old_name:
+        if yaclog.version.is_release(old_name):
             click.confirm(f'Rename release version "{cur_version.name}" to "{new_name}"?', abort=True)
 
         cur_version.name = new_name
