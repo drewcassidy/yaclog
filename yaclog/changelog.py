@@ -14,6 +14,8 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import datetime
 import os
 import re
@@ -35,7 +37,7 @@ class VersionEntry:
 
     def __init__(self, name: str = 'Unreleased',
                  date: Optional[datetime.date] = None, tags: Optional[List[str]] = None,
-                 link: Optional[str] = None, link_id: Optional[str] = None):
+                 link: Optional[str] = None, link_id: Optional[str] = None, line_no: Optional[int] = None):
         """
         Create a new version entry
 
@@ -44,6 +46,7 @@ class VersionEntry:
         :param tags: The version's tags
         :param link: The version's URL
         :param link_id: The version's link ID
+        :param line_no What line in the original file the version starts on
         """
 
         self.name: str = name
@@ -61,7 +64,7 @@ class VersionEntry:
         self.link_id: Optional[str] = link_id
         """The version's link ID, uses the version name by default when writing"""
 
-        self.line_no: Optional[int] = None
+        self.line_no: Optional[int] = line_no
         """What line the version occurs at in the file, or None if the version was not read from a file. 
         This is not guaranteed to be correct after the changelog has been modified, 
         and it has no effect on the written file"""
@@ -71,8 +74,15 @@ class VersionEntry:
         Uncategorized changes have a section of an empty string."""
 
     @classmethod
-    def from_header(cls, header: str):
-        version = cls()
+    def from_header(cls, header: str, line_no: Optional[int] = None) -> VersionEntry:
+        """
+        Create a new version entry from a markdown header
+
+        :param header: A markdown header to parse
+        :param line_no: Line number the header is on
+        :return: a new VersionEntry with the header's information
+        """
+        version = cls(line_no=line_no)
 
         match = cls.header_regex.match(header)
         assert match, f'failed to parse version header: "{header}"'
@@ -83,7 +93,7 @@ class VersionEntry:
             try:
                 version.date = datetime.date.fromisoformat(match['date'])
             except ValueError:
-                return cls(name=header.lstrip('#').strip())
+                return cls(name=header.lstrip('#').strip(), line_no=line_no)
 
         if match['tags']:
             version.tags = [m['tag'].upper() for m in cls.tag_regex.finditer(match['tags'])]
@@ -224,7 +234,7 @@ class Changelog:
 
             if token.kind == 'h2':
                 # start of a version
-                self.versions.append(VersionEntry.from_header(text))
+                self.versions.append(VersionEntry.from_header(text, line_no=token.line_no))
                 section = ''
 
             elif len(self.versions) == 0:
