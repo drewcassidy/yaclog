@@ -6,8 +6,10 @@ All notable changes to this project will be documented in this file
 
 ### Changed
 
-- improved version header parsing
-- improved version number incrementing. It can now handle other text surrounding a pep440-compliant version number, which will not be modified
+- improved version header parsing to be more robust and handle multi-word version names.
+- improved version number incrementing in `release`.
+  - can now handle other text surrounding a pep440-compliant version number, which will not be modified
+  - can now handle pre-releases correctly. The version to increment is the most recent version in the log with a valid pep440 version number in it. Release increment and prerelease increments can be mixed, allowing e.g: `yaclog release -mr` to create a release candidate with in incremented minor version number.
 
 ## 0.3.3 - 2021-04-27
 
@@ -18,8 +20,7 @@ All notable changes to this project will be documented in this file
 ### Fixed
 
 - Default links and dates in VersionEntry are now consistently `None`
-- Changelog links dict now contains version links. 
-  Modified version links will overwrite those in the table when writing to a file
+- Changelog links dict now contains version links. Modified version links will overwrite those in the table when writing to a file
 - Changelog object no longer errors when creating without a path.
 - `release` now resets lesser version values when incrementing
 - `release` now works with logs that have only unreleased changes

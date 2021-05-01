@@ -138,7 +138,6 @@ class TestRelease(unittest.TestCase):
             result = runner.invoke(cli, ['release', '--version', '1.0.0'])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, '1.0.0')
-            self.assertIn('Unreleased', result.output)
             self.assertIn('1.0.0', result.output)
 
             runner.invoke(cli, ['entry', '-b', 'entry number 2'])
@@ -146,7 +145,6 @@ class TestRelease(unittest.TestCase):
             result = runner.invoke(cli, ['release', '-p'])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, '1.0.1')
-            self.assertIn('Unreleased', result.output)
             self.assertIn('1.0.1', result.output)
 
             runner.invoke(cli, ['entry', '-b', 'entry number 3'])
@@ -154,7 +152,6 @@ class TestRelease(unittest.TestCase):
             result = runner.invoke(cli, ['release', '-m'])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, '1.1.0')
-            self.assertIn('Unreleased', result.output)
             self.assertIn('1.1.0', result.output)
 
             runner.invoke(cli, ['entry', '-b', 'entry number 4'])
@@ -162,8 +159,29 @@ class TestRelease(unittest.TestCase):
             result = runner.invoke(cli, ['release', '-M'])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, '2.0.0')
-            self.assertIn('Unreleased', result.output)
             self.assertIn('2.0.0', result.output)
+
+            runner.invoke(cli, ['entry', '-b', 'entry number 5'])
+
+            result = runner.invoke(cli, ['release', '-Ma'])
+            check_result(self, result)
+            self.assertEqual(yaclog.read(location).versions[0].name, '3.0.0a1')
+            self.assertIn('3.0.0a1', result.output)
+
+            result = runner.invoke(cli, ['release', '-b'])
+            check_result(self, result)
+            self.assertEqual(yaclog.read(location).versions[0].name, '3.0.0b1')
+            self.assertIn('3.0.0b1', result.output)
+
+            result = runner.invoke(cli, ['release', '-r'])
+            check_result(self, result)
+            self.assertEqual(yaclog.read(location).versions[0].name, '3.0.0rc1')
+            self.assertIn('3.0.0rc1', result.output)
+
+            result = runner.invoke(cli, ['release', '-f'])
+            check_result(self, result)
+            self.assertEqual(yaclog.read(location).versions[0].name, '3.0.0')
+            self.assertIn('3.0.0', result.output)
 
     def test_commit(self):
         """Test committing and tagging releases"""

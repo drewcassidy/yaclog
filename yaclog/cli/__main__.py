@@ -186,21 +186,26 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 @click.option('-a', '--alpha', 'pre_seg', flag_value='a', default=None, help='Increment alpha version number.')
 @click.option('-b', '--beta', 'pre_seg', flag_value='b', help='Increment beta version number.')
 @click.option('-r', '--rc', 'pre_seg', flag_value='rc', help='Increment release candidate version number.')
-@click.option('-c', '--commit', is_flag=True, help='Create a git commit tagged with the new version number.')
+@click.option('-f', '--full', 'pre_seg', flag_value='', help='Clear the prerelease value creating a full release.')
+@click.option('-c', '--commit', is_flag=True,
+              help='Create a git commit tagged with the new version number. '
+                   'If there are no changes to commit, the current commit will be tagged instead.')
 @click.pass_obj
 def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
     """Release versions in the changelog and increment their version numbers"""
-    try:
-        version = obj.current_version(released=True).name
-    except ValueError:
-        version = '0.0.0'
 
     cur_version = obj.current_version()
-    new_name = version
     old_name = cur_version.name
 
     if version_name:
         new_name = version_name
+    else:
+        for v in obj.versions:
+            if v.version is not None:
+                new_name = v.name
+                break
+        else:
+            new_name = '0.0.0'
 
     if rel_seg is not None or pre_seg is not None:
         new_name = yaclog.version.increment_version(new_name, rel_seg, pre_seg)

@@ -41,7 +41,7 @@ def increment_version(version_str: str, rel_seg: int = None, pre_seg: str = None
 
     :param version_str: The input string to manipulate
     :param rel_seg: Which segment of the "release" value to increment, if any
-    :param pre_seg: Which kind of prerelease to use, if any
+    :param pre_seg: Which kind of prerelease to use, if any. An empty string clears the prerelease field.
     :return: The original string with the version number incremented
     """
     v, *span = extract_version(version_str)
@@ -56,12 +56,15 @@ def increment_version(version_str: str, rel_seg: int = None, pre_seg: str = None
         if len(release) <= rel_seg:
             release += (0,) * (1 + rel_seg - len(release))
         release = release[0:rel_seg] + (release[rel_seg] + 1,) + (0,) * (len(release) - rel_seg - 1)
+        pre = None
 
     if pre_seg is not None:
-        if pre and pre[0] == pre_seg:
+        if pre_seg == '':  # full release, clear prerelease field
+            pre = None
+        elif pre and pre[0] == pre_seg:  # increment current prerelease type
             pre = (pre_seg, pre[1] + 1)
         else:
-            pre = (pre_seg, 1)
+            pre = (pre_seg, 1)  # set prerelease field
 
     new_v = join_version(epoch, release, pre, post, dev, local)
     return version_str[0:span[0]] + new_v + version_str[span[1]:]

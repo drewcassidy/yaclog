@@ -182,6 +182,10 @@ class VersionEntry:
     def released(self):
         return yaclog.version.is_release(self.name)
 
+    @property
+    def version(self):
+        return yaclog.version.extract_version(self.name)[0]
+
     def __str__(self) -> str:
         return self.header(False)
 
