@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file
   - can now handle other text surrounding a pep440-compliant version number, which will not be modified
   - can now handle pre-releases correctly. The version to increment is the most recent version in the log with a valid pep440 version number in it. Release increment and prerelease increments can be mixed, allowing e.g: `yaclog release -mr` to create a release candidate with in incremented minor version number.
 
+### Removed
+
+- `entry` with multiple `-b` options no longer add sub bullet points, instead adding each bullet as its own line.
+
 ## 0.3.3 - 2021-04-27
 
 ### Added

@@ -154,26 +154,11 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     except KeyError as k:
         raise click.BadArgumentUsage(k)
 
-    if section_name not in version.sections.keys():
-        version.sections[section_name] = []
-
     for p in paragraphs:
         version.add_entry(p, section_name)
 
-    sub_bullet = False
-    bullet_str = ''
-    for bullet in bullets:
-        bullet = bullet.strip()
-        if bullet[0] not in ['-+*']:
-            bullet = '- ' + bullet
-
-        if sub_bullet:
-            bullet = '\n    ' + bullet
-
-        bullet_str += bullet
-        sub_bullet = True
-
-    version.add_entry(bullet_str, section_name)
+    for b in bullets:
+        version.add_entry('- ' + b, section_name)
 
     obj.write()
 
