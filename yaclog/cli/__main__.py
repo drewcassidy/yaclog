@@ -87,7 +87,7 @@ def show(obj: Changelog, all_versions, markdown, str_func, version_names):
     except ValueError as v:
         raise click.ClickException(v)
 
-    kwargs = {'md': markdown}
+    kwargs = {'md': markdown, 'color': True}
 
     for v in versions:
         text = str_func(v, kwargs)
@@ -122,17 +122,14 @@ def tag(obj: Changelog, add, tag_name: str, version_name: str):
         try:
             version.tags.remove(tag_name)
         except ValueError:
-            raise click.BadArgumentUsage(f'Tag {tag_name} not found in version {version.name}.')
+            raise click.BadArgumentUsage(f"Tag {tag_name} not found in version {version.name}.")
 
     obj.write()
 
 
 @cli.command(short_help='Add entries to the changelog.')
-@click.option('--bullet', '-b', 'bullets', multiple=True, type=str,
-              help='Bullet points to add. '
-                   'When multiple bullet points are provided, additional points are added as sub-points.')
-@click.option('--paragraph', '-p', 'paragraphs', multiple=True, type=str,
-              help='Paragraphs to add')
+@click.option('--bullet', '-b', 'bullets', multiple=True, type=str, help='Add a bullet point.')
+@click.option('--paragraph', '-p', 'paragraphs', multiple=True, type=str, help='Add a paragraph')
 @click.argument('section_name', metavar='SECTION', type=str, default='', required=False)
 @click.argument('version_name', metavar='VERSION', type=str, default=None, required=False)
 @click.pass_obj
@@ -161,6 +158,13 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
         version.add_entry('- ' + b, section_name)
 
     obj.write()
+    count = len(paragraphs) + len(bullets)
+    message = f"Created {count} {['entry', 'entries'][min(count - 1, 1)]}"
+    if section_name:
+        message += f" in section {click.style(section_name, fg='yellow')}"
+    if version.name.lower() != 'unreleased':
+        message += f" in version {click.style(version.name, fg='blue')}"
+    print(message)
 
 
 @cli.command(short_help='Release versions.')
@@ -178,6 +182,9 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 @click.pass_obj
 def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
     """Release versions in the changelog and increment their version numbers"""
+
+    if not (rel_seg or pre_seg or version_name or commit):
+        rel_seg = 2  # default to incrementing patch number I guess
 
     cur_version = obj.current_version()
     old_name = cur_version.name
@@ -197,47 +204,50 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
 
     if new_name != old_name:
         if yaclog.version.is_release(old_name):
-            click.confirm(f'Rename release version "{cur_version.name}" to "{new_name}"?', abort=True)
+            click.confirm(
+                f"Rename release version {click.style(old_name, fg='blue')} "
+                f"to {click.style(new_name, fg='blue')}?",
+                abort=True)
 
         cur_version.name = new_name
         cur_version.date = datetime.datetime.utcnow().date()
 
         obj.write()
-        print(f'Renamed version "{old_name}" to "{cur_version.name}".')
+        print(f"Renamed {click.style(old_name, fg='blue')} to {click.style(new_name, fg='blue')}")
 
     if commit:
         repo = git.Repo(os.curdir)
 
         if repo.bare:
-            raise click.BadOptionUsage('commit', f'Directory {os.path.abspath(os.curdir)} is not a git repo.')
+            raise click.BadOptionUsage('commit', f'Directory {os.path.abspath(os.curdir)} is not a git repo')
 
         repo.index.add(obj.path)
 
-        version_type = '' if yaclog.version.is_release(cur_version.name) else 'non-release '
         tracked = len(repo.index.diff(repo.head.commit))
-        tracked_warning = 'Create tag'
         untracked = len(repo.index.diff(None))
-        untracked_warning = ''
-        untracked_plural = 's' if untracked > 1 else ''
+
+        message = [['Commit and create tag', 'Create tag'][min(tracked, 1)], 'for']
+
+        if not cur_version.released:
+            message.append('non-release')
+
+        message.append(f"version {click.style(new_name, fg='blue')}?")
+
         if untracked > 0:
-            untracked_warning = click.style(
-                f' You have {untracked} untracked file{untracked_plural} that will not be included.',
-                fg='red', bold=True)
+            message.append(click.style(
+                f"You have {untracked} untracked file{'s'[:untracked]} that will not be included!",
+                fg='red', bold=True))
 
-        if tracked > 0:
-            tracked_warning = 'Commit and create tag'
-
-        click.confirm(f'{tracked_warning} for {version_type}version {cur_version.name}?{untracked_warning}',
-                      abort=True)
+        click.confirm(' '.join(message), abort=True)
 
         if tracked > 0:
             commit = repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
-            print(f'Created commit {repo.head.commit.hexsha[0:7]}')
+            print(f"Created commit {click.style(repo.head.commit.hexsha[0:7], fg='green')}")
         else:
             commit = repo.head.commit
 
         repo_tag = repo.create_tag(cur_version.name, ref=commit, message=cur_version.body(False))
-        print(f'Created tag "{repo_tag.name}".')
+        print(f"Created tag {click.style(repo_tag.name, fg='green')}.")
 
 
 if __name__ == '__main__':

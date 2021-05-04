@@ -15,6 +15,10 @@ All notable changes to this project will be documented in this file
 
 - `entry` with multiple `-b` options no longer add sub bullet points, instead adding each bullet as its own line.
 
+### Added
+
+- Terminal output has color to distinguish version names/headers, sections, and git information
+
 ## 0.3.3 - 2021-04-27
 
 ### Added

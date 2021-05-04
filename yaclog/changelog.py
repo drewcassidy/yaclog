@@ -21,6 +21,8 @@ import os
 import re
 from typing import List, Optional, Dict
 
+import click  # only for styling
+
 import yaclog.markdown as markdown
 import yaclog.version
 
@@ -114,11 +116,12 @@ class VersionEntry:
 
         self.sections[section].append(contents)
 
-    def body(self, md: bool = True) -> str:
+    def body(self, md: bool = True, color: bool = False) -> str:
         """
         Get the version's body as a string
 
-        :param md: Whether or not to use markdown syntax in headings
+        :param md: Format headings as markdown
+        :param color: Add color codes to the string for display in a terminal
         :return: The formatted version body, without the version header
         """
 
@@ -127,27 +130,38 @@ class VersionEntry:
         for section, entries in self.sections.items():
             if section:
                 if md:
-                    segments.append(f'### {section.title()}')
+                    prefix = '### '
+                    title = section.title()
                 else:
-                    segments.append(f'{section.upper()}:')
+                    prefix = ''
+                    title = section.upper()
+
+                if color:
+                    prefix = click.style(prefix, fg='bright_black')
+                    title = click.style(title, fg='cyan', bold=True)
+
+                segments.append(prefix + title)
 
             if len(entries) > 0:
                 segments += entries
 
         return markdown.join(segments)
 
-    def header(self, md: bool = True) -> str:
+    def header(self, md: bool = True, color: bool = False) -> str:
         """
         Get the version's header as a string
 
-        :param md: Whether or not to use markdown syntax in headings
+        :param md: Format headings as markdown
+        :param color: Add color codes to the string for display in a terminal
         :return: The formatted version header
         """
 
-        segments = []
-
         if md:
-            segments.append('##')
+            prefix = '## '
+        else:
+            prefix = ''
+
+        segments = []
 
         if self.link and md:
             segments.append(f'[{self.name}]')
@@ -162,18 +176,25 @@ class VersionEntry:
 
         segments += [f'[{t.upper()}]' for t in self.tags]
 
-        return ' '.join(segments)
+        title = ' '.join(segments)
 
-    def text(self, md: bool = True) -> str:
+        if color:
+            prefix = click.style(prefix, fg='bright_black')
+            title = click.style(title, fg='blue', bold=True)
+
+        return prefix + title
+
+    def text(self, md: bool = True, color: bool = False) -> str:
         """
         Get the version's contents as a string
 
-        :param md: Whether or not to use markdown syntax in headings
+        :param md: Format headings as markdown
+        :param color: Add color codes to the string for display in a terminal
         :return: The formatted version header and body
         """
 
-        contents = self.header(md)
-        body = self.body(md)
+        contents = self.header(md, color)
+        body = self.body(md, color)
         if body:
             contents += '\n\n' + body
         return contents
