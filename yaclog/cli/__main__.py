@@ -48,7 +48,7 @@ def init(obj: Changelog):
         os.remove(obj.path)
 
     yaclog.Changelog(obj.path).write()
-    print(f'Created new changelog file at {obj.path}')
+    click.echo(f'Created new changelog file at {obj.path}')
 
 
 @cli.command('format')  # dont accidentally hide the `format` python builtin
@@ -56,7 +56,7 @@ def init(obj: Changelog):
 def reformat(obj: Changelog):
     """Reformat the changelog file."""
     obj.write()
-    print(f'Reformatted changelog file at {obj.path}')
+    click.echo(f'Reformatted changelog file at {obj.path}')
 
 
 @cli.command(short_help='Show changes from the changelog file')
@@ -72,7 +72,7 @@ def reformat(obj: Changelog):
 def show(obj: Changelog, all_versions, markdown, str_func, version_names):
     """Show the changes for VERSIONS.
 
-    VERSIONS is a list of versions to print. If not given, the most recent version is used.
+    VERSIONS is a list of versions to click.echo. If not given, the most recent version is used.
     """
 
     try:
@@ -164,7 +164,7 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
         message += f" in section {click.style(section_name, fg='yellow')}"
     if version.name.lower() != 'unreleased':
         message += f" in version {click.style(version.name, fg='blue')}"
-    print(message)
+    click.echo(message)
 
 
 @cli.command(short_help='Release versions.')
@@ -214,7 +214,7 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
         cur_version.date = datetime.datetime.utcnow().date()
 
         obj.write()
-        print(f"Renamed {click.style(old_name, fg='blue')} to {click.style(new_name, fg='blue')}")
+        click.echo(f"Renamed {click.style(old_name, fg='blue')} to {click.style(new_name, fg='blue')}")
 
     if commit:
         repo = git.Repo(os.curdir)
@@ -243,12 +243,12 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
 
         if tracked > 0:
             commit = repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
-            print(f"Created commit {click.style(repo.head.commit.hexsha[0:7], fg='green')}")
+            click.echo(f"Created commit {click.style(repo.head.commit.hexsha[0:7], fg='green')}")
         else:
             commit = repo.head.commit
 
         repo_tag = repo.create_tag(cur_version.name, ref=commit, message=cur_version.body(False))
-        print(f"Created tag {click.style(repo_tag.name, fg='green')}.")
+        click.echo(f"Created tag {click.style(repo_tag.name, fg='green')}.")
 
 
 if __name__ == '__main__':
