@@ -183,8 +183,9 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
     """Release versions in the changelog and increment their version numbers"""
 
-    if not (rel_seg or pre_seg or version_name or commit):
-        rel_seg = 2  # default to incrementing patch number I guess
+    if rel_seg is None and pre_seg is None and not version_name and not commit:
+        click.echo('Nothing to release!')
+        raise click.Abort
 
     cur_version = obj.current_version()
     old_name = cur_version.name
