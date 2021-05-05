@@ -1,14 +1,12 @@
-.. Yaclog documentation master file, created by
-   sphinx-quickstart on Tue May  4 13:30:49 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Yaclog: Yet Another Command Line Changelog Tool
+===============================================
 
-Welcome to Yaclog's documentation!
-==================================
+Yaclog is a python library and command line tool to make it easier to keep track of changes to your projects.
+It includes commands for appending new changes to a markdown changelog file, as well as releasing new versions
+for deployment via git tags.
 
 .. toctree::
    :maxdepth: 2
-   :includehidden:
    :caption: Contents:
 
    API Reference <reference/index.rst>
