@@ -17,6 +17,6 @@
  */
 
 .rst-content .toctree-wrapper:not(:last-child) ul {
-   margin-bottom: 0;
+   /*margin-bottom: 0;*/
    /* make adjacent toctrees appear to merge */
 }

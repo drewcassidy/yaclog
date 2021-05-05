@@ -72,7 +72,7 @@ def reformat(obj: Changelog):
 def show(obj: Changelog, all_versions, markdown, str_func, version_names):
     """Show the changes for VERSIONS.
 
-    VERSIONS is a list of versions to click.echo. If not given, the most recent version is used.
+    VERSIONS is a list of versions to print. If not given, the most recent version is used.
     """
 
     try:
@@ -97,7 +97,7 @@ def show(obj: Changelog, all_versions, markdown, str_func, version_names):
 
 @cli.command(short_help='Modify version tags')
 @click.option('--add/--delete', '-a/-d', default=True, is_flag=True, help='Add or delete tags')
-@click.argument('tag_name', metavar='tag', type=str)
+@click.argument('tag_name', metavar='TAG', type=str)
 @click.argument('version_name', metavar='VERSION', type=str, required=False)
 @click.pass_obj
 def tag(obj: Changelog, add, tag_name: str, version_name: str):

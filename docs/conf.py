@@ -32,10 +32,13 @@ version = '.'.join(release.split('.')[:3])
 # ones.
 extensions = [
     'myst_parser',
+    'sphinx_click',
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
 ]
+
+myst_heading_anchors = 2
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

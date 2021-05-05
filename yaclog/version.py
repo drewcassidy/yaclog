@@ -1,5 +1,5 @@
 """
-Various helper functions for analyzing and manipulating PEP440 version numbers,
+Various helper functions for analyzing and manipulating :pep:`440` version numbers,
 meant to augment the `packaging.version` module.
 """
 
@@ -29,7 +29,7 @@ version_regex = re.compile(VERSION_PATTERN, re.VERBOSE | re.IGNORECASE)
 
 def extract_version(version_str: str) -> Tuple[Optional[Version], int, int]:
     """
-    Extracts a PEP440 version object from a string which may have other text
+    Extracts a :pep:`440` version object from a string which may have other text
 
     :param version_str: The input string to extract from
     :return: A tuple of (version, start, end), where start and end are the span of the version in the original string
@@ -42,7 +42,7 @@ def extract_version(version_str: str) -> Tuple[Optional[Version], int, int]:
 
 def increment_version(version_str: str, rel_seg: int = None, pre_seg: str = None) -> str:
     """
-    Increment the PEP440 version number in a string
+    Increment the :pep:`440` version number in a string
 
     :param version_str: The input string to manipulate
     :param rel_seg: Which segment of the "release" value to increment, if any
@@ -76,7 +76,7 @@ def increment_version(version_str: str, rel_seg: int = None, pre_seg: str = None
 
 
 def join_version(epoch, release, pre, post, dev, local) -> str:
-    """Join multiple segments of a PEP440 version"""
+    """Join multiple segments of a :pep:`440` version"""
     parts = []
 
     # Epoch
@@ -106,7 +106,13 @@ def join_version(epoch, release, pre, post, dev, local) -> str:
 
 
 def is_release(version_str: str) -> bool:
-    """Check if a version string is a release version or not. Returns false if a PEP440 version could not be found"""
+    """
+    Check if a version string is a release version
+
+    :param version_str: the input string to check
+    :return: True if the input contains a released :pep:`440` version,
+        or False if a prerelease version or no version is found
+    """
     v, *span = extract_version(version_str)
     if v:
         return not (v.is_devrelease or v.is_prerelease)
