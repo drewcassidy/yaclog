@@ -8,7 +8,16 @@ Welcome to Yaclog's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :includehidden:
    :caption: Contents:
+
+   Changelog <changelog>
+
+.. toctree::
+   :maxdepth: 1
+
+   Changelog <changelog>
+   License <license>
 
 
 
