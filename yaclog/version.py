@@ -1,3 +1,8 @@
+"""
+Various helper functions for analyzing and manipulating PEP440 version numbers,
+meant to augment the `packaging.version` module.
+"""
+
 #  yaclog: yet another changelog tool
 #  Copyright (c) 2021. Andrew Cassidy
 #

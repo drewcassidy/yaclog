@@ -11,7 +11,7 @@ Welcome to Yaclog's documentation!
    :includehidden:
    :caption: Contents:
 
-   Changelog <changelog>
+   API Reference <reference/index.rst>
 
 .. toctree::
    :maxdepth: 1

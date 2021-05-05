@@ -1,3 +1,8 @@
+"""
+Contains the `Changelog` class that represents a parsed changelog file that can be read from and written to
+disk as markdown, as well as the `VersionEntry` class that represents a single version within that changelog
+"""
+
 #  yaclog: yet another changelog tool
 #  Copyright (c) 2021. Andrew Cassidy
 #
@@ -32,23 +37,21 @@ default_header = '# Changelog\n\nAll notable changes to this project will be doc
 class VersionEntry:
     """Holds a single version entry in a :py:class:`Changelog`"""
 
-    header_regex = re.compile(  # THE LANGUAGE OF THE GODS
+    _header_regex = re.compile(  # THE LANGUAGE OF THE GODS
         r"##\s+(?P<name>.*?)(?:\s+-)?(?:\s+(?P<date>\d{4}-\d{2}-\d{2}))?(?P<tags>(?:\s+\[[^]]*?])*)\s*$")
 
-    tag_regex = re.compile(r'\[(?P<tag>[^]]*?)]')
+    _tag_regex = re.compile(r'\[(?P<tag>[^]]*?)]')
 
     def __init__(self, name: str = 'Unreleased',
                  date: Optional[datetime.date] = None, tags: Optional[List[str]] = None,
                  link: Optional[str] = None, link_id: Optional[str] = None, line_no: Optional[int] = None):
         """
-        Create a new version entry
-
         :param str name: The version's name
-        :param date: When the version was released
+        :param Optional[datetime.date] date: When the version was released
         :param tags: The version's tags
         :param link: The version's URL
         :param link_id: The version's link ID
-        :param line_no What line in the original file the version starts on
+        :param line_no: What line in the original file the version starts on
         """
 
         self.name: str = name
@@ -67,7 +70,7 @@ class VersionEntry:
         """The version's link ID, uses the version name by default when writing"""
 
         self.line_no: Optional[int] = line_no
-        """What line the version occurs at in the file, or None if the version was not read from a file. 
+        """What line the version occurs at in the file, or `None` if the version was not read from a file. 
         This is not guaranteed to be correct after the changelog has been modified, 
         and it has no effect on the written file"""
 
@@ -86,7 +89,7 @@ class VersionEntry:
         """
         version = cls(line_no=line_no)
 
-        match = cls.header_regex.match(header)
+        match = cls._header_regex.match(header)
         assert match, f'failed to parse version header: "{header}"'
 
         version.name, version.link, version.link_id = markdown.strip_link(match['name'])
@@ -98,7 +101,7 @@ class VersionEntry:
                 return cls(name=header.lstrip('#').strip(), line_no=line_no)
 
         if match['tags']:
-            version.tags = [m['tag'].upper() for m in cls.tag_regex.finditer(match['tags'])]
+            version.tags = [m['tag'].upper() for m in cls._tag_regex.finditer(match['tags'])]
 
         return version
 
@@ -200,11 +203,13 @@ class VersionEntry:
         return contents
 
     @property
-    def released(self):
+    def released(self) -> bool:
+        """Returns true if a PEP440 version number is present in the version name, and has no prerelease segments"""
         return yaclog.version.is_release(self.name)
 
     @property
     def version(self):
+        """Returns the PEP440 version number from the version name, or `None` if none is found"""
         return yaclog.version.extract_version(self.name)[0]
 
     def __str__(self) -> str:
@@ -216,7 +221,7 @@ class Changelog:
 
     def __init__(self, path=None, header: str = default_header):
         """
-        Create a new changelog object. Contents will be automatically read from disk if the file exists
+        Contents will be automatically read from disk if the file exists
 
         :param path: The changelog's path on disk
         :param header: The header at the top of the changelog to use if the file does not exist
@@ -230,7 +235,7 @@ class Changelog:
         self.versions: List[VersionEntry] = []
         """A list of versions in the changelog"""
 
-        self.links = {}
+        self.links: Dict[str, str] = {}
         """Link IDs at the end of the changelog"""
 
         if path and os.path.exists(path):
@@ -339,12 +344,12 @@ class Changelog:
         Get the current version from the changelog
 
         :param released: if the returned version should be a released version,
-            an unreleased version, or ``None`` to return the most recent
+            an unreleased version, or `None` to return the most recent
         :param new_version: if a new version should be created if none exist.
         :param new_version_name: The name of the version to create if there
             are no matches and ``new_version`` is True.
         :return: The current version matching the criteria,
-            or None if ``new_version`` is disabled and none are found.
+            or `None` if ``new_version`` is disabled and none are found.
         """
 
         # return the first version that matches `released`
@@ -365,7 +370,7 @@ class Changelog:
         """
         Get a version from the changelog
 
-        :param name: The name of the version to get, or ``None`` to return the most recent
+        :param name: The name of the version to get, or `None` to return the most recent
         :return: The first version with the selected name
         """
 
