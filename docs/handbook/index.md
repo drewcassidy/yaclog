@@ -2,10 +2,10 @@
 
 ```{toctree}
 ---
-maxdepth: 2
-glob:
+maxdepth: 3
 ---
 
 getting_started
+changelog_files
 commands
 ```
