@@ -1,4 +1,9 @@
-# Yaclog
+# Yaclog 
+
+[![Documentation Status](https://readthedocs.org/projects/yaclog/badge/?version=latest)](https://yaclog.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://github.com/drewcassidy/yaclog/actions/workflows/python-publish.yml/badge.svg)](https://github.com/drewcassidy/yaclog/actions/workflows/python-publish.yml)
+[![PyPI version](https://badge.fury.io/py/yaclog.svg)](https://badge.fury.io/py/yaclog)
+
 Yet another changelog command line tool
 
 ![a yak who is a log](https://github.com/drewcassidy/yaclog/raw/main/logo.png)
