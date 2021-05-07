@@ -1,6 +1,6 @@
 # Changelog Files
 
-Yaclog works on markdown changelog files, using a machine-readable format based on what is proposed by [Keep a Changelog](https://keepachangelog.com). Changelog files can be created using the {command}`yaclog init` command.
+Yaclog works on Markdown changelog files, using a machine-readable format based on what is proposed by [Keep a Changelog](https://keepachangelog.com). Changelog files can be created using the {command}`yaclog init` command.
 
 ## Preamble
 
@@ -37,7 +37,7 @@ Tags are additional metadata added to a version header, denoted by all-caps text
 ```markdown
 # Changelog
 
-This is the changelog for my cool project!
+All notable changes to this project will be documented in this file.
 
 ## 0.13.0 "Aquarius" - 1970-04-11 [YANKED]
 
