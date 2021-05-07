@@ -6,11 +6,13 @@ All notable changes to this project will be documented in this file
 
 ### Changed
 
+- API changes:
+  - `header` attribute renamed to `preamble` to avoid confusion.
 - improved version header parsing to be more robust and handle multi-word version names.
 - improved version number incrementing in `release`.
   - can now handle other text surrounding a pep440-compliant version number, which will not be modified
-  - can now handle pre-releases correctly. The version to increment is the most recent version in the log with a valid pep440 version number in it. Release increment and prerelease increments can be mixed, allowing e.g: `yaclog release -mr` to create a release candidate with in incremented minor version number.
-- `header` attribute on the changelog class has been split into `title` and `preamble`
+  - can now handle pre-releases correctly. The version to increment is the most recent version in the log with a valid pep440 version number in it. 
+  - Release increment and prerelease increments can be mixed, allowing e.g: `yaclog release -mr` to create a release candidate with in incremented minor version number.
 
 ### Removed
 
@@ -19,6 +21,7 @@ All notable changes to this project will be documented in this file
 ### Added
 
 - Terminal output has color to distinguish version names/headers, sections, and git information
+
 
 ## 0.3.3 - 2021-04-27
 
@@ -33,6 +36,7 @@ All notable changes to this project will be documented in this file
 - Changelog object no longer errors when creating without a path.
 - `release` now resets lesser version values when incrementing
 - `release` now works with logs that have only unreleased changes
+
 
 ## 0.3.2 - 2021-04-24
 
@@ -49,17 +53,19 @@ All notable changes to this project will be documented in this file
 
 - `release` and `entry` commands now work using empty changelogs.
 
+
 ## 0.3.1 - 2021-04-24
 
 ### Added
 
 - `yaclog` tool for manipulating changelogs from the command line
-    - `init` command to make a new changelog
-    - `format` command to reformat the changelog
-    - `show` command to show changes from the changelog
-    - `entry` command for manipulating entries in the changelog
-    - `tag` command for manipulating tags in the changelog
-    - `release` command for creating releases
+  - `init` command to make a new changelog
+  - `format` command to reformat the changelog
+  - `show` command to show changes from the changelog
+  - `entry` command for manipulating entries in the changelog
+  - `tag` command for manipulating tags in the changelog
+  - `release` command for creating releases
+
 
 ## 0.2.0 - 2021-04-19
 
@@ -71,8 +77,9 @@ All notable changes to this project will be documented in this file
 
 - Updated package metadata
 - Rewrote parser to use a 2-step method that is more flexible.
-    - Parser can now handle code blocks.
-    - Parser can now handle setext-style headers and H2s not conforming to the schema.
+  - Parser can now handle code blocks.
+  - Parser can now handle setext-style headers and H2s not conforming to the schema.
+
 
 ## 0.1.0 - 2021-04-16
 

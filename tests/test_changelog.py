@@ -22,10 +22,6 @@ class TestParser(unittest.TestCase):
         """Test the log's path"""
         self.assertEqual(self.path, self.log.path)
 
-    def test_title(self):
-        """Test the title at the top of the file"""
-        self.assertEqual(log.title, self.log.title)
-
     def test_preamble(self):
         """Test the preamble at the top of the file"""
         self.assertEqual(log.preamble, self.log.preamble)
@@ -56,11 +52,11 @@ class TestWriter(unittest.TestCase):
             log.write(cls.path)
             with open(cls.path) as fd:
                 cls.log_text = fd.read()
-                cls.log_segments = [line for line in cls.log_text.split('\n\n') if line]
+                cls.log_segments = [line.lstrip('\n') for line in cls.log_text.split('\n\n') if line]
 
-    def test_header(self):
+    def test_preamble(self):
         """Test the header information at the top of the file"""
-        self.assertEqual(log_segments[1], self.log_segments[1])
+        self.assertEqual(log_segments[0:2], self.log_segments[0:2])
 
     def test_links(self):
         """Test the links at the end of the file"""

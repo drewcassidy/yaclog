@@ -2,13 +2,9 @@
 
 Yaclog works on markdown changelog files, using a machine-readable format based on what is proposed by [Keep a Changelog](https://keepachangelog.com). Changelog files can be created using the {command}`yaclog init` command.
 
-## Title
-
-The title is the first H1 in the file giving its title, usually `# Changlog`.
-
 ## Preamble
 
-The preamble is the text at the top of the file before any version information. It can contain an explanation of the file's purpose, as well as any general machine-readable information you may want to include for use with other tools. Yaclog does not provide any ways to manipulate the front matter from the command line due to its open-ended nature.
+The preamble is the text at the top of the file before any version information. It can contain the title, an explanation of the file's purpose, as well as any general machine-readable information you may want to include for use with other tools. Yaclog does not provide any ways to manipulate the front matter from the command line due to its open-ended nature.
 
 ## Versions
 
@@ -17,9 +13,11 @@ Version information begins with a header, which is an H2 containing the version'
 ```markdown
 ## 1.0.0
 ```
+
 ```markdown
 ## 3.2.0 "Columbia" - 1981-07-20
 ```
+
 ```markdown
 ## Version 8.0.0rc1 1988-11-15 [PRERELEASE]
 ```
@@ -54,7 +52,6 @@ Yanked due to issues with oxygen tanks, currently investigating
 - Replaced Ken Mattingly
 - Stirred oxygen tanks
 
-
 ## 0.12.0 "Intrepid" - 1969-11-14
 
 ### Added
@@ -70,7 +67,6 @@ Yanked due to issues with oxygen tanks, currently investigating
 ### Known Issues
 
 - Lightning strike during launch: No effect on performance
-
 
 ## 0.11.0 "Eagle" - 1969-07-20
 

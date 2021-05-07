@@ -1,6 +1,6 @@
 """
 Contains the `Changelog` class that represents a parsed changelog file that can be read from and written to
-disk as markdown, as well as the `VersionEntry` class that represents a single version within that changelog
+disk as markdown, as well as the `VersionEntry` class that represents a single version within that changelog.
 """
 
 #  yaclog: yet another changelog tool
@@ -33,7 +33,10 @@ import yaclog.version
 
 
 class VersionEntry:
-    """Holds a single version entry in a :py:class:`Changelog`"""
+    """
+    A serialized representation of a single version entry in a `Changelog`,
+    containing the changes made since the previous version
+    """
 
     _header_regex = re.compile(  # THE LANGUAGE OF THE GODS
         r"##\s+(?P<name>.*?)(?:\s+-)?(?:\s+(?P<date>\d{4}-\d{2}-\d{2}))?(?P<tags>(?:\s+\[[^]]*?])*)\s*$")
@@ -215,32 +218,31 @@ class VersionEntry:
 
 
 class Changelog:
-    """A changelog made up of a header, several versions, and a link table"""
+    """
+    A serialized representation of a Markdown changelog made up of a preamble, multiple versions, and a link table.
+    """
 
     def __init__(self, path=None,
-                 title: str = 'Changelog',
-                 preamble: str = "All notable changes to this project will be documented in this file"):
+                 preamble: str = "Changelog\n\nAll notable changes to this project will be documented in this file"):
         """
         Contents will be automatically read from disk if the file exists
 
-        :param path: The changelog's path on disk
-        :param str title: The changelog title to use if the file does not exist.
+        :param path: The changelog's path on disk.
         :param str preamble: The changelog preamble to use if the file does not exist.
         """
         self.path = os.path.abspath(path) if path else None
         """The path of the changelog's file on disk"""
 
-        self.title: str = title
-        """The title of the changelog"""
-
-        self.preamble: List[str] = preamble
-        """Any text at the top of the changelog before any version information as a list of paragraphs"""
+        self.preamble: str = preamble
+        """Any text at the top of the changelog before any version information, including the title.
+        It can contain the title, an explanation of the file's purpose, as well as any general machine-readable 
+        information for use with other tools."""
 
         self.versions: List[VersionEntry] = []
-        """A list of versions in the changelog"""
+        """A list of versions in the changelog, with the most recent version first"""
 
         self.links: Dict[str, str] = {}
-        """Link IDs at the end of the changelog"""
+        """Link definitions at the end of the changelog, as a dictionary of ``{id: url}``"""
 
         if path and os.path.exists(path):
             self.read()
@@ -250,7 +252,7 @@ class Changelog:
         Read a markdown changelog file from disk. The object's contents will be overwritten by the file contents if
         reading is successful.
 
-        :param path: The changelog's path on disk. By default, :py:attr:`~Changelog.path` is used.
+        :param path: The changelog's path on disk. By default, :py:attr:`~Changelog.path` is used
         """
 
         if not path:
@@ -263,8 +265,7 @@ class Changelog:
 
         section = ''
         versions = []
-        title = None
-        preamble = []
+        preamble_segments = []
 
         for token in tokens:
             text = '\n'.join(token.lines)
@@ -276,11 +277,8 @@ class Changelog:
 
             elif len(versions) == 0:
                 # we haven't encountered any version headers yet,
-                # so its best to just add this line to the preamble or title
-                if token.kind == 'h1' and not title:
-                    title = text.strip('#').strip()
-                else:
-                    preamble.append(text)
+                # so its best to just add this line to the preamble
+                preamble_segments.append(text)
 
             elif token.kind == 'h3':
                 # start of a version section
@@ -306,14 +304,13 @@ class Changelog:
                 # id-matched link
                 version.link = links[version.link_id]
 
-        self.title = title
-        self.preamble = preamble
+        self.preamble = markdown.join(preamble_segments)
         self.versions = versions
         self.links = links
 
     def write(self, path=None) -> None:
         """
-        Write a markdown changelog to a file.
+        Write a changelog to a Markdown file.
 
         :param path: The changelog's path on disk. By default, :py:attr:`~Changelog.path` is used.
         """
@@ -324,10 +321,8 @@ class Changelog:
 
         segments = []
 
-        if self.title:
-            segments.append(f'# {self.title}')
         if self.preamble:
-            segments += self.preamble
+            segments.append(self.preamble)
 
         v_links = {**self.links}
 
@@ -335,7 +330,7 @@ class Changelog:
             if version.link:
                 v_links[version.name.lower()] = version.link
 
-            segments.append(version.text())
+            segments.append(version.text() + '\n')
 
         segments += [f'[{link_id}]: {link}' for link_id, link in v_links.items()]
 
@@ -386,7 +381,7 @@ class Changelog:
 
     def get_version(self, name: Optional[str] = None) -> VersionEntry:
         """
-        Get a version from the changelog
+        Get a version from the changelog by name
 
         :param name: The name of the version to get, or `None` to return the most recent
         :return: The first version with the selected name
