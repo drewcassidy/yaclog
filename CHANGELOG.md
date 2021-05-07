@@ -20,7 +20,8 @@ All notable changes to this project will be documented in this file
 
 ### Added
 
-- Terminal output has color to distinguish version names/headers, sections, and git information
+- Terminal output has color to distinguish version names/headers, sections, and git information.
+- Extra newlines are added between versions to improve readability of the raw markdown file.
 
 
 ## 0.3.3 - 2021-04-27
