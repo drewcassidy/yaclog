@@ -2,9 +2,13 @@
 
 Yaclog works on markdown changelog files, using a machine-readable format based on what is proposed by [Keep a Changelog](https://keepachangelog.com). Changelog files can be created using the {command}`yaclog init` command.
 
-## Front Matter
+## Title
 
-The front matter, or header, of a changelog is the text at the top of the file before any version information. It can contain the file's title, an explanation of the file's purpose, as well as any general machine-readable information you may want to include for use with other tools. Yaclog does not provide any ways to manipulate the front matter from the command line due to its open-ended nature.
+The title is the first H1 in the file giving its title, usually `# Changlog`.
+
+## Preamble
+
+The preamble is the text at the top of the file before any version information. It can contain an explanation of the file's purpose, as well as any general machine-readable information you may want to include for use with other tools. Yaclog does not provide any ways to manipulate the front matter from the command line due to its open-ended nature.
 
 ## Versions
 

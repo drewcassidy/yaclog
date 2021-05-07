@@ -46,7 +46,8 @@ log_segments = [
 log_text = '\n\n'.join(log_segments)
 
 log = yaclog.Changelog()
-log.header = '# Changelog\n\nThis changelog is for testing the parser, and has many things in it that might trip it up.'
+log.title = 'Changelog'
+log.preamble = ['This changelog is for testing the parser, and has many things in it that might trip it up.']
 log.links = {'id': 'http://www.koalastothemax.com'}
 log.versions = [yaclog.changelog.VersionEntry(), yaclog.changelog.VersionEntry(), yaclog.changelog.VersionEntry()]
 

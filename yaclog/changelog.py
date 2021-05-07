@@ -31,8 +31,6 @@ import click  # only for styling
 import yaclog.markdown as markdown
 import yaclog.version
 
-default_header = '# Changelog\n\nAll notable changes to this project will be documented in this file'
-
 
 class VersionEntry:
     """Holds a single version entry in a :py:class:`Changelog`"""
@@ -219,18 +217,24 @@ class VersionEntry:
 class Changelog:
     """A changelog made up of a header, several versions, and a link table"""
 
-    def __init__(self, path=None, header: str = default_header):
+    def __init__(self, path=None,
+                 title: str = 'Changelog',
+                 preamble: str = "All notable changes to this project will be documented in this file"):
         """
         Contents will be automatically read from disk if the file exists
 
         :param path: The changelog's path on disk
-        :param header: The header at the top of the changelog to use if the file does not exist
+        :param str title: The changelog title to use if the file does not exist.
+        :param str preamble: The changelog preamble to use if the file does not exist.
         """
         self.path = os.path.abspath(path) if path else None
         """The path of the changelog's file on disk"""
 
-        self.header: str = header
-        """Any text at the top of the changelog before any H2s"""
+        self.title: str = title
+        """The title of the changelog"""
+
+        self.preamble: List[str] = preamble
+        """Any text at the top of the changelog before any version information as a list of paragraphs"""
 
         self.versions: List[VersionEntry] = []
         """A list of versions in the changelog"""
@@ -243,7 +247,8 @@ class Changelog:
 
     def read(self, path=None) -> None:
         """
-        Read a markdown changelog file from disk
+        Read a markdown changelog file from disk. The object's contents will be overwritten by the file contents if
+        reading is successful.
 
         :param path: The changelog's path on disk. By default, :py:attr:`~Changelog.path` is used.
         """
@@ -254,50 +259,57 @@ class Changelog:
 
         # Read file
         with open(path, 'r') as fp:
-            tokens, self.links = markdown.tokenize(fp.read())
+            tokens, links = markdown.tokenize(fp.read())
 
         section = ''
-        header_segments = []
+        versions = []
+        title = None
+        preamble = []
 
         for token in tokens:
             text = '\n'.join(token.lines)
 
             if token.kind == 'h2':
                 # start of a version
-                self.versions.append(VersionEntry.from_header(text, line_no=token.line_no))
+                versions.append(VersionEntry.from_header(text, line_no=token.line_no))
                 section = ''
 
-            elif len(self.versions) == 0:
+            elif len(versions) == 0:
                 # we haven't encountered any version headers yet,
-                # so its best to just add this line to the header string
-                header_segments.append(text)
+                # so its best to just add this line to the preamble or title
+                if token.kind == 'h1' and not title:
+                    title = text.strip('#').strip()
+                else:
+                    preamble.append(text)
 
             elif token.kind == 'h3':
                 # start of a version section
                 section = text.strip('#').strip()
-                if section not in self.versions[-1].sections.keys():
-                    self.versions[-1].sections[section] = []
+                if section not in versions[-1].sections.keys():
+                    versions[-1].sections[section] = []
 
             else:
                 # change log entry
-                self.versions[-1].sections[section].append(text)
+                versions[-1].sections[section].append(text)
 
         # handle links
-        for version in self.versions:
+        for version in versions:
             if match := re.fullmatch(r'\[(.*)]', version.name):
                 # ref-matched link
                 link_id = match[1].lower()
-                if link_id in self.links:
-                    version.link = self.links[link_id]
+                if link_id in links:
+                    version.link = links[link_id]
                     version.link_id = None
                     version.name = match[1]
 
-            elif version.link_id in self.links:
+            elif version.link_id in links:
                 # id-matched link
-                version.link = self.links[version.link_id]
+                version.link = links[version.link_id]
 
-        # strip whitespace from header
-        self.header = markdown.join(header_segments)
+        self.title = title
+        self.preamble = preamble
+        self.versions = versions
+        self.links = links
 
     def write(self, path=None) -> None:
         """
@@ -310,7 +322,13 @@ class Changelog:
             # use the object path if none was provided
             path = self.path
 
-        segments = [self.header]
+        segments = []
+
+        if self.title:
+            segments.append(f'# {self.title}')
+        if self.preamble:
+            segments += self.preamble
+
         v_links = {**self.links}
 
         for version in self.versions:

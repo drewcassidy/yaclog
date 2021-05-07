@@ -66,7 +66,7 @@ def reformat(obj: Changelog):
               help='Show version header and body.')
 @click.option('--name', '-n', 'str_func', flag_value=lambda v, k: v.name, help='Show only the version name')
 @click.option('--body', '-b', 'str_func', flag_value=lambda v, k: v.body(**k), help='Show only the version body.')
-@click.option('--header', '-h', 'str_func', flag_value=lambda v, k: v.header(**k), help='Show only the version header.')
+@click.option('--header', '-h', 'str_func', flag_value=lambda v, k: v.preamble(**k), help='Show only the version header.')
 @click.argument('version_names', metavar='VERSIONS', type=str, nargs=-1)
 @click.pass_obj
 def show(obj: Changelog, all_versions, markdown, str_func, version_names):

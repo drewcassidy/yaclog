@@ -22,9 +22,13 @@ class TestParser(unittest.TestCase):
         """Test the log's path"""
         self.assertEqual(self.path, self.log.path)
 
-    def test_header(self):
-        """Test the header information at the top of the file"""
-        self.assertEqual(log.header, self.log.header)
+    def test_title(self):
+        """Test the title at the top of the file"""
+        self.assertEqual(log.title, self.log.title)
+
+    def test_preamble(self):
+        """Test the preamble at the top of the file"""
+        self.assertEqual(log.preamble, self.log.preamble)
 
     def test_links(self):
         """Test the links at the end of the file"""
@@ -56,7 +60,7 @@ class TestWriter(unittest.TestCase):
 
     def test_header(self):
         """Test the header information at the top of the file"""
-        self.assertEqual(log_segments[0:2], self.log_segments[0:2])
+        self.assertEqual(log_segments[1], self.log_segments[1])
 
     def test_links(self):
         """Test the links at the end of the file"""
