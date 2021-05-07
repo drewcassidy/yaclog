@@ -66,7 +66,8 @@ def reformat(obj: Changelog):
               help='Show version header and body.')
 @click.option('--name', '-n', 'str_func', flag_value=lambda v, k: v.name, help='Show only the version name')
 @click.option('--body', '-b', 'str_func', flag_value=lambda v, k: v.body(**k), help='Show only the version body.')
-@click.option('--header', '-h', 'str_func', flag_value=lambda v, k: v.preamble(**k), help='Show only the version header.')
+@click.option('--header', '-h', 'str_func', flag_value=lambda v, k: v.preamble(**k),
+              help='Show only the version header.')
 @click.argument('version_names', metavar='VERSIONS', type=str, nargs=-1)
 @click.pass_obj
 def show(obj: Changelog, all_versions, markdown, str_func, version_names):
@@ -168,7 +169,6 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 
 
 @cli.command(short_help='Release versions.')
-@click.option('-v', '--version', 'version_name', type=str, default=None, help='The new version number to use.')
 @click.option('-M', '--major', 'rel_seg', flag_value=0, default=None, help='Increment major version number.')
 @click.option('-m', '--minor', 'rel_seg', flag_value=1, help='Increment minor version number.')
 @click.option('-p', '--patch', 'rel_seg', flag_value=2, help='Increment patch number.')
@@ -179,9 +179,15 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 @click.option('-c', '--commit', is_flag=True,
               help='Create a git commit tagged with the new version number. '
                    'If there are no changes to commit, the current commit will be tagged instead.')
+@click.argument('version_name', metavar='VERSION', type=str, default=None, required=False)
 @click.pass_obj
 def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
-    """Release versions in the changelog and increment their version numbers"""
+    """
+    Release versions in the changelog and increment their version numbers.
+
+    VERSION is the name of the version to release. If VERSION is not provided but increment options are, then the most
+    recent released version (PEP440 version without any prerelease information) is used instead.
+    """
 
     if rel_seg is None and pre_seg is None and not version_name and not commit:
         click.echo('Nothing to release!')

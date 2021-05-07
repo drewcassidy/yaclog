@@ -135,7 +135,7 @@ class TestRelease(unittest.TestCase):
             runner.invoke(cli, ['init'])  # create the changelog
             runner.invoke(cli, ['entry', '-b', 'entry number 1'])
 
-            result = runner.invoke(cli, ['release', '--version', '1.0.0'])
+            result = runner.invoke(cli, ['release', '1.0.0'])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, '1.0.0')
             self.assertIn('1.0.0', result.output)
@@ -178,6 +178,11 @@ class TestRelease(unittest.TestCase):
             self.assertEqual(yaclog.read(location).versions[0].name, '3.0.0rc1')
             self.assertIn('3.0.0rc1', result.output)
 
+            result = runner.invoke(cli, ['release', '-r'])
+            check_result(self, result)
+            self.assertEqual(yaclog.read(location).versions[0].name, '3.0.0rc2')
+            self.assertIn('3.0.0rc1', result.output)
+
             result = runner.invoke(cli, ['release', '-f'])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, '3.0.0')
@@ -199,7 +204,7 @@ class TestRelease(unittest.TestCase):
             runner.invoke(cli, ['init'])  # create the changelog
             runner.invoke(cli, ['entry', '-b', 'entry number 1'])
 
-            result = runner.invoke(cli, ['release', '--version', '1.0.0', '-c'], input='y\n')
+            result = runner.invoke(cli, ['release', '1.0.0', '-c'], input='y\n')
             check_result(self, result)
             self.assertIn('Created commit', result.output)
             self.assertIn('Created tag', result.output)

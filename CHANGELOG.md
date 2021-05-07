@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file
   - can now handle other text surrounding a pep440-compliant version number, which will not be modified
   - can now handle pre-releases correctly. The version to increment is the most recent version in the log with a valid pep440 version number in it. 
   - Release increment and prerelease increments can be mixed, allowing e.g: `yaclog release -mr` to create a release candidate with in incremented minor version number.
+- `release` base version is now an argument instead of an option, for consistency with other commands.
 
 ### Removed
 
