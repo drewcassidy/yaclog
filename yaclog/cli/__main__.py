@@ -34,7 +34,7 @@ def cli(ctx, path):
     """Manipulate markdown changelog files."""
     if not (ctx.invoked_subcommand == 'init') and not os.path.exists(path):
         # file does not exist and this isn't the init command
-        raise click.FileError(f'Changelog file {path} does not exist. Create it by running `yaclog init`.')
+        raise click.FileError(f'Changelog file {path} does not exist. Create it by running yaclog init.')
 
     ctx.obj = yaclog.read(path)
 
@@ -71,7 +71,8 @@ def reformat(obj: Changelog):
 @click.argument('version_names', metavar='VERSIONS', type=str, nargs=-1)
 @click.pass_obj
 def show(obj: Changelog, all_versions, markdown, str_func, version_names):
-    """Show the changes for VERSIONS.
+    """
+    Show the changes for VERSIONS.
 
     VERSIONS is a list of versions to print. If not given, the most recent version is used.
     """
@@ -102,7 +103,8 @@ def show(obj: Changelog, all_versions, markdown, str_func, version_names):
 @click.argument('version_name', metavar='VERSION', type=str, required=False)
 @click.pass_obj
 def tag(obj: Changelog, add, tag_name: str, version_name: str):
-    """Modify TAG on VERSION.
+    """
+    Modify TAG on VERSION.
 
     VERSION is the name of a version to add tags to. If not given, the most recent version is used.
     """
@@ -129,13 +131,14 @@ def tag(obj: Changelog, add, tag_name: str, version_name: str):
 
 
 @cli.command(short_help='Add entries to the changelog.')
-@click.option('--bullet', '-b', 'bullets', multiple=True, type=str, help='Add a bullet point.')
-@click.option('--paragraph', '-p', 'paragraphs', multiple=True, type=str, help='Add a paragraph')
+@click.option('--bullet', '-b', 'bullets', metavar='text', multiple=True, type=str, help='Add a bullet point.')
+@click.option('--paragraph', '-p', 'paragraphs', metavar='text', multiple=True, type=str, help='Add a paragraph')
 @click.argument('section_name', metavar='SECTION', type=str, default='', required=False)
 @click.argument('version_name', metavar='VERSION', type=str, default=None, required=False)
 @click.pass_obj
 def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
-    """Add entries to SECTION in VERSION
+    """
+    Add entries to SECTION in VERSION
 
     SECTION is the name of the section to append to. If not given, entries will be uncategorized.
 
@@ -162,7 +165,7 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     count = len(paragraphs) + len(bullets)
     message = f"Created {count} {['entry', 'entries'][min(count - 1, 1)]}"
     if section_name:
-        message += f" in section {click.style(section_name, fg='yellow')}"
+        message += f" in section {click.style(section_name, fg='cyan')}"
     if version.name.lower() != 'unreleased':
         message += f" in version {click.style(version.name, fg='blue')}"
     click.echo(message)
@@ -183,10 +186,14 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 @click.pass_obj
 def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
     """
-    Release versions in the changelog and increment their version numbers.
+    Release VERSION, or a version incremented from the last release.
 
     VERSION is the name of the version to release. If VERSION is not provided but increment options are, then the most
-    recent released version (PEP440 version without any prerelease information) is used instead.
+    recent valid PEP440 version number is used instead.
+
+    The most recent version in the log will be renamed (except by the --commit option) by using the VERSION as well as
+    any increment options. Increment options will always reset the later segments, and prerelease increments will clear
+    other kinds of prerelease.
     """
 
     if rel_seg is None and pre_seg is None and not version_name and not commit:

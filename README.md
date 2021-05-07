@@ -63,7 +63,7 @@ Unreleased
 Release the current version and make a git tag for it
 
 ```shell
-$ yaclog release --version 0.0.1 -c
+$ yaclog release 0.0.1 -c
 ```
 ```
 Renamed version "Unreleased" to "0.0.1".
