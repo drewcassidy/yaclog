@@ -25,7 +25,7 @@ from yaclog.changelog import Changelog
 
 
 @click.group()
-@click.option('--path', envvar='YACLOG_PATH', default='CHANGELOG.md', show_default=True,
+@click.option('--path', envvar='YACLOG_PATH', metavar='FILE', default='CHANGELOG.md', show_default=True,
               type=click.Path(dir_okay=False, writable=True, readable=True),
               help='Location of the changelog file.')
 @click.version_option()
