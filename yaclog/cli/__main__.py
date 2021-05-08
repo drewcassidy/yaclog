@@ -131,8 +131,8 @@ def tag(obj: Changelog, add, tag_name: str, version_name: str):
 
 
 @cli.command(short_help='Add entries to the changelog.')
-@click.option('--bullet', '-b', 'bullets', metavar='text', multiple=True, type=str, help='Add a bullet point.')
-@click.option('--paragraph', '-p', 'paragraphs', metavar='text', multiple=True, type=str, help='Add a paragraph')
+@click.option('--bullet', '-b', 'bullets', metavar='TEXT', multiple=True, type=str, help='Add a bullet point.')
+@click.option('--paragraph', '-p', 'paragraphs', metavar='TEXT', multiple=True, type=str, help='Add a paragraph')
 @click.argument('section_name', metavar='SECTION', type=str, default='', required=False)
 @click.argument('version_name', metavar='VERSION', type=str, default=None, required=False)
 @click.pass_obj
