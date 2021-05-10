@@ -28,6 +28,12 @@ class TestCreation(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.abspath(location)), 'yaclog init did not create a file')
             self.assertIn(location, result.output, "yaclog init did not echo the file's correct location")
 
+            with open(location, 'r') as fp:
+                self.assertEqual('# Changelog\n', fp.readline())
+                self.assertEqual('\n', fp.readline())
+                self.assertEqual('All notable changes to this project will be documented in this file',
+                                 fp.readline().rstrip())
+
             with open(location, 'w') as fp:
                 fp.write(err_str)
 

@@ -223,7 +223,7 @@ class Changelog:
     """
 
     def __init__(self, path=None,
-                 preamble: str = "Changelog\n\nAll notable changes to this project will be documented in this file"):
+                 preamble: str = "# Changelog\n\nAll notable changes to this project will be documented in this file"):
         """
         Contents will be automatically read from disk if the file exists
 

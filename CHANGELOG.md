@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## 1.0.1 - 2021-05-10
+
+### Fixed
+
+- Fixed broken header in new changelogs
+
+
 ## 1.0.0 - 2021-05-07
 
 ### Changed
