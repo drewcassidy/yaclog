@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file
 ### Fixed
 
 - Fixed broken header in new changelogs
+- Improved consistency in command documentation metavars
 
 
 ## 1.0.0 - 2021-05-07
