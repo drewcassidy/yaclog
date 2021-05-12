@@ -210,7 +210,7 @@ class TestRelease(unittest.TestCase):
             runner.invoke(cli, ['init'])  # create the changelog
             runner.invoke(cli, ['entry', '-b', 'entry number 1'])
 
-            result = runner.invoke(cli, ['release', '1.0.0', '-c'], input='y\n')
+            result = runner.invoke(cli, ['release', 'Version 1.0.0', '-c'], input='y\n')
             check_result(self, result)
             self.assertIn('Created commit', result.output)
             self.assertIn('Created tag', result.output)

@@ -20,6 +20,7 @@ import os.path
 import click
 import git
 
+import version
 import yaclog.version
 from yaclog.changelog import Changelog
 
@@ -267,7 +268,11 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
         else:
             commit = repo.head.commit
 
-        repo_tag = repo.create_tag(cur_version.name, ref=commit, message=cur_version.body(False))
+        short_version, *_ = version.extract_version(cur_version.name)
+        if not short_version:
+            short_version = cur_version.name.replace(' ', '-')
+
+        repo_tag = repo.create_tag(short_version, ref=commit, message=cur_version.body(False))
         click.echo(f"Created tag {click.style(repo_tag.name, fg='green')}.")
 
 
