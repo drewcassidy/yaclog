@@ -20,7 +20,6 @@ import os.path
 import click
 import git
 
-import version
 import yaclog.version
 from yaclog.changelog import Changelog
 
@@ -268,7 +267,7 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
         else:
             commit = repo.head.commit
 
-        short_version, *_ = version.extract_version(cur_version.name)
+        short_version, *_ = yaclog.version.extract_version(cur_version.name)
         if not short_version:
             short_version = cur_version.name.replace(' ', '-')
 
