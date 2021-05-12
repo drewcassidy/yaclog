@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ 3.8, 3.9 ]
+        click-version: [ click~=7.0, click~=8.0 ]
 
     steps:
       - uses: actions/checkout@v2
@@ -23,6 +24,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install flake8
+          python -m pip install ${{ matrix.click-version }}
 
       - name: Install module
         run: python -m pip install .
