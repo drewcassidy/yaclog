@@ -262,7 +262,7 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
         click.confirm(' '.join(message), abort=True)
 
         if tracked > 0:
-            commit = repo.index.commit(f'Version {cur_version.name}\n\n{cur_version.body()}')
+            commit = repo.index.commit(f'Release {cur_version.name}\n\n{cur_version.body()}')
             click.echo(f"Created commit {click.style(repo.head.commit.hexsha[0:7], fg='green')}")
         else:
             commit = repo.head.commit
