@@ -172,13 +172,20 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 
 
 @cli.command(short_help='Release versions.')
-@click.option('-M', '--major', 'rel_seg', flag_value=0, default=None, help='Increment major version number.')
-@click.option('-m', '--minor', 'rel_seg', flag_value=1, help='Increment minor version number.')
-@click.option('-p', '--patch', 'rel_seg', flag_value=2, help='Increment patch number.')
-@click.option('-a', '--alpha', 'pre_seg', flag_value='a', default=None, help='Increment alpha version number.')
-@click.option('-b', '--beta', 'pre_seg', flag_value='b', help='Increment beta version number.')
-@click.option('-r', '--rc', 'pre_seg', flag_value='rc', help='Increment release candidate version number.')
-@click.option('-f', '--full', 'pre_seg', flag_value='', help='Clear the prerelease value creating a full release.')
+@click.option('-M', '--major', 'rel_seg', flag_value=0, type=int, default=None,
+              help='Increment major version number.')
+@click.option('-m', '--minor', 'rel_seg', flag_value=1, type=int,
+              help='Increment minor version number.')
+@click.option('-p', '--patch', 'rel_seg', flag_value=2, type=int,
+              help='Increment patch number.')
+@click.option('-a', '--alpha', 'pre_seg', flag_value='a', type=str, default=None,
+              help='Increment alpha version number.')
+@click.option('-b', '--beta', 'pre_seg', flag_value='b', type=str,
+              help='Increment beta version number.')
+@click.option('-r', '--rc', 'pre_seg', flag_value='rc', type=str,
+              help='Increment release candidate version number.')
+@click.option('-f', '--full', 'pre_seg', flag_value='',
+              help='Clear the prerelease value creating a full release.')
 @click.option('-c', '--commit', is_flag=True,
               help='Create a git commit tagged with the new version number. '
                    'If there are no changes to commit, the current commit will be tagged instead.')
