@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file
 - Modified module documentation page titles to include a module role
 
 
-## 1.0.1 - 2021-05-10
+## Version 1.0.1 - 2021-05-10
 
 ### Fixed
 
@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file
 - Improved consistency in command documentation metavars
 
 
-## 1.0.0 - 2021-05-07
+## Version 1.0.0 - 2021-05-07
 
 ### Changed
 
@@ -41,7 +41,7 @@ All notable changes to this project will be documented in this file
 - Extra newlines are added between versions to improve readability of the raw markdown file.
 
 
-## 0.3.3 - 2021-04-27
+## Version 0.3.3 - 2021-04-27
 
 ### Added
 
@@ -56,7 +56,7 @@ All notable changes to this project will be documented in this file
 - `release` now works with logs that have only unreleased changes
 
 
-## 0.3.2 - 2021-04-24
+## Version 0.3.2 - 2021-04-24
 
 ### Added
 
@@ -72,7 +72,7 @@ All notable changes to this project will be documented in this file
 - `release` and `entry` commands now work using empty changelogs.
 
 
-## 0.3.1 - 2021-04-24
+## Version 0.3.1 - 2021-04-24
 
 ### Added
 
@@ -85,7 +85,7 @@ All notable changes to this project will be documented in this file
   - `release` command for creating releases
 
 
-## 0.2.0 - 2021-04-19
+## Version 0.2.0 - 2021-04-19
 
 ### Added
 
@@ -99,7 +99,7 @@ All notable changes to this project will be documented in this file
   - Parser can now handle setext-style headers and H2s not conforming to the schema.
 
 
-## 0.1.0 - 2021-04-16
+## Version 0.1.0 - 2021-04-16
 
 First release
 
