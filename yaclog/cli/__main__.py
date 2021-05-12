@@ -257,7 +257,7 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
         tracked = len(repo.index.diff(repo.head.commit))
         untracked = len(repo.index.diff(None))
 
-        message = [['Commit and create tag', 'Create tag'][min(tracked, 1)], 'for']
+        message = [['Create tag', 'Commit and create tag'][min(tracked, 1)], 'for']
 
         if not cur_version.released:
             message.append('non-release')

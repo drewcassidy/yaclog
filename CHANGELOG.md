@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Fixed
+
+- Fixed `show` command not working with Click version 8
+- Fixed release message incorrectly stating if a commit will be created or not
+
+
 ## Version 1.0.2 - 2021-05-12
 
 ### Changed
