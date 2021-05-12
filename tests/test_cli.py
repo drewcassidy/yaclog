@@ -218,5 +218,70 @@ class TestRelease(unittest.TestCase):
             self.assertEqual(repo.tags[0].name, '1.0.0')
 
 
+class TestShow(unittest.TestCase):
+
+    # noinspection PyShadowingNames
+    def setUp(self):
+        self.runner = CliRunner()
+        self.location = 'CHANGELOG.md'
+
+        self.log = yaclog.Changelog()
+
+        self.log.add_version(name='1.0.0').add_entry('- entry number 1')
+        self.log.add_version(name='Version 2.0.0').add_entry('- entry number 2', 'Added')
+        self.log.add_version(name='Three Point Oh').add_entry('entry number 3')
+        v = self.log.add_version(name='4.0.0 "Euclid"')
+        v.add_entry('- entry number 4')
+        v.add_entry('- entry number 5')
+        v.tags.append('TAGGED')
+
+        self.modes = {
+            'full': ([], lambda v, k: v.text(**k), '\n\n'),
+            'name': (['-n'], lambda v, k: v.name, '\n'),
+            'body': (['-b'], lambda v, k: v.body(**k), '\n\n'),
+            'header': (['-h'], lambda v, k: v.header(**k), '\n'),
+        }
+
+    def test_show_all(self):
+        """Test showing all version information"""
+
+        with self.runner.isolated_filesystem():
+            self.log.write(self.location)
+
+            for mode, t in self.modes.items():
+                with self.subTest(mode, flags=t[0]):
+                    check_result(self, result := self.runner.invoke(cli, ['show', '-a'] + t[0]))
+                    self.assertEqual(t[2].join([t[1](v, {'md': False}) for v in self.log.versions]),
+                                     result.output.strip(), 'incorrect plaintext output')
+
+                    check_result(self, result := self.runner.invoke(cli, ['show', '-am'] + t[0]))
+                    self.assertEqual(t[2].join([t[1](v, {'md': True}) for v in self.log.versions]),
+                                     result.output.strip(), 'incorrect markdown output')
+
+    def test_show_version(self):
+        with self.runner.isolated_filesystem():
+            self.log.write(self.location)
+
+            for mode, t in self.modes.items():
+                with self.subTest(mode, flags=t[0]):
+
+                    for version in self.log.versions:
+                        check_result(self, result := self.runner.invoke(cli, ['show', version.name] + t[0]))
+                        self.assertEqual(t[1](version, {'md': False}),
+                                         result.output.strip(), 'incorrect plaintext output')
+
+                        check_result(self, result := self.runner.invoke(cli, ['show', version.name[-5:]] + t[0]))
+                        self.assertEqual(t[1](version, {'md': False}),
+                                         result.output.strip(), 'incorrect plaintext output')
+
+                        check_result(self, result := self.runner.invoke(cli, ['show', version.name, '-m'] + t[0]))
+                        self.assertEqual(t[1](version, {'md': True}),
+                                         result.output.strip(), 'incorrect markdown output')
+
+                        check_result(self, result := self.runner.invoke(cli, ['show', version.name[-5:], '-m'] + t[0]))
+                        self.assertEqual(t[1](version, {'md': True}),
+                                         result.output.strip(), 'incorrect markdown output')
+
+
 if __name__ == '__main__':
     unittest.main()

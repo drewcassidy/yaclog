@@ -381,14 +381,15 @@ class Changelog:
 
     def get_version(self, name: Optional[str] = None) -> VersionEntry:
         """
-        Get a version from the changelog by name
+        Get a version from the changelog by name.
 
-        :param name: The name of the version to get, or `None` to return the most recent
+        :param name: The name of the version to get, or `None` to return the most recent.
+            The first version with this value in its name is returned.
         :return: The first version with the selected name
         """
 
         for version in self.versions:
-            if version.name == name or name is None:
+            if name in version.name or name is None:
                 return version
         raise KeyError(f'Version {name} not found in changelog')
 

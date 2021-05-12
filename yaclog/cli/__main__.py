@@ -59,23 +59,35 @@ def reformat(obj: Changelog):
     click.echo(f'Reformatted changelog file at {obj.path}')
 
 
+# noinspection PyShadowingNames
 @cli.command(short_help='Show changes from the changelog file')
 @click.option('--all', '-a', 'all_versions', is_flag=True, help='Show the entire changelog.')
 @click.option('--markdown/--txt', '-m/-t', default=False, help='Display as markdown or plain text.')
-@click.option('--full', '-f', 'str_func', flag_value=lambda v, k: v.text(**k), default=True,
+@click.option('--full', '-f', 'mode', flag_value='full', default=True,
               help='Show version header and body.')
-@click.option('--name', '-n', 'str_func', flag_value=lambda v, k: v.name, help='Show only the version name')
-@click.option('--body', '-b', 'str_func', flag_value=lambda v, k: v.body(**k), help='Show only the version body.')
-@click.option('--header', '-h', 'str_func', flag_value=lambda v, k: v.preamble(**k),
+@click.option('--name', '-n', 'mode', flag_value='name',
+              help='Show only the version name')
+@click.option('--body', '-b', 'mode', flag_value='body',
+              help='Show only the version body.')
+@click.option('--header', '-h', 'mode', flag_value='header',
               help='Show only the version header.')
 @click.argument('version_names', metavar='VERSIONS', type=str, nargs=-1)
 @click.pass_obj
-def show(obj: Changelog, all_versions, markdown, str_func, version_names):
+def show(obj: Changelog, all_versions, markdown, mode, version_names):
     """
     Show the changes for VERSIONS.
 
     VERSIONS is a list of versions to print. If not given, the most recent version is used.
     """
+
+    functions = {
+        'full': (lambda v, k: v.text(**k)),
+        'name': (lambda v, k: v.name),
+        'body': (lambda v, k: v.body(**k)),
+        'header': (lambda v, k: v.header(**k)),
+    }
+
+    str_func = functions[mode]
 
     try:
         if all_versions:
@@ -85,16 +97,14 @@ def show(obj: Changelog, all_versions, markdown, str_func, version_names):
         else:
             versions = [obj.get_version(name) for name in version_names]
     except KeyError as k:
-        raise click.BadArgumentUsage(k)
+        raise click.BadArgumentUsage(str(k))
     except ValueError as v:
-        raise click.ClickException(v)
+        raise click.ClickException(str(v))
 
     kwargs = {'md': markdown, 'color': True}
 
-    for v in versions:
-        text = str_func(v, kwargs)
-        click.echo(text)
-        click.echo('\n')
+    sep = '\n\n' if mode == 'body' or mode == 'full' else '\n'
+    click.echo(sep.join([str_func(v, kwargs) for v in versions]))
 
 
 @cli.command(short_help='Modify version tags')
@@ -115,9 +125,9 @@ def tag(obj: Changelog, add, tag_name: str, version_name: str):
         else:
             version = obj.current_version()
     except KeyError as k:
-        raise click.BadArgumentUsage(k)
+        raise click.BadArgumentUsage(str(k))
     except ValueError as v:
-        raise click.ClickException(v)
+        raise click.ClickException(str(v))
 
     if add:
         version.tags.append(tag_name)
@@ -153,7 +163,7 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
         else:
             version = obj.current_version(released=False, new_version=True)
     except KeyError as k:
-        raise click.BadArgumentUsage(k)
+        raise click.BadArgumentUsage(str(k))
 
     for p in paragraphs:
         version.add_entry(p, section_name)
