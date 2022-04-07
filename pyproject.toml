@@ -1,9 +1,62 @@
 [build-system]
 requires = [
-    "setuptools >= 35.0.2",
-    "setuptools_scm[toml] >= 3.4",
+    "setuptools>=61",
+    "setuptools_scm>=6.2",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "yaclog"
+description = "Yet another changelog CLI tool."
+readme = "README.md"
+license = { file = "LICENSE.md" }
+authors = [{ name = "Andrew Cassidy", email = "drewcassidy@me.com" }]
+keywords = ["changelog", "commandline", "markdown"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Text Processing :: Markup :: Markdown",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Utilities"
+]
+
+requires-python = ">= 3.8"
+dependencies = [
+    "Click >= 7.0",
+    "GitPython >= 3",
+    "packaging >= 20"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+docs = [
+    "Sphinx >= 3.5",
+    "sphinx-click >= 2.7",
+    "sphinx-rtd-theme",
+    "myst-parser >= 0.14",
+]
+
+[project.scripts]
+yaclog = "yaclog.cli.__main__:cli"
+
+[project.urls]
+Source = "https://github.com/drewcassidy/yaclog"
+Changelog = "https://github.com/drewcassidy/yaclog/blob/main/CHANGELOG.md"
+Docs = "https://yaclog.readthedocs.io/"
+
 [tool.setuptools_scm]
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["yaclog", "yaclog.*"]
+exclude = ["tests*"]
+namespaces = false
