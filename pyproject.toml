@@ -10,7 +10,6 @@ build-backend = "setuptools.build_meta"
 name = "yaclog"
 description = "Yet another changelog CLI tool."
 readme = "README.md"
-license = { file = "LICENSE.md" }
 authors = [{ name = "Andrew Cassidy", email = "drewcassidy@me.com" }]
 keywords = ["changelog", "commandline", "markdown"]
 classifiers = [
