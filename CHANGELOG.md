@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Fixed
+
+- Fixed tests folder being installed as a package
+
+
 ## Version 1.0.3 - 2021-05-12
 
 ### Fixed
