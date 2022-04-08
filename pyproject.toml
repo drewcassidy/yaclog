@@ -53,10 +53,5 @@ Docs = "https://yaclog.readthedocs.io/"
 
 [tool.setuptools_scm]
 
-[tool.setuptools]
-include-package-data = false
-
 [tool.setuptools.packages.find]
-include = ["yaclog", "yaclog.*"]
-exclude = ["tests*"]
-namespaces = false
+include = ["yaclog"]
