@@ -217,6 +217,31 @@ class TestRelease(unittest.TestCase):
             self.assertIn(repo.head.commit.hexsha[0:7], result.output)
             self.assertEqual(repo.tags[0].name, '1.0.0')
 
+    def test_cargo(self):
+        """Test updating cargo.toml files"""
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            with open("Cargo.toml", "w") as fp:
+                fp.write((
+                    '[package]\n'
+                    'name = "dummy"\n'
+                    'version = "0.3.4"\n'
+                    'authors = ["Andrew Cassidy <drewcassidy@me.com>"]\n'
+                    'description = "A dummy crate used for testing yaclog"\n'
+                    'keywords = ["does", "not", "exist"]\n'
+                    'edition = "2018"\n'
+                ))
+
+            runner.invoke(cli, ['init'])  # create the changelog
+            runner.invoke(cli, ['entry', '-b', 'entry number 1'])
+
+            result = runner.invoke(cli, ['release', 'Version 1.0.0', '-C'])
+            check_result(self, result)
+
+            with open("Cargo.toml", "r") as fp:
+                self.assertIn('version = "1.0.0"', fp.read())
+                # we're just going to trust tomlkit not to mangle everything else
+
 
 class TestShow(unittest.TestCase):
 

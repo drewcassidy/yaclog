@@ -16,6 +16,7 @@
 
 import datetime
 import os.path
+from ..cli import cargo_toml
 
 import click
 import git
@@ -199,9 +200,11 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
 @click.option('-c', '--commit', is_flag=True,
               help='Create a git commit tagged with the new version number. '
                    'If there are no changes to commit, the current commit will be tagged instead.')
+@click.option('-C', '--cargo', '-🦀', is_flag=True,
+              help='Update the version in a Rust cargo.toml manifest file.')
 @click.argument('version_name', metavar='VERSION', type=str, default=None, required=False)
 @click.pass_obj
-def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
+def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo):
     """
     Release VERSION, or a version incremented from the last release.
 
@@ -213,7 +216,7 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
     other kinds of prerelease.
     """
 
-    if rel_seg is None and pre_seg is None and not version_name and not commit:
+    if rel_seg is None and pre_seg is None and not version_name and not commit and not cargo:
         click.echo('Nothing to release!')
         raise click.Abort
 
@@ -246,6 +249,14 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
         obj.write()
         click.echo(f"Renamed {click.style(old_name, fg='blue')} to {click.style(new_name, fg='blue')}")
 
+    short_version, *_ = yaclog.version.extract_version(cur_version.name)
+    if not short_version:
+        short_version = cur_version.name.replace(' ', '-')
+
+    if cargo:
+        cargo_toml.set_version("Cargo.toml", str(short_version))
+        click.echo("Updated Cargo.toml")
+
     if commit:
         repo = git.Repo(os.curdir)
 
@@ -276,10 +287,6 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit):
             click.echo(f"Created commit {click.style(repo.head.commit.hexsha[0:7], fg='green')}")
         else:
             commit = repo.head.commit
-
-        short_version, *_ = yaclog.version.extract_version(cur_version.name)
-        if not short_version:
-            short_version = cur_version.name.replace(' ', '-')
 
         repo_tag = repo.create_tag(short_version, ref=commit, message=cur_version.body(False))
         click.echo(f"Created tag {click.style(repo_tag.name, fg='green')}.")

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Added
+
+- Added a flag to update Rust Cargo.toml files when releasing a new version
+
+
 ## Version 1.0.4 - 2022-04-08
 
 ### Fixed
