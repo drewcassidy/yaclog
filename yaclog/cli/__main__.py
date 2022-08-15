@@ -265,6 +265,9 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo):
 
         repo.index.add(obj.path)
 
+        if cargo:
+            repo.index.add("Cargo.toml")
+
         tracked = len(repo.index.diff(repo.head.commit))
         untracked = len(repo.index.diff(None))
 

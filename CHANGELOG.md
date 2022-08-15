@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Version 1.1.1 - 2022-08-15
+
+### Fixed
+
+- Fixed `yaclog release -C -c` not committing changes to cargo.toml
+
+
 ## Version 1.1.0 - 2022-08-14
 
 ### Added
