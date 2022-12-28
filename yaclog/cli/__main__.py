@@ -16,10 +16,8 @@
 
 import datetime
 import os.path
-from ..cli import cargo_toml
 
 import click
-import git
 
 import yaclog.version
 from yaclog.changelog import Changelog
@@ -254,10 +252,12 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo):
         short_version = cur_version.name.replace(' ', '-')
 
     if cargo:
+        from ..cli import cargo_toml
         cargo_toml.set_version("Cargo.toml", str(short_version))
         click.echo("Updated Cargo.toml")
 
     if commit:
+        import git
         repo = git.Repo(os.curdir)
 
         if repo.bare:
