@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Changed
+
+- yaclog now only tries to use git when invoked with a command that needs it, meaning most sub commands can now be used on systems without git
+
+
 ## Version 1.1.1 - 2022-08-15
 
 ### Fixed
