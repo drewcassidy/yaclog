@@ -50,7 +50,7 @@ def init(obj: Changelog):
     click.echo(f'Created new changelog file at {obj.path}')
 
 
-@cli.command('format')  # dont accidentally hide the `format` python builtin
+@cli.command('format')  # don't accidentally hide the `format` python builtin
 @click.pass_obj
 def reformat(obj: Changelog):
     """Reformat the changelog file."""
@@ -291,6 +291,7 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo):
         else:
             commit = repo.head.commit
 
+        # noinspection PyTypeChecker
         repo_tag = repo.create_tag(short_version, ref=commit, message=cur_version.body(False))
         click.echo(f"Created tag {click.style(repo_tag.name, fg='green')}.")
 
