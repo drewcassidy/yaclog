@@ -292,7 +292,8 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo, yes, 
                 f"You have {untracked} untracked file{'s'[:untracked]} that will not be included!",
                 fg='red', bold=True))
 
-        click.confirm(' '.join(message), abort=True)
+        if not yes:
+            click.confirm(' '.join(message), abort=True)
 
         if tracked > 0:
             commit = repo.index.commit(f'Release {cur_version.name}\n\n{cur_version.body()}')
