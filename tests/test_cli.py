@@ -153,6 +153,11 @@ class TestRelease(unittest.TestCase):
             self.assertEqual(yaclog.read(location).versions[0].name, '1.0.1')
             self.assertIn('1.0.1', result.output)
 
+            result = runner.invoke(cli, ['release', '-y', '-s', 2])
+            check_result(self, result)
+            self.assertEqual(yaclog.read(location).versions[0].name, '1.0.2')
+            self.assertIn('1.0.2', result.output)
+
             runner.invoke(cli, ['entry', '-b', 'entry number 3'])
 
             result = runner.invoke(cli, ['release', '-m'])
@@ -193,6 +198,12 @@ class TestRelease(unittest.TestCase):
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, '3.0.0')
             self.assertIn('3.0.0', result.output)
+
+            result = runner.invoke(cli, ['release', '-p', '-n'])
+            check_result(self, result)
+            self.assertEqual(yaclog.read(location).versions[0].name, '3.0.1')
+            self.assertEqual(yaclog.read(location).versions[1].name, '3.0.0')
+            self.assertIn('3.0.1', result.output)
 
     def test_commit(self):
         """Test committing and tagging releases"""

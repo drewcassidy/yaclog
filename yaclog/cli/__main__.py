@@ -187,6 +187,8 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
               help='Increment minor version number.')
 @click.option('-p', '--patch', 'rel_seg', flag_value=2, type=int,
               help='Increment patch number.')
+@click.option('-s', '--segment', 'rel_seg', type=int,
+              help='Increment nth segment of the version. For example, `--segment 2` is equivalent to `--patch`')
 @click.option('-a', '--alpha', 'pre_seg', flag_value='a', type=str, default=None,
               help='Increment alpha version number.')
 @click.option('-b', '--beta', 'pre_seg', flag_value='b', type=str,
@@ -200,9 +202,13 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
                    'If there are no changes to commit, the current commit will be tagged instead.')
 @click.option('-C', '--cargo', '-🦀', is_flag=True,
               help='Update the version in a Rust cargo.toml manifest file.')
+@click.option('-y', '--yes', is_flag=True,
+              help='Answer "yes" to all confirmation dialogs')
+@click.option('-n', '--new', is_flag=True,
+              help = 'Create a new version instead of renaming an existing one')
 @click.argument('version_name', metavar='VERSION', type=str, default=None, required=False)
 @click.pass_obj
-def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo):
+def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo, yes, new):
     """
     Release VERSION, or a version incremented from the last release.
 
@@ -218,7 +224,10 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo):
         click.echo('Nothing to release!')
         raise click.Abort
 
-    cur_version = obj.current_version()
+    if new:
+        cur_version = obj.add_version()
+    else:
+        cur_version = obj.current_version()
     old_name = cur_version.name
 
     if version_name:
@@ -235,11 +244,11 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo):
         new_name = yaclog.version.increment_version(new_name, rel_seg, pre_seg)
 
     if new_name != old_name:
-        if yaclog.version.is_release(old_name):
+        if yaclog.version.is_release(old_name) and not yes:
             click.confirm(
-                f"Rename release version {click.style(old_name, fg='blue')} "
-                f"to {click.style(new_name, fg='blue')}?",
-                abort=True)
+            f"Rename release version {click.style(old_name, fg='blue')} "
+            f"to {click.style(new_name, fg='blue')}?",
+            abort=True)
 
         cur_version.name = new_name
         cur_version.date = datetime.datetime.utcnow().date()

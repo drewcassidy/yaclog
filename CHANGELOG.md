@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Added
+
+- added the `-s` option to `yaclog release` to increment arbitrary version segments 
+- added the `-n` option to `yaclog release` to create a new release instead of releasing a new one
+- added the `-y` option to `yaclog release` to answer "yes" to all confirmation dialogs. Use with caution!
+
+
 ## Version 1.1.2 - 2022-12-29
 
 ### Changed
