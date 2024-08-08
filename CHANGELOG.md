@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file
 
 - added a `--version` option to `yaclog show` that prints just the version number
 
+### Changed
+
+- removed support for Click 7 as a dependency
+
 
 ## Version 1.2.0 - 2024-04-16
 
