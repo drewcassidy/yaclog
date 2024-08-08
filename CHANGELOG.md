@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Added
+
+- added a `--version` option to `yaclog show` that prints just the version number
+
+
 ## Version 1.2.0 - 2024-04-16
 
 ### Added
