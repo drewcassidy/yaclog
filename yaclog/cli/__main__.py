@@ -70,7 +70,8 @@ def reformat(obj: Changelog):
               help='Show only the version body.')
 @click.option('--header', '-h', 'mode', flag_value='header',
               help='Show only the version header.')
-@click.option('--version', '-v', 'mode', flag_value='version', help='Show only the version number.')
+@click.option('--version', '-v', 'mode', flag_value='version', help='Show only the version number. If the current version is unreleased, '
+                                                                    'this is inferred by incrementing the patch number of the last released version')
 @click.argument('version_names', metavar='VERSIONS', type=str, nargs=-1)
 @click.pass_obj
 def show(obj: Changelog, all_versions, markdown, mode, version_names):
@@ -89,20 +90,24 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names):
     }
 
     str_func = functions[mode]
+    kwargs = {'md': markdown, 'color': True}
 
     try:
         if all_versions:
             versions = obj.versions
         elif len(version_names) == 0:
             versions = [obj.current_version()]
+            if mode == 'version' and versions[0].name == 'Unreleased':
+                latest = obj.current_version(released=True).version
+                inferred = yaclog.version.increment_version(str(latest), 2, '')
+                print(str(inferred))
+                return
         else:
             versions = [obj.get_version(name) for name in version_names]
     except KeyError as k:
         raise click.BadArgumentUsage(str(k))
     except ValueError as v:
         raise click.ClickException(str(v))
-
-    kwargs = {'md': markdown, 'color': True}
 
     sep = '\n\n' if mode == 'body' or mode == 'full' else '\n'
     click.echo(sep.join([str_func(v, kwargs) for v in versions]))
