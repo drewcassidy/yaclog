@@ -1,5 +1,5 @@
-name: 'Hello World'
-description: 'Greet someone'
+name: 'Yaclog'
+description: 'Get version information from a changelog, and optionally create a new release'
 
 inputs:
   markdown:
