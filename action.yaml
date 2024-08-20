@@ -1,0 +1,76 @@
+name: 'Hello World'
+description: 'Greet someone'
+
+inputs:
+  markdown:
+    description: If outputs should be in markdown format or not
+    default: 'true'
+
+  release:
+    description: > 
+      Creates a new release and commits it if set. Directly passed to the arguments of `yaclog release`. 
+      Can be a version number or an increment tag like `--major`, `--minor`, or `--patch`. 
+      The resulting commit and tag will be pushed back to the repo, but the workflow must have write permissions. 
+      Add
+      ```yaml
+      permissions:
+        contents: write
+      ```
+      to your workflow to allow this.
+
+outputs:
+  name:
+    description: "The current version name. For example, `Version 1.3.0`"
+    value: ${{ steps.yaclog-show.outputs.name}}
+  header:
+    description: "The entire header for the current version. For example, `Version 1.3.0 - 2024-08-08`"
+    value: ${{ steps.yaclog-show.outputs.header }}
+  version:
+    description: "The current version number. For example, `1.3.0`"
+    value: ${{ steps.yaclog-show.outputs.version }}
+  body_file:
+    description: "Path to a temporary file containing the version body"
+    value: ${{ steps.yaclog-show.outputs.body_file }}
+  changelog:
+    description: "Path to the entire changelog file."
+    value: ${{ steps.yaclog-show.outputs.changelog }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Setup Yaclog
+      shell: bash
+      run: python -m pip install ${{ github.action_path }}
+
+    - name: Create New Release
+      shell: bash
+      if: ${{ inputs.release }}
+      run: yaclog release --yes --commit ${{ inputs.release }}
+
+    - name: Get Version Information
+      id: yaclog-show
+      shell: bash
+      run: |
+        yaclog show ---gh-actions ${{ inputs.markdown && '--markdown' }} >> "$GITHUB_OUTPUT"
+        # output like so:
+        #  name=Version 1.3.0
+        #  header=Version 1.3.0 - 2024-08-08
+        #  version=1.3.0
+        #  body_file={path to file containing version body}
+        #  changelog={path to changelog}
+
+    - name: Push Changes
+      if: ${{ inputs.release }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git push
+        git push --tags

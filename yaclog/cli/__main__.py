@@ -72,9 +72,10 @@ def reformat(obj: Changelog):
               help='Show only the version header.')
 @click.option('--version', '-v', 'mode', flag_value='version', help='Show only the version number. If the current version is unreleased, '
                                                                     'this is inferred by incrementing the patch number of the last released version')
+@click.option('---gh-actions', 'gh_actions', is_flag=True, hidden=True)
 @click.argument('version_names', metavar='VERSIONS', type=str, nargs=-1)
 @click.pass_obj
-def show(obj: Changelog, all_versions, markdown, mode, version_names):
+def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions):
     """
     Show the changes for VERSIONS.
 
@@ -110,6 +111,20 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names):
         raise click.ClickException(str(v))
 
     sep = '\n\n' if mode == 'body' or mode == 'full' else '\n'
+
+    if gh_actions:
+        import tempfile
+
+        all_modes = [ 'name', 'header', 'version' ]
+        outputs = [f'{mode}={sep.join([functions[mode](v, kwargs) for v in versions])}' for mode in all_modes]
+        click.echo('\n'.join(outputs))
+        body_fd, body_file = tempfile.mkstemp(text=True)
+        with os.fdopen(body_fd, 'w') as f:
+            f.write(sep.join([functions['body'](v, kwargs) for v in versions]))
+        click.echo(f'body_file={body_file}')
+        click.echo(f'changelog={obj.path}')
+        return
+
     click.echo(sep.join([str_func(v, kwargs) for v in versions]))
 
 
