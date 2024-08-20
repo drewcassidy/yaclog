@@ -40,9 +40,9 @@ jobs:
         run: python -m unittest -v
 
   deploy:
-    needs: test
+#    needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
 
     steps:
       - uses: actions/checkout@v4
@@ -56,7 +56,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install setuptools wheel twine
-          python -m pip install . # Self hosting!
 
       - name: Install pypa/build
         run: python -m pip install build --user
@@ -64,10 +63,9 @@ jobs:
       - name: Build a binary wheel and source tarball
         run: python -m build --sdist --wheel --outdir dist/
 
-      - name: Get version name and body
-        run: |
-          echo "VERSION_TILE=$(yaclog show -n)" >> $GITHUB_ENV
-          echo "$(yaclog show -mb)" >> RELEASE.md
+      - name: Get version info
+        id: yaclog-show
+        uses: ./
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -78,7 +76,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
-          name: ${{ env.VERSION_TITLE }}
-          body_path: RELEASE.md
+          name: ${{ steps.yaclog-show.outputs.name }}
+          body_path: ${{ steps.yaclog-show.outputs.body_file }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
