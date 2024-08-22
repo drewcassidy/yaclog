@@ -1,8 +1,10 @@
-name: 'Yaclog'
-description: 'Get version information from a changelog, and optionally create a new release'
+name: Yaclog
+description: > 
+  Get version information from a changelog, and optionally create a new release. 
+  The `yaclog` command is made available for use in future steps.
 branding:
   icon: file-text
-  color: blue
+  color: orange
 
 inputs:
   markdown:
@@ -44,19 +46,12 @@ runs:
     - id: setup-python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.12'
         update-environment: 'false'
 
     - name: Setup Yaclog
       shell: bash
-      run: |
-        ${{ steps.setup-python.outputs.python-path }} -m pip install ${{ github.action_path }}
-        # now make it available in $PATH
-        # this whole rigamarole is because we are using a python root that isnt in $PATH as to not step over other actions
-        mkdir -p "$GITHUB_ACTION_PATH/bin"
-        echo '${{ steps.setup-python.outputs.python-path }} -m yaclog.cli $@' > "$GITHUB_ACTION_PATH/bin/yaclog"
-        chmod +x "$GITHUB_ACTION_PATH/bin/yaclog"
-        echo "$GITHUB_ACTION_PATH/bin" > "$GITHUB_PATH"
+      run: pipx install --python ${{ steps.setup-python.outputs.python-path }} ${{ github.action_path }}
 
     - name: Create New Release
       shell: bash
