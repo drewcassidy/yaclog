@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Version 1.4.0 - 2024-08-25
+
+### Added
+
+- added a github action to the repository. The action can create new releases and fetch version information. For mor information see the "Github Actions" page in the handbook
+
+
 ## Version 1.3.0 - 2024-08-08
 
 ### Added
