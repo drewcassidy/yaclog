@@ -4,7 +4,7 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-from pkg_resources import get_distribution
+from importlib.metadata import version
 
 # -- Path setup --------------------------------------------------------------
 
@@ -22,8 +22,9 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'Yaclog'
 copyright = '2021, Andrew Cassidy'
 author = 'Andrew Cassidy'
-release = get_distribution('yaclog').version
+release = version('yaclog')
 version = '.'.join(release.split('.')[:3])
+ref = version if len(release.split('.')) == 3 else 'main'
 
 # -- General configuration ---------------------------------------------------
 
@@ -36,9 +37,13 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    'sphinx_jinja'
 ]
 
 myst_heading_anchors = 2
+myst_enable_extensions = [
+    "colon_fence"
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -76,6 +81,8 @@ autodoc_default_options = {
     'undoc-members': True,
 }
 
+
+
 # -- Options for Intersphinx -------------------------------------------------
 
 # This config value contains the locations and names of other projects that
@@ -84,4 +91,10 @@ autodoc_default_options = {
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'packaging': ('https://packaging.pypa.io/en/latest/', None),
+}
+
+jinja_globals = {
+    'version': version,
+    'release': release,
+    'ref': ref,
 }

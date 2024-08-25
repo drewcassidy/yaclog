@@ -15,13 +15,7 @@ inputs:
     description: > 
       Creates a new release and commits it if set. Directly passed to the arguments of `yaclog release`. 
       Can be a version number or an increment tag like `--major`, `--minor`, or `--patch`. 
-      The resulting commit and tag will be pushed back to the repo, but the workflow must have write permissions. 
-      Add
-      ```yaml
-      permissions:
-        contents: write
-      ```
-      to your workflow to allow this.
+      The resulting commit and tag will NOT be pushed back to the repo. You must add a step to do this yourself
 
 outputs:
   name:
@@ -69,14 +63,3 @@ runs:
         #  version=1.3.0
         #  body_file={path to file containing version body}
         #  changelog={path to changelog}
-
-    - name: Push Changes
-      if: ${{ inputs.release }}
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        git config --global user.name "github-actions"
-        git config --global user.email "github-actions@github.com"
-        git push
-        git push --tags

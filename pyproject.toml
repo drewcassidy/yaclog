@@ -43,6 +43,7 @@ docs = [
     "sphinx-click >= 2.7",
     "sphinx-rtd-theme",
     "myst-parser >= 0.14",
+    "sphinx-jinja >=1.2.1",
 ]
 
 [project.scripts]
