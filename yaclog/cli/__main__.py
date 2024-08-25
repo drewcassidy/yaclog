@@ -16,6 +16,7 @@
 
 import datetime
 import os.path
+from sys import stdout
 
 import click
 
@@ -91,7 +92,7 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
     }
 
     str_func = functions[mode]
-    kwargs = {'md': markdown, 'color': True}
+    kwargs = {'md': markdown, 'color': stdout.isatty()}
 
     try:
         if all_versions:
@@ -115,6 +116,7 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
     if gh_actions:
         import tempfile
 
+        kwargs['color'] = False
         all_modes = [ 'name', 'header', 'version' ]
         outputs = [f'{mode}={sep.join([functions[mode](v, kwargs) for v in versions])}' for mode in all_modes]
         click.echo('\n'.join(outputs))

@@ -2,38 +2,49 @@
 
 All notable changes to this project will be documented in this file
 
+## Version 1.4.1 - 2024-08-25
+
+### Fixed
+
+- Fixed escape characters being included in github actions body file
+
+### Added
+
+- Added pypi tags for python 3.11 and 3.12
+
+
 ## Version 1.4.0 - 2024-08-25
 
 ### Added
 
-- added a github action to the repository. The action can create new releases and fetch version information. For mor information see the "Github Actions" page in the handbook
+- Added a github action to the repository. The action can create new releases and fetch version information. For more information see the "Github Actions" page in the handbook
 
 
 ## Version 1.3.0 - 2024-08-08
 
 ### Added
 
-- added a `--version` option to `yaclog show` that prints just the version number
+- Added a `--version` option to `yaclog show` that prints just the version number
 
 ### Changed
 
-- removed support for Click 7 as a dependency
+- Removed support for Click 7 as a dependency
 
 
 ## Version 1.2.0 - 2024-04-16
 
 ### Added
 
-- added the `-s` option to `yaclog release` to increment arbitrary version segments 
-- added the `-n` option to `yaclog release` to create a new release instead of releasing a new one
-- added the `-y` option to `yaclog release` to answer "yes" to all confirmation dialogs. Use with caution!
+- Added the `-s` option to `yaclog release` to increment arbitrary version segments 
+- Added the `-n` option to `yaclog release` to create a new release instead of releasing a new one
+- Added the `-y` option to `yaclog release` to answer "yes" to all confirmation dialogs. Use with caution!
 
 
 ## Version 1.1.2 - 2022-12-29
 
 ### Changed
 
-- yaclog now only tries to use git when invoked with a command that needs it, meaning most sub commands can now be used on systems without git
+- Yaclog now only tries to use git when invoked with a command that needs it, meaning most sub commands can now be used on systems without git
 
 
 ## Version 1.1.1 - 2022-08-15
