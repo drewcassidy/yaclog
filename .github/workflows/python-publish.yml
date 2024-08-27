@@ -52,6 +52,7 @@ jobs:
       url: https://pypi.org/p/yaclog
     permissions:
       id-token: write
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
