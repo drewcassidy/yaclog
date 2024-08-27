@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Fixed
+
+- Fixed package failing to install without git history
+
+### Added
+
+- Added the ability to specify the changelog path in the action
+
+
 ## Version 1.4.1 - 2024-08-25
 
 ### Fixed
