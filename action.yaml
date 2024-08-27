@@ -1,7 +1,5 @@
 name: Yaclog
-description: > 
-  Get version information from a changelog, and optionally create a new release. 
-  The `yaclog` command is made available for use in future steps.
+description: Get version information from a changelog
 branding:
   icon: file-text
   color: orange
@@ -54,14 +52,8 @@ runs:
       if: ${{ inputs.release }}
       run: yaclog release --yes --commit ${{ inputs.release }}
 
-    - name: Get Version Information
+    - name: Get Changelog Information
       id: yaclog-show
       shell: bash
       run: |
-        yaclog show ---gh-actions ${{ inputs.markdown && '--markdown' }} >> "$GITHUB_OUTPUT"
-        # output like so:
-        #  name=Version 1.3.0
-        #  header=Version 1.3.0 - 2024-08-08
-        #  version=1.3.0
-        #  body_file={path to file containing version body}
-        #  changelog={path to changelog}
+        yaclog show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
