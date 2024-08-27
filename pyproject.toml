@@ -57,6 +57,7 @@ Changelog = "https://github.com/drewcassidy/yaclog/blob/main/CHANGELOG.md"
 Docs = "https://yaclog.readthedocs.io/"
 
 [tool.setuptools_scm]
+fallback_version = "0.0.0"
 
 [tool.setuptools.packages.find]
 include = ["yaclog"]

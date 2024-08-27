@@ -46,6 +46,8 @@ runs:
     - name: Setup Yaclog
       shell: bash
       run: pipx install --python ${{ steps.setup-python.outputs.python-path }} ${{ github.action_path }}
+      env:
+        SETUPTOOLS_SCM_PRETEND_VERSION_FOR_YACLOG: '0.0.0'
 
     - name: Create New Release
       shell: bash
