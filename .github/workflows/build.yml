@@ -52,6 +52,10 @@ jobs:
         with:
           changelog-path: 'tests/Test-Changelog.md'
 
+      - name: Copy Body File
+        run:
+          cp ${{ steps.yaclog-show.outputs.body-file }} body.md
+
       - name: Fail Outputs
         if: >
           !(
@@ -59,7 +63,7 @@ jobs:
           steps.yaclog-show.outputs.header == '## 0.13.0 "Aquarius" - 1970-04-11 [YANKED]' &&
           steps.yaclog-show.outputs.version == '0.13.0' &&
           endsWith(steps.yaclog-show.outputs.changelog, 'tests/Test-Changelog.md') &&
-          hashFiles(steps.yaclog-show.outputs.body-file) == 'ff2730ab0e44e541227facd28e7dbd08977f6b1fa642dddff426ff6fa16cfc2b'
+          hashFiles('body.md') == 'ff2730ab0e44e541227facd28e7dbd08977f6b1fa642dddff426ff6fa16cfc2b'
           )
         run: 'false' # fail the run
 
