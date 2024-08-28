@@ -40,9 +40,34 @@ jobs:
       - name: Run Unit Tests
         run: python -m unittest -v
 
+  test-action:
+    name: Test Github Action
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Changelog Information
+        uses: ./
+        id: yaclog-show
+        with:
+          changelog-path: 'tests/Test-Changelog.md'
+
+      - name: Fail Outputs
+        if: >
+          !(
+          steps.yaclog-show.outputs.name == '0.13.0 "Aquarius"' &&
+          steps.yaclog-show.outputs.header == '0.13.0 "Aquarius" - 1970-04-11 [YANKED]' &&
+          steps.yaclog-show.outputs.version == '0.13.0' &&
+          endsWith(steps.yaclog-show.outputs.changelog, 'tests/Test-Changelog.md') &&
+          hashFiles(steps.yaclog-show.outputs.body-file) == '33b42eab899b0ff3b0e2a0647718cf9bf748af40e5e9a7c6af3642b35001223a'
+          )
+        run: 'false' # fail the run
+
   build:
     name: Build Distribution
-    needs: test
+    needs:
+      - test
+      - test-action
     runs-on: ubuntu-22.04
     outputs:
       body-file: ${{ steps.yaclog-show.outputs.body-file }}
