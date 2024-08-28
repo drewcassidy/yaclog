@@ -56,10 +56,10 @@ jobs:
         if: >
           !(
           steps.yaclog-show.outputs.name == '0.13.0 "Aquarius"' &&
-          steps.yaclog-show.outputs.header == '0.13.0 "Aquarius" - 1970-04-11 [YANKED]' &&
+          steps.yaclog-show.outputs.header == '## 0.13.0 "Aquarius" - 1970-04-11 [YANKED]' &&
           steps.yaclog-show.outputs.version == '0.13.0' &&
           endsWith(steps.yaclog-show.outputs.changelog, 'tests/Test-Changelog.md') &&
-          hashFiles(steps.yaclog-show.outputs.body-file) == '33b42eab899b0ff3b0e2a0647718cf9bf748af40e5e9a7c6af3642b35001223a'
+          hashFiles(steps.yaclog-show.outputs.body-file) == 'ff2730ab0e44e541227facd28e7dbd08977f6b1fa642dddff426ff6fa16cfc2b'
           )
         run: 'false' # fail the run
 
