@@ -77,9 +77,6 @@ jobs:
       - test
       - test-action
     runs-on: ubuntu-22.04
-    outputs:
-      body-file: ${{ steps.yaclog-show.outputs.body-file }}
-      version-name: ${{ steps.yaclog-show.outputs.name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -87,10 +84,6 @@ jobs:
         uses: actions/setup-python@v5.1.1
         with:
           python-version: '3.12'
-
-      - name: Get Changelog Information
-        id: yaclog-show
-        uses: ./ # self-hosting!
 
       - name: Install pypa/build
         run: python -m pip install build --user
@@ -134,16 +127,22 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           name: python-distribution
           path: dist/
 
+      - name: Get Changelog Information
+        id: yaclog-show
+        uses: ./ # self-hosting!
+
       - name: Publish to Github
         run: >
           gh release create ${{ github.ref_name }}
-          --notes-file "${{ needs.build.outputs.body-file }}"
-          --title "${{ needs.build.outputs.version-name }}"
+          --notes-file "${{ steps.yaclog-show.outputs.body-file }}"
+          --title "${{ steps.yaclog-show.outputs.name }}"
           dist/*
         env:
           GH_TOKEN: ${{ github.token }}
