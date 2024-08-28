@@ -56,7 +56,7 @@ jobs:
         run:
           cp ${{ steps.yaclog-show.outputs.body-file }} body.md
 
-      - name: Fail Outputs
+      - name: Fail
         if: >
           !(
           steps.yaclog-show.outputs.name == '0.13.0 "Aquarius"' &&
@@ -65,7 +65,11 @@ jobs:
           endsWith(steps.yaclog-show.outputs.changelog, 'tests/Test-Changelog.md') &&
           hashFiles('body.md') == 'ad49b5c946b7d361db1c3dacc73de4f6222cca6272aab426786de168eede702b'
           )
-        run: 'false' # fail the run
+        run: |
+          echo "Action self-test failed!"
+          echo "${{ toJSON(steps.yaclog-show.outputs) }}"
+          echo "${{ hashFiles('body.md') }}"
+          false
 
   build:
     name: Build Distribution
