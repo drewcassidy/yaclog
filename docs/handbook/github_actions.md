@@ -46,7 +46,7 @@ The most recent version name, equivalent to the output of `yaclog show --name`. 
 The entire header for the most recent version, equivalent to the output of `yaclog show --header`. For example, `Version 1.3.0 - 2024-08-08`
 ```
 
-```{confval} body_file
+```{confval} body-file
 The path to a temporary file containing the body of the most recent version. Contents equivalent to `yaclog show --body`
 ```
 
@@ -82,7 +82,7 @@ jobs:
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         run: |
           gh release create {{ '${{ github.ref_name }}' }} \
-            --notes-file "{{ '${{ steps.yaclog.outputs.body_file }}' }}" \
+            --notes-file "{{ '${{ steps.yaclog.outputs.body-file }}' }}" \
             --title "{{ '${{ steps.yaclog.outputs.name }}' }}" 
         env:
           GH_TOKEN: {{ '${{ github.token }}' }}

@@ -28,9 +28,12 @@ outputs:
   version:
     description: "The current version number. For example, `1.3.0`"
     value: ${{ steps.yaclog-show.outputs.version }}
-  body_file:
+  body-file:
     description: "Path to a temporary file containing the version body"
-    value: ${{ steps.yaclog-show.outputs.body_file }}
+    value: ${{ steps.yaclog-show.outputs.body-file }}
+  body_file:
+    description: "Alias for body-file"
+    value: ${{ steps.yaclog-show.outputs.body-file }}
   changelog:
     description: "Path to the entire changelog file."
     value: ${{ steps.yaclog-show.outputs.changelog }}

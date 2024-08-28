@@ -123,7 +123,7 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
         body_fd, body_file = tempfile.mkstemp(text=True)
         with os.fdopen(body_fd, 'w') as f:
             f.write(sep.join([functions['body'](v, kwargs) for v in versions]))
-        click.echo(f'body_file={body_file}')
+        click.echo(f'body-file={body_file}')
         click.echo(f'changelog={obj.path}')
         return
 

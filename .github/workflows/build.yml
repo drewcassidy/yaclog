@@ -45,8 +45,8 @@ jobs:
     needs: test
     runs-on: ubuntu-22.04
     outputs:
-      body_file: ${{ steps.yaclog-show.outputs.body_file }}
-      version_name: ${{ steps.yaclog-show.outputs.name }}
+      body-file: ${{ steps.yaclog-show.outputs.body-file }}
+      version-name: ${{ steps.yaclog-show.outputs.name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -109,8 +109,8 @@ jobs:
       - name: Publish to Github
         run: >
           gh release create ${{ github.ref_name }}
-          --notes-file "${{ needs.build.outputs.body_file }}"
-          --title "${{ needs.build.outputs.version_name }}"
+          --notes-file "${{ needs.build.outputs.body-file }}"
+          --title "${{ needs.build.outputs.version-name }}"
           dist/*
         env:
           GH_TOKEN: ${{ github.token }}
