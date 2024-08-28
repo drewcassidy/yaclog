@@ -6,7 +6,8 @@ on: [ push, pull_request ]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Test Python Module
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
@@ -39,28 +40,24 @@ jobs:
       - name: Run Unit Tests
         run: python -m unittest -v
 
-      - name: Run Action
-        id: yaclog-show
-        uses: ./
-
-  deploy:
+  build:
+    name: Build Distribution
     needs: test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    environment:
-      name: pypi
-      url: https://pypi.org/p/yaclog
-    permissions:
-      id-token: write
-      contents: write
-
+    runs-on: ubuntu-22.04
+    outputs:
+      body_file: ${{ steps.yaclog-show.outputs.body_file }}
+      version_name: ${{ steps.yaclog-show.outputs.name }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5.1.1
         with:
-          python-version: '>=3.8'
+          python-version: '3.12'
+
+      - name: Get Changelog Information
+        id: yaclog-show
+        uses: ./ # self-hosting!
 
       - name: Install pypa/build
         run: python -m pip install build --user
@@ -68,20 +65,52 @@ jobs:
       - name: Build a binary wheel and source tarball
         run: python -m build --sdist --wheel --outdir dist/
 
-      - name: Get Changelog Information
-        id: yaclog-show
-        uses: ./
-        # self-hosting!
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-distribution
+          path: dist/
+          compression-level: 0 # already compressed
+
+  publish-pypi:
+    name: Deploy to PyPI
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    needs: build
+    runs-on: ubuntu-22.04
+    environment:
+      name: Publish
+      url: https://pypi.org/project/yaclog/${{ github.ref_name }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-distribution
+          path: dist/
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
 
+  publish-github:
+    name: Deploy to Github
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    needs: build
+    runs-on: ubuntu-22.04
+    environment:
+      name: Publish
+      url: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-distribution
+          path: dist/
+
       - name: Publish to Github
-        run: |
-          gh release create ${{ github.ref_name }} \
-            --notes-file "${{ steps.yaclog-show.outputs.body_file }}" \
-            --title "${{ steps.yaclog-show.outputs.name }}"
-          
-          gh release upload ${{ github.ref_name }} dist/*
+        run: >
+          gh release create ${{ github.ref_name }}
+          --notes-file "${{ needs.build.outputs.body_file }}"
+          --title "${{ needs.build.outputs.version_name }}"
+          dist/*
         env:
           GH_TOKEN: ${{ github.token }}
