@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Fixed
+
+- Fixed package missing the cli module in some circumstances
+
+### Changed
+
+- Added the `body-file` output to the github action. `body_file` still exists but is aliased to `body-file`
+
+
 ## Version 1.4.2 - 2024-08-27
 
 ### Fixed
