@@ -63,7 +63,7 @@ jobs:
           steps.yaclog-show.outputs.header == '## 0.13.0 "Aquarius" - 1970-04-11 [YANKED]' &&
           steps.yaclog-show.outputs.version == '0.13.0' &&
           endsWith(steps.yaclog-show.outputs.changelog, 'tests/Test-Changelog.md') &&
-          hashFiles('body.md') == 'ff2730ab0e44e541227facd28e7dbd08977f6b1fa642dddff426ff6fa16cfc2b'
+          hashFiles('body.md') == 'ad49b5c946b7d361db1c3dacc73de4f6222cca6272aab426786de168eede702b'
           )
         run: 'false' # fail the run
 
