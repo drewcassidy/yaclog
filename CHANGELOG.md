@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file
 
-## Unreleased
+## Version 1.4.4 - 2024-09-09
 
 ### Fixed
 
