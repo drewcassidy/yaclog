@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Fixed
+
+- Fixed incorrect version inference in github actions
+
+
 ## Version 1.4.3 - 2024-08-28
 
 ### Fixed

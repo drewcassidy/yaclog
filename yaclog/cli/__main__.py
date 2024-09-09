@@ -88,22 +88,22 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
         'name': (lambda v, k: v.name),
         'body': (lambda v, k: v.body(**k)),
         'header': (lambda v, k: v.header(**k)),
-        'version': (lambda v, k: str(v.version))
+        'version': (lambda v, k: latest_version)
     }
 
     str_func = functions[mode]
     kwargs = {'md': markdown, 'color': stdout.isatty()}
+    latest_version = str(obj.versions[0].version)
 
     try:
         if all_versions:
             versions = obj.versions
         elif len(version_names) == 0:
             versions = [obj.current_version()]
-            if mode == 'version' and versions[0].name == 'Unreleased':
+            if ((mode == 'version') or gh_actions) and versions[0].name == 'Unreleased':
                 latest = obj.current_version(released=True).version
                 inferred = yaclog.version.increment_version(str(latest), 2, '')
-                print(str(inferred))
-                return
+                latest_version = inferred
         else:
             versions = [obj.get_version(name) for name in version_names]
     except KeyError as k:
