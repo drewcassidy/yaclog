@@ -52,6 +52,12 @@ jobs:
         with:
           changelog-path: 'tests/Test-Changelog.md'
 
+      - name: Get Changelog Information (Unreleased)
+        uses: ./
+        id: yaclog-show-unreleased
+        with:
+          changelog-path: 'tests/Test-Changelog-Unreleased.md'
+
       - name: Copy Body File
         run:
           cp ${{ steps.yaclog-show.outputs.body-file }} body.md
@@ -62,12 +68,14 @@ jobs:
           steps.yaclog-show.outputs.name == '0.13.0 "Aquarius"' &&
           steps.yaclog-show.outputs.header == '## 0.13.0 "Aquarius" - 1970-04-11 [YANKED]' &&
           steps.yaclog-show.outputs.version == '0.13.0' &&
+          steps.yaclog-show-unreleased.outputs.version == '0.13.1' &&
           endsWith(steps.yaclog-show.outputs.changelog, 'tests/Test-Changelog.md') &&
           hashFiles('body.md') == 'ad49b5c946b7d361db1c3dacc73de4f6222cca6272aab426786de168eede702b'
           )
         run: |
           echo "Action self-test failed!"
-          echo "${{ toJSON(steps.yaclog-show.outputs) }}"
+          echo "yaclog-show:\n ${{ toJSON(steps.yaclog-show.outputs) }}"
+          echo "yaclog-show-unreleased:\n${{ toJSON(steps.yaclog-show.outputs) }}"
           echo "${{ hashFiles('body.md') }}"
           false
 
