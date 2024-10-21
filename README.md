@@ -1,10 +1,10 @@
-# Yaclog 
+# Yaclog: Yet Another Commandline Changelog Tool
 
 [![Documentation Status](https://readthedocs.org/projects/yaclog/badge/?version=latest)](https://yaclog.readthedocs.io/en/)
 [![build](https://github.com/drewcassidy/yaclog/actions/workflows/build.yml/badge.svg)](https://github.com/drewcassidy/yaclog/actions/workflows/build.yml)
 [![PyPI version](https://badge.fury.io/py/yaclog.svg)](https://pypi.org/project/yaclog/)
 
-Yet another changelog command line tool
+Yaclog is a python library and command line tool to make it easier to keep track of changes to your projects. It includes commands for appending new changes to a markdown changelog file, as well as releasing new versions for deployment via git tags.
 
 ![a yak who is a log](https://github.com/drewcassidy/yaclog/raw/main/logo.png)
 
