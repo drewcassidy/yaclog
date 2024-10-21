@@ -2,10 +2,6 @@
 
 Yaclog makes an action available for Github Actions and compatible CI systems.
 
-## The Yaclog Action
-
-To use the Yaclog action add the following to your workflow steps
-
 ```{gha:action}
 :path: .
 ```
