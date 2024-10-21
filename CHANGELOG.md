@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Changed
+
+- Cleaned up github actions and index pages in documentation
+
+
 ## Version 1.5.0 - 2024-10-16
 
 ### Changed
