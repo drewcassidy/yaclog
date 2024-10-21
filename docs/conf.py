@@ -14,6 +14,7 @@ from importlib.metadata import version
 #
 import os
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -37,7 +38,8 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinx_jinja'
+    'sphinx_gha',
+    'sphinx_copybutton',
 ]
 
 myst_heading_anchors = 2
@@ -98,3 +100,9 @@ jinja_globals = {
     'release': release,
     'ref': ref,
 }
+
+# -- Options for sphinx-gha --------------------------------------------------
+
+sphinx_gha_repo_root = str(Path(__file__).parent.parent.absolute())  # docs/..
+sphinx_gha_repo_slug = 'drewcassidy/yaclog'
+

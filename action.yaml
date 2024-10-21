@@ -4,38 +4,40 @@ branding:
   icon: file-text
   color: orange
 
+x-example-name: Get version info
+
 inputs:
   changelog-path:
     description: "Path of the changelog markdown file"
 
   markdown:
-    description: If outputs should be in markdown format or not
+    description: "If the output should be in markdown format or not. Equivalent to the `--markdown` flag"
     default: 'true'
 
   release:
-    description: > 
-      Creates a new release and commits it if set. Directly passed to the arguments of `yaclog release`. 
-      Can be a version number or an increment tag like `--major`, `--minor`, or `--patch`. 
-      The resulting commit and tag will NOT be pushed back to the repo. You must add a step to do this yourself
+    description: |
+      When set, creates a new release and commits it. Directly passed to the arguments of `yaclog release --yes --commit`.
+
+      Can be a version number or an increment tag like `--major`, `--minor`, or `--patch`. The resulting commit and tag will NOT be pushed back to the repo. You must add a step to do this yourself
 
 outputs:
   name:
-    description: "The current version name. For example, `Version 1.3.0`"
+    description: "The most recent version name, equivalent to the output of `yaclog show --name`. For example, `Version 1.3.0`"
     value: ${{ steps.yaclog-show.outputs.name}}
   header:
-    description: "The entire header for the current version. For example, `Version 1.3.0 - 2024-08-08`"
+    description: "The entire header for the most recent version, equivalent to the output of `yaclog show --header`. For example, `Version 1.3.0 - 2024-08-08`"
     value: ${{ steps.yaclog-show.outputs.header }}
   version:
-    description: "The current version number. For example, `1.3.0`"
+    description: "The current version number, equivalent to the output of `yaclog show --version`. For example, `1.3.1`"
     value: ${{ steps.yaclog-show.outputs.version }}
   body-file:
-    description: "Path to a temporary file containing the version body"
+    description: "The path to a temporary file containing the body of the most recent version. Contents equivalent to `yaclog show --body`"
     value: ${{ steps.yaclog-show.outputs.body-file }}
   body_file:
     description: "Alias for body-file"
     value: ${{ steps.yaclog-show.outputs.body-file }}
   changelog:
-    description: "Path to the entire changelog file."
+    description: "The path to the changelog file. Usually `CHANGELOG.md` in the current directory."
     value: ${{ steps.yaclog-show.outputs.changelog }}
 
 runs:
