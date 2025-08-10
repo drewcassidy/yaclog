@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Changed
+
+- Removed SetupTools dependency. This was added in error
+
+
 ## Version 1.5.1 - 2025-08-10
 
 ### Changed

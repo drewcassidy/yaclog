@@ -101,7 +101,3 @@ tomlkit==0.13.2
     # via yaclog (pyproject.toml)
 urllib3==2.2.3
     # via requests
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==80.9.0
-    # via yaclog (pyproject.toml)
