@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file
 ### Changed
 
 - Cleaned up github actions and index pages in documentation
+- Removed support for Python 3.8 since it is EOL
+- Added Setuptools as a dependency due to distutils being removed from the standard library in Python 3.12. See PEP 632.
 
 
 ## Version 1.5.0 - 2024-10-16
