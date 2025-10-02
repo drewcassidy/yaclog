@@ -43,29 +43,38 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: setup-python
+    - name: Setup Python
+      id: setup-python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
         update-environment: 'false'
 
-    - name: Setup Yaclog
+    - name: Filter Version
+      id: filter-version
       shell: bash
       run: |
-        [[ "$ACTION_REF" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_YACLOG="$ACTION_REF"
-        pipx install --python ${{ steps.setup-python.outputs.python-path }} ${{ github.action_path }}
-      env:
-        ACTION_REF: ${{ github.action_ref }}
+        [[ "$ACTION_REF" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] 
+        echo "version=$ACTION_REF" >> GITHUB_OUTPUT $
 
     - name: Create New Release
       shell: bash
       if: ${{ inputs.release }}
-      run: yaclog release --yes --commit ${{ inputs.release }}
+      run: >
+        pipx run --python ${{ steps.setup-python.outputs.python-path }} 
+                 --spec ${{ github.action_path }} 
+                 yaclog release --yes --commit ${{ inputs.release }}
+      env:
+        SETUPTOOLS_SCM_PRETEND_VERSION_FOR_YACLOG: ${{ steps.filter-version.version }}
 
     - name: Get Changelog Information
       id: yaclog-show
       shell: bash
       run: >
-        yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
-        show ---gh-actions ${{ inputs.markdown && '--markdown' }} 
+        pipx run --python ${{ steps.setup-python.outputs.python-path }} 
+                 --spec ${{ github.action_path }}  
+                 yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
+                     show ---gh-actions ${{ inputs.markdown && '--markdown' }} 
         | tee -a "$GITHUB_OUTPUT"
+      env:
+        SETUPTOOLS_SCM_PRETEND_VERSION_FOR_YACLOG: ${{ steps.filter-version.version }}
