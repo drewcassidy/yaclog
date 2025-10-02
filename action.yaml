@@ -54,16 +54,17 @@ runs:
       shell: bash
       if: ${{ inputs.release }}
       run: >
-        pipx run --python ${{ steps.setup-python.outputs.python-path }} 
-                 --spec ${{ github.action_path }} 
-                 yaclog release --yes --commit ${{ inputs.release }}
+        pipx run 
+        --python '${{ steps.setup-python.outputs.python-path }}'
+        --spec '${{ github.action_path }}' 
+        yaclog release --yes --commit ${{ inputs.release }}
 
     - name: Get Changelog Information
       id: yaclog-show
       shell: bash
       run: >
-        pipx run --python ${{ steps.setup-python.outputs.python-path }} 
-                 --spec ${{ github.action_path }}  
-                 yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
-                     show ---gh-actions ${{ inputs.markdown && '--markdown' }} 
-        | tee -a "$GITHUB_OUTPUT"
+        pipx run 
+        --python '${{ steps.setup-python.outputs.python-path }}'
+        --spec '${{ github.action_path }}'
+        yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
+          show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
