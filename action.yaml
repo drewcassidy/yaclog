@@ -67,4 +67,4 @@ runs:
         --python '${{ steps.setup-python.outputs.python-path }}'
         --spec '${{ github.action_path }}'
         yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
-          show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
+        show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
