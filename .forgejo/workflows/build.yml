@@ -6,18 +6,17 @@ on: [ push, pull_request ]
 
 jobs:
   test:
-    name: Test Python Module
-    runs-on: ubuntu-22.04
+    name: Test On Python ${{ matrix.python-version }}
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
-        click-version: [ "click~=8.0" ]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: code.forgejo.org/actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5.1.1
+        uses: code.forgejo.org/actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -25,7 +24,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install flake8
-          python -m pip install ${{ matrix.click-version }}
 
       - name: Lint with flake8
         run: |
@@ -41,10 +39,10 @@ jobs:
         run: python -m unittest -v
 
   test-action:
-    name: Test Github Action
-    runs-on: ubuntu-22.04
+    name: Test Action
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: code.forgejo.org/actions/checkout@v5
 
       - name: Get Changelog Information
         uses: ./
@@ -86,10 +84,10 @@ jobs:
       - test-action
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: code.forgejo.org/actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5.1.1
+        uses: code.forgejo.org/actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -99,45 +97,21 @@ jobs:
       - name: Build a binary wheel and source tarball
         run: python -m build --sdist --wheel --outdir dist/
 
-      - uses: actions/upload-artifact@v4
+      - uses: code.forgejo.org/actions/upload-artifact@v4
         with:
           name: python-distribution
           path: dist/
           compression-level: 0 # already compressed
 
-  publish-pypi:
-    name: Deploy to PyPI
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+  publish:
+    name: Publish Package
+    if: forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')
     needs: build
-    runs-on: ubuntu-22.04
-    environment:
-      name: Publish
-      url: https://pypi.org/project/yaclog/${{ github.ref_name }}
-    permissions:
-      id-token: write
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: python-distribution
-          path: dist/
+      - uses: code.forgejo.org/actions/checkout@v5
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
-  publish-github:
-    name: Deploy to Github
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    needs: build
-    runs-on: ubuntu-22.04
-    environment:
-      name: Publish
-      url: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
+      - uses: code.forgejo.org/actions/download-artifact@v4
         with:
           name: python-distribution
           path: dist/
@@ -146,11 +120,5 @@ jobs:
         id: yaclog-show
         uses: ./ # self-hosting!
 
-      - name: Publish to Github
-        run: >
-          gh release create ${{ github.ref_name }}
-          --notes-file "${{ steps.yaclog-show.outputs.body-file }}"
-          --title "${{ steps.yaclog-show.outputs.name }}"
-          dist/*
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Publish to PyPI
+        uses: github.com/pypa/gh-action-pypi-publish@release/v1
