@@ -13,6 +13,8 @@ jobs:
         python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
 
     steps:
+      - run: ls -la $RUNNER_TOOL_CACHE
+
       - uses: https://code.forgejo.org/actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
@@ -41,8 +43,6 @@ jobs:
     name: Test Action
     runs-on: ubuntu-24.04
     steps:
-      - run: ls -la $RUNNER_TOOL_CACHE
-
       - uses: https://code.forgejo.org/actions/checkout@v5
 
       - name: Get Changelog Information
