@@ -24,6 +24,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          echo $PATH
+          which python
           python -m pip install flake8
 
       - name: Lint with flake8
