@@ -50,6 +50,12 @@ runs:
         python-version: '>=3.10'
         update-environment: 'false'
 
+    - name: Cache
+      uses: actions/cache@v3.4.0
+      with:
+        key: 'yaclog-${{github.action_ref}}'
+        path: ${{github.workspace}}/.cache/yaclog
+
     - name: Create New Release
       shell: bash
       if: ${{ inputs.release }}
@@ -58,6 +64,8 @@ runs:
         --python '${{ steps.setup-python.outputs.python-path }}'
         --spec '${{ github.action_path }}' 
         yaclog release --yes --commit ${{ inputs.release }}
+      env:
+        PIPX_HOME:  ${{github.workspace}}/.cache/yaclog
 
     - name: Get Changelog Information
       id: yaclog-show
@@ -68,3 +76,5 @@ runs:
         --spec '${{ github.action_path }}'
         yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
         show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
+      env:
+        PIPX_HOME:  ${{github.workspace}}/.cache/yaclog
