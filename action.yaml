@@ -50,21 +50,32 @@ runs:
         python-version: '3.13'
         update-environment: 'false'
 
+    - name: Setup Yaclog
+      shell: bash
+      id: setup-yaclog
+      run: |
+        set YACLOG_INSTALL=${{ github.action_path }}
+        if [ ! -d $YACLOG_INSTALL ]; then
+          mkdir -p $YACLOG_INSTALL
+          ${{ steps.setup-python.outputs.python-path }} -m pip install -r ${{ format('{0}/requirements.txt', github.action_path) }} --target $YACLOG_INSTALL
+        fi
+        echo "python-install=$YACLOG_INSTALL" >> $GITHUB_OUTPUT
+
     - name: Create New Release
       shell: bash
       if: ${{ inputs.release }}
       run: >
-        pipx run 
-        --python '${{ steps.setup-python.outputs.python-path }}'
-        --spec '${{ github.action_path }}' 
-        yaclog release --yes --commit ${{ inputs.release }}
+        ${{ steps.setup-python.outputs.python-path }} -m yaclog.cli
+        release --yes --commit ${{ inputs.release }}
+      env:
+        PYTHON_HOME: ${{ steps.setup-yaclog.outputs.yaclog-install }}
 
     - name: Get Changelog Information
       id: yaclog-show
       shell: bash
       run: >
-        pipx run 
-        --python '${{ steps.setup-python.outputs.python-path }}'
-        --spec '${{ github.action_path }}'
-        yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
+        ${{ steps.setup-python.outputs.python-path }} -m yaclog.cli
+        ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
         show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
+      env:
+        PYTHON_HOME: ${{ steps.setup-yaclog.outputs.yaclog-install }}
