@@ -53,7 +53,7 @@ runs:
     - name: Cache
       uses: actions/cache@v3.4.0
       with:
-        key: "yaclog-${{ github.action_ref || github.ref_name }}"
+        key: "yaclog-${{ github.action_ref || github.workflow_sha }}"
         path: ${{github.workspace}}/.cache/yaclog
 
     - name: Create New Release
