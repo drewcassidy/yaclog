@@ -54,12 +54,7 @@ runs:
       shell: bash
       id: setup-yaclog
       run: |
-        set YACLOG_INSTALL=${{ github.action_path }}
-        if [ ! -d $YACLOG_INSTALL ]; then
-          mkdir -p $YACLOG_INSTALL
-          ${{ steps.setup-python.outputs.python-path }} -m pip install -r ${{ format('{0}/requirements.txt', github.action_path) }} --target $YACLOG_INSTALL
-        fi
-        echo "python-install=$YACLOG_INSTALL" >> $GITHUB_OUTPUT
+        ${{ steps.setup-python.outputs.python-path }} -m pip install -r ${{ format('{0}/requirements.txt', github.action_path) }} --target ${{ github.action_path }}
 
     - name: Create New Release
       shell: bash
@@ -68,7 +63,7 @@ runs:
         ${{ steps.setup-python.outputs.python-path }} -m yaclog.cli
         release --yes --commit ${{ inputs.release }}
       env:
-        PYTHON_HOME: ${{ steps.setup-yaclog.outputs.yaclog-install }}
+        PYTHON_HOME: ${{ github.action_path }}
 
     - name: Get Changelog Information
       id: yaclog-show
@@ -78,4 +73,4 @@ runs:
         ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
         show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
       env:
-        PYTHON_HOME: ${{ steps.setup-yaclog.outputs.yaclog-install }}
+        PYTHON_HOME: ${{ github.action_path }}
