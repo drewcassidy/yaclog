@@ -39,13 +39,20 @@ class VersionEntry:
     """
 
     _header_regex = re.compile(  # THE LANGUAGE OF THE GODS
-        r"##\s+(?P<name>.*?)(?:\s+-)?(?:\s+(?P<date>\d{4}-\d{2}-\d{2}))?(?P<tags>(?:\s+\[[^]]*?])*)\s*$")
+        r"##\s+(?P<name>.*?)(?:\s+-)?(?:\s+(?P<date>\d{4}-\d{2}-\d{2}))?(?P<tags>(?:\s+\[[^]]*?])*)\s*$"
+    )
 
-    _tag_regex = re.compile(r'\[(?P<tag>[^]]*?)]')
+    _tag_regex = re.compile(r"\[(?P<tag>[^]]*?)]")
 
-    def __init__(self, name: str = 'Unreleased',
-                 date: Optional[datetime.date] = None, tags: Optional[List[str]] = None,
-                 link: Optional[str] = None, link_id: Optional[str] = None, line_no: Optional[int] = None):
+    def __init__(
+        self,
+        name: str = "Unreleased",
+        date: Optional[datetime.date] = None,
+        tags: Optional[List[str]] = None,
+        link: Optional[str] = None,
+        link_id: Optional[str] = None,
+        line_no: Optional[int] = None,
+    ):
         """
         :param str name: The version's name
         :param Optional[datetime.date] date: When the version was released
@@ -75,7 +82,7 @@ class VersionEntry:
         This is not guaranteed to be correct after the changelog has been modified, 
         and it has no effect on the written file"""
 
-        self.sections: Dict[str, List[str]] = {'': []}
+        self.sections: Dict[str, List[str]] = {"": []}
         """The dictionary of change entries in the version, organized by section. 
         Uncategorized changes have a section of an empty string."""
 
@@ -93,20 +100,22 @@ class VersionEntry:
         match = cls._header_regex.match(header)
         assert match, f'failed to parse version header: "{header}"'
 
-        version.name, version.link, version.link_id = markdown.strip_link(match['name'])
+        version.name, version.link, version.link_id = markdown.strip_link(match["name"])
 
-        if match['date']:
+        if match["date"]:
             try:
-                version.date = datetime.date.fromisoformat(match['date'])
+                version.date = datetime.date.fromisoformat(match["date"])
             except ValueError:
-                return cls(name=header.lstrip('#').strip(), line_no=line_no)
+                return cls(name=header.lstrip("#").strip(), line_no=line_no)
 
-        if match['tags']:
-            version.tags = [m['tag'].upper() for m in cls._tag_regex.finditer(match['tags'])]
+        if match["tags"]:
+            version.tags = [
+                m["tag"].upper() for m in cls._tag_regex.finditer(match["tags"])
+            ]
 
         return version
 
-    def add_entry(self, contents: str, section: str = '') -> None:
+    def add_entry(self, contents: str, section: str = "") -> None:
         """
         Add a new entry to the version
 
@@ -134,15 +143,15 @@ class VersionEntry:
         for section, entries in self.sections.items():
             if section:
                 if md:
-                    prefix = '### '
+                    prefix = "### "
                     title = section.title()
                 else:
-                    prefix = ''
+                    prefix = ""
                     title = section.upper()
 
                 if color:
-                    prefix = click.style(prefix, fg='bright_black')
-                    title = click.style(title, fg='cyan', bold=True)
+                    prefix = click.style(prefix, fg="bright_black")
+                    title = click.style(title, fg="cyan", bold=True)
 
                 segments.append(prefix + title)
 
@@ -161,30 +170,30 @@ class VersionEntry:
         """
 
         if md:
-            prefix = '## '
+            prefix = "## "
         else:
-            prefix = ''
+            prefix = ""
 
         segments = []
 
         if self.link and md:
-            segments.append(f'[{self.name}]')
+            segments.append(f"[{self.name}]")
         else:
             segments.append(self.name)
 
         if self.date or len(self.tags) > 0:
-            segments.append('-')
+            segments.append("-")
 
         if self.date:
             segments.append(self.date.isoformat())
 
-        segments += [f'[{t.upper()}]' for t in self.tags]
+        segments += [f"[{t.upper()}]" for t in self.tags]
 
-        title = ' '.join(segments)
+        title = " ".join(segments)
 
         if color:
-            prefix = click.style(prefix, fg='bright_black')
-            title = click.style(title, fg='blue', bold=True)
+            prefix = click.style(prefix, fg="bright_black")
+            title = click.style(title, fg="blue", bold=True)
 
         return prefix + title
 
@@ -200,7 +209,7 @@ class VersionEntry:
         contents = self.header(md, color)
         body = self.body(md, color)
         if body:
-            contents += '\n\n' + body
+            contents += "\n\n" + body
         return contents
 
     @property
@@ -222,8 +231,11 @@ class Changelog:
     A serialized representation of a Markdown changelog made up of a preamble, multiple versions, and a link table.
     """
 
-    def __init__(self, path=None,
-                 preamble: str = "# Changelog\n\nAll notable changes to this project will be documented in this file"):
+    def __init__(
+        self,
+        path=None,
+        preamble: str = "# Changelog\n\nAll notable changes to this project will be documented in this file",
+    ):
         """
         Contents will be automatically read from disk if the file exists
 
@@ -260,29 +272,29 @@ class Changelog:
             path = self.path
 
         # Read file
-        with open(path, 'r') as fp:
+        with open(path, "r") as fp:
             tokens, links = markdown.tokenize(fp.read())
 
-        section = ''
+        section = ""
         versions = []
         preamble_segments = []
 
         for token in tokens:
-            text = '\n'.join(token.lines)
+            text = "\n".join(token.lines)
 
-            if token.kind == 'h2':
+            if token.kind == "h2":
                 # start of a version
                 versions.append(VersionEntry.from_header(text, line_no=token.line_no))
-                section = ''
+                section = ""
 
             elif len(versions) == 0:
                 # we haven't encountered any version headers yet,
                 # so its best to just add this line to the preamble
                 preamble_segments.append(text)
 
-            elif token.kind == 'h3':
+            elif token.kind == "h3":
                 # start of a version section
-                section = text.strip('#').strip()
+                section = text.strip("#").strip()
                 if section not in versions[-1].sections.keys():
                     versions[-1].sections[section] = []
 
@@ -292,7 +304,7 @@ class Changelog:
 
         # handle links
         for version in versions:
-            if match := re.fullmatch(r'\[(.*)]', version.name):
+            if match := re.fullmatch(r"\[(.*)]", version.name):
                 # ref-matched link
                 link_id = match[1].lower()
                 if link_id in links:
@@ -330,13 +342,13 @@ class Changelog:
             if version.link:
                 v_links[version.name.lower()] = version.link
 
-            segments.append(version.text() + '\n')
+            segments.append(version.text() + "\n")
 
-        segments += [f'[{link_id}]: {link}' for link_id, link in v_links.items()]
+        segments += [f"[{link_id}]: {link}" for link_id, link in v_links.items()]
 
         text = markdown.join(segments)
 
-        with open(path, 'w') as fp:
+        with open(path, "w") as fp:
             fp.write(text)
 
     def add_version(self, index: int = 0, *args, **kwargs) -> VersionEntry:
@@ -351,8 +363,12 @@ class Changelog:
         self.versions.insert(index, version := VersionEntry(*args, **kwargs))
         return version
 
-    def current_version(self, released: Optional[bool] = None, new_version: bool = False,
-                        new_version_name: str = 'Unreleased') -> VersionEntry:
+    def current_version(
+        self,
+        released: Optional[bool] = None,
+        new_version: bool = False,
+        new_version_name: str = "Unreleased",
+    ) -> VersionEntry:
         """
         Get the current version from the changelog
 
@@ -375,9 +391,11 @@ class Changelog:
             return self.add_version(name=new_version_name)
         else:
             if released is not None:
-                raise ValueError(f'Changelog has no current version matching released={released}')
+                raise ValueError(
+                    f"Changelog has no current version matching released={released}"
+                )
             else:
-                raise ValueError('Changelog has no current version')
+                raise ValueError("Changelog has no current version")
 
     def get_version(self, name: Optional[str] = None) -> VersionEntry:
         """
@@ -391,7 +409,7 @@ class Changelog:
         for version in self.versions:
             if name in version.name or name is None:
                 return version
-        raise KeyError(f'Version {name} not found in changelog')
+        raise KeyError(f"Version {name} not found in changelog")
 
     def __getitem__(self, item: str) -> VersionEntry:
         return self.get_version(item)

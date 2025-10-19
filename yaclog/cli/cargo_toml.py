@@ -25,9 +25,9 @@ def set_version(path, version):
     :param path: path-like file location
     :param version: version string to overwrite with
     """
-    with open(path, 'r+') as fp:
+    with open(path, "r+") as fp:
         toml = parse(fp.read())
-        toml['package']['version'] = version
+        toml["package"]["version"] = version
         fp.seek(0)
         fp.write(dumps(toml))
         fp.truncate()

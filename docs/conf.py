@@ -16,16 +16,16 @@ import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Yaclog'
-copyright = '2021, Andrew Cassidy'
-author = 'Andrew Cassidy'
-release = version('yaclog')
-version = '.'.join(release.split('.')[:3])
-ref = version if len(release.split('.')) == 3 else 'main'
+project = "Yaclog"
+copyright = "2021, Andrew Cassidy"
+author = "Andrew Cassidy"
+release = version("yaclog")
+version = ".".join(release.split(".")[:3])
+ref = version if len(release.split(".")) == 3 else "main"
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,56 +33,53 @@ ref = version if len(release.split('.')) == 3 else 'main'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'myst_parser',
-    'sphinx_click',
-    'sphinx_rtd_theme',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx_gha',
-    'sphinx_copybutton',
+    "myst_parser",
+    "sphinx_click",
+    "sphinx_rtd_theme",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx_gha",
+    "sphinx_copybutton",
 ]
 
 myst_heading_anchors = 2
-myst_enable_extensions = [
-    "colon_fence"
-]
+myst_enable_extensions = ["colon_fence"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-default_role = 'py:obj'
+default_role = "py:obj"
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
-html_logo = 'docs_logo.png'
-html_favicon = 'favicon.ico'
+html_theme = "sphinx_rtd_theme"
+html_logo = "docs_logo.png"
+html_favicon = "favicon.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-html_css_files = ['css/custom.css']
+html_static_path = ["_static"]
+html_css_files = ["css/custom.css"]
 
 # -- Options for Autodoc -----------------------------------------------------
 
 add_module_names = False
 autodoc_docstring_signature = True
-autoclass_content = 'both'
+autoclass_content = "both"
 
 autodoc_default_options = {
-    'member-order': 'bysource',
-    'undoc-members': True,
+    "member-order": "bysource",
+    "undoc-members": True,
 }
-
 
 
 # -- Options for Intersphinx -------------------------------------------------
@@ -91,18 +88,17 @@ autodoc_default_options = {
 # should be linked to in this documentation.
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'packaging': ('https://packaging.pypa.io/en/latest/', None),
+    "python": ("https://docs.python.org/3", None),
+    "packaging": ("https://packaging.pypa.io/en/latest/", None),
 }
 
 jinja_globals = {
-    'version': version,
-    'release': release,
-    'ref': ref,
+    "version": version,
+    "release": release,
+    "ref": ref,
 }
 
 # -- Options for sphinx-gha --------------------------------------------------
 
 sphinx_gha_repo_root = str(Path(__file__).parent.parent.absolute())  # docs/..
-sphinx_gha_repo_slug = 'drewcassidy/yaclog'
-
+sphinx_gha_repo_slug = "drewcassidy/yaclog"

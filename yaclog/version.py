@@ -40,7 +40,9 @@ def extract_version(version_str: str) -> Tuple[Optional[Version], int, int]:
     return (Version(match[0]),) + match.span()
 
 
-def increment_version(version_str: str, rel_seg: int = None, pre_seg: str = None) -> str:
+def increment_version(
+    version_str: str, rel_seg: int = None, pre_seg: str = None
+) -> str:
     """
     Increment the :pep:`440` version number in a string
 
@@ -60,11 +62,15 @@ def increment_version(version_str: str, rel_seg: int = None, pre_seg: str = None
     if rel_seg is not None:
         if len(release) <= rel_seg:
             release += (0,) * (1 + rel_seg - len(release))
-        release = release[0:rel_seg] + (release[rel_seg] + 1,) + (0,) * (len(release) - rel_seg - 1)
+        release = (
+            release[0:rel_seg]
+            + (release[rel_seg] + 1,)
+            + (0,) * (len(release) - rel_seg - 1)
+        )
         pre = None
 
     if pre_seg is not None:
-        if pre_seg == '':  # full release, clear prerelease field
+        if pre_seg == "":  # full release, clear prerelease field
             pre = None
         elif pre and pre[0] == pre_seg:  # increment current prerelease type
             pre = (pre_seg, pre[1] + 1)
@@ -72,7 +78,7 @@ def increment_version(version_str: str, rel_seg: int = None, pre_seg: str = None
             pre = (pre_seg, 1)  # set prerelease field
 
     new_v = join_version(epoch, release, pre, post, dev, local)
-    return version_str[0:span[0]] + new_v + version_str[span[1]:]
+    return version_str[0 : span[0]] + new_v + version_str[span[1] :]
 
 
 def join_version(epoch, release, pre, post, dev, local) -> str:
