@@ -1,4 +1,3 @@
-import os
 from yaclog.changelog import Changelog
 
 

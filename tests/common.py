@@ -1,5 +1,4 @@
 import datetime
-import os.path
 import textwrap
 
 import yaclog.changelog
