@@ -43,28 +43,34 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup Python
-      id: setup-python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '>=3.10'
-        update-environment: 'false'
+    - name: Setup uv
+      shell: bash
+      run: | 
+        if ! command -v uv >/dev/null 2>&1; then
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+        else
+          echo "uv already installed"
+        fi
+      env:
+        UV_UNMANAGED_INSTALL: /usr/local/bin
 
     - name: Create New Release
       shell: bash
       if: ${{ inputs.release }}
       run: >
-        pipx run 
-        --python '${{ steps.setup-python.outputs.python-path }}'
-        --spec '${{ github.action_path }}' 
-        yaclog release --yes --commit ${{ inputs.release }}
+        uv run -m yaclog.cli release --yes --commit ${{ inputs.release }}
+      env:
+        UV_PROJECT: ${{ github.action_path }}
+        UV_LINK_MODE: copy
+        UV_FROZEN: true
 
     - name: Get Changelog Information
       id: yaclog-show
       shell: bash
       run: >
-        pipx run 
-        --python '${{ steps.setup-python.outputs.python-path }}'
-        --spec '${{ github.action_path }}'
-        yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
+        uv run -m yaclog.cli ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
         show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
+      env:
+        UV_PROJECT: ${{ github.action_path }}
+        UV_LINK_MODE: copy
+        UV_FROZEN: true

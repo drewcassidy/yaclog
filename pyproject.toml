@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: Utilities"
 ]
 
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 dependencies = [
     "Click >= 8.0",
     "GitPython >= 3",
@@ -40,12 +40,16 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 docs = [
-    "Sphinx >= 3.5",
+    "Sphinx >= 8.1",
     "sphinx-click >= 2.7",
     "sphinx-rtd-theme",
     "myst-parser >= 0.14",
     "sphinx-gha",
     "sphinx-copybutton",
+]
+
+test = [
+    "pytest"
 ]
 
 [project.scripts]

@@ -5,40 +5,8 @@ name: build
 on: [ push, pull_request ]
 
 jobs:
-  test:
-    name: Test On Python ${{ matrix.python-version }}
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
-
-    steps:
-      - uses: https://code.forgejo.org/actions/checkout@v5
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: https://code.forgejo.org/actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install flake8
-
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-      - name: Install module
-        run: python -m pip install .
-
-      - name: Run Unit Tests
-        run: python -m unittest -v
-
   test-action:
-    name: Test Action
+    name: Test action
     runs-on: ubuntu-24.04
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v5
@@ -76,48 +44,119 @@ jobs:
           echo "${{ hashFiles('body.md') }}"
           false
 
-  build:
-    name: Build Distribution
-    needs:
-      - test
-      - test-action
-    runs-on: ubuntu-22.04
+  test:
+    name: Test on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+    env:
+      UV_LINK_MODE: copy
+
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v5
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@v5
 
       - name: Set up Python
         uses: https://code.forgejo.org/actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install pypa/build
-        run: python -m pip install build --user
+      - name: Setup uv
+        shell: bash
+        run: | 
+          if ! command -v uv >/dev/null 2>&1; then
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+          else
+            echo "uv already installed"
+          fi
+        env:
+          UV_UNMANAGED_INSTALL: /usr/local/bin
 
-      - name: Build a binary wheel and source tarball
-        run: python -m build --sdist --wheel --outdir dist/
+      - name: Lint with ruff
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          uvx ruff check --select=E9,F63,F7,F82
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          uvx ruff check --exit-zero
 
-      - uses: https://code.forgejo.org/forgejo/upload-artifact@v4
-        with:
-          name: python-distribution
-          path: dist/
-          compression-level: 0 # already compressed
+      - name: Run unit tests
+        run: |
+          uv venv
+          uv pip install .[test]
+          uv run -m pytest --verbose
 
   publish:
-    name: Publish Package
-    if: forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')
-    needs: build
+    name: Build and Publish
+    needs:
+      - test
+      - test-action
     runs-on: ubuntu-24.04
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v5
-
-      - uses: https://code.forgejo.org/forgejo/download-artifact@v4
-        with:
-          name: python-distribution
-          path: dist/
 
       - name: Get Changelog Information
         id: yaclog-show
         uses: ./ # self-hosting!
 
-      - name: Publish to PyPI
-        uses: github.com/pypa/gh-action-pypi-publish@release/v1
+      - name: Setup uv
+        shell: bash
+        run: |
+          if ! command -v uv >/dev/null 2>&1; then
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+          else
+            echo "uv already installed"
+          fi
+        env:
+          UV_UNMANAGED_INSTALL: /usr/local/bin
+
+      - name: Setup tea
+        shell: bash
+        run: |
+          set -u
+          if ! command tea 2>/dev/null; then
+            TEA_BIN=/usr/local/bin/tea
+            TEA_VERSION=0.11.0
+            case $RUNNER_ARCH in
+              ARM64)
+                ARCH=arm64
+              ;;
+              X64)
+                ARCH=amd64
+              ;;
+            esac
+            curl -sL https://dl.gitea.io/tea/$TEA_VERSION/tea-$TEA_VERSION-linux-$ARCH -o $TEA_BIN
+            chmod +x $TEA_BIN
+          fi
+          tea login add --url ${{ forge.server_url }} --token ${{ secrets.FORGEJO_TOKEN }}
+
+      - name: Build
+        run: uv build
+
+      - uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        with:
+          name: python-distribution.zip
+          path: dist/
+          compression-level: 0 # already compressed
+
+      - name: Upload to PyPI
+        run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' }}
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+      - name: Upload to Forgejo
+        run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' }}
+        env:
+          UV_PUBLISH_USERNAME: ${{ forge.repository_owner }}
+          UV_PUBLISH_PASSWORD: ${{ secrets.FORGEJO_TOKEN }}
+          UV_PUBLISH_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_owner }}/pypi
+
+      - name: Create Release
+        if: forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')
+        run: >
+          tea releases create 
+          --repo ${{ forge.repository }}
+          --tag ${{ forge.ref_name }} 
+          --title ${{ steps.yaclog-show.outputs.name }}
+          --note-file ${{ steps.yaclog-show.outputs.body-file }}
+          --asset dist/*.whl
