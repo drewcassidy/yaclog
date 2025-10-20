@@ -11,19 +11,19 @@ name = "yaclog"
 description = "Yet another changelog CLI tool."
 readme = "README.md"
 authors = [{ name = "Andrew Cassidy", email = "drewcassidy@me.com" }]
+license = "Apache-2.0"
 keywords = ["changelog", "commandline", "markdown"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Text Processing :: Markup :: Markdown",
     "Topic :: Software Development :: Version Control :: Git",
     "Topic :: Utilities"
@@ -56,8 +56,8 @@ test = [
 yaclog = "yaclog.cli.__main__:cli"
 
 [project.urls]
-Source = "https://github.com/drewcassidy/yaclog"
-Changelog = "https://github.com/drewcassidy/yaclog/blob/main/CHANGELOG.md"
+Source = "https://git.offworldcolonies.nexus/drewcassidy/yaclog"
+Changelog = "https://yaclog.readthedocs.io/en/stable/changelog.html"
 Docs = "https://yaclog.readthedocs.io/"
 
 [tool.setuptools_scm]
