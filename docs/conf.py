@@ -101,4 +101,4 @@ jinja_globals = {
 # -- Options for sphinx-gha --------------------------------------------------
 
 sphinx_gha_repo_root = str(Path(__file__).parent.parent.absolute())  # docs/..
-sphinx_gha_repo_slug = "drewcassidy/yaclog"
+sphinx_gha_repo_slug = "https://git.offworldcolonies.nexus/drewcassidy/yaclog"

@@ -1,6 +1,6 @@
-# Github Actions
+# CI Actions
 
-Yaclog makes an action available for Github Actions and compatible CI systems.
+Yaclog makes an action available for Forgejo Actions and compatible CI systems like Gitea and Github actions.
 
 ```{gha:action}
 :path: .
