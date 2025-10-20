@@ -15,6 +15,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import datetime
+from datetime import timezone
 import os.path
 from sys import stdout
 
@@ -399,7 +400,7 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo, yes, 
             )
 
         cur_version.name = new_name
-        cur_version.date = datetime.datetime.utcnow().date()
+        cur_version.date = datetime.datetime.now(timezone.utc).date()
 
         obj.write()
         click.echo(
