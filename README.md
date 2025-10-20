@@ -1,5 +1,6 @@
 # Yaclog: Yet Another Commandline Changelog Tool
 
+[![Documentation Status](https://readthedocs.org/projects/yaclog/badge/?version=latest)](https://yaclog.readthedocs.io/en/)
 [![CI Status](https://git.offworldcolonies.nexus/drewcassidy/yaclog/badges/workflows/build.yml/badge.svg?branch=main&label=build)](https://git.offworldcolonies.nexus/drewcassidy/yaclog/actions)
 [![PyPI version](https://badge.fury.io/py/yaclog.svg)](https://pypi.org/project/yaclog/)
 
