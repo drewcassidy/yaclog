@@ -57,8 +57,7 @@ yaclog = "yaclog.cli.__main__:cli"
 
 [project.urls]
 Source = "https://git.offworldcolonies.nexus/drewcassidy/yaclog"
-Changelog = "https://yaclog.readthedocs.io/en/stable/changelog.html"
-Docs = "https://yaclog.readthedocs.io/"
+Changelog = "https://git.offworldcolonies.nexus/drewcassidy/yaclog/src/branch/main/CHANGELOG.md"
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0"

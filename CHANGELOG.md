@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Removed
+
+- Removed official support for Python 3.9 now that it has reached end of life
+
+### Changed
+
+- Migrated project to https://git.offworldcolonies.nexus/drewcassidy/yaclog
+- Minor code cleanup
+- Redesigned action.yaml. It should now work correctly on forgejo/gitea actions in addition to github actions
+
+
 ## Version 1.5.2 - 2025-08-10
 
 ### Changed
