@@ -15,6 +15,10 @@ All notable changes to this project will be documented in this file
 - Redesigned action.yaml. It should now work correctly on forgejo/gitea actions in addition to github actions
 - Fixed incorrect license in source files
 
+### Added
+
+- Added support for running the yaclog CLI through `python -m yaclog`/`uv run -m yaclog` instead of needing to use the `yaclog.cli` module directly
+
 
 ## Version 1.5.2 - 2025-08-10
 

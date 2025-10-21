@@ -58,7 +58,7 @@ runs:
       shell: bash
       if: ${{ inputs.release }}
       run: >
-        uv run -m yaclog.cli release --yes --commit ${{ inputs.release }}
+        uv run -m yaclog release --yes --commit ${{ inputs.release }}
       env:
         UV_PROJECT: ${{ github.action_path }}
         UV_LINK_MODE: copy
@@ -68,7 +68,7 @@ runs:
       id: yaclog-show
       shell: bash
       run: >
-        uv run -m yaclog.cli ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
+        uv run -m yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
         show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
       env:
         UV_PROJECT: ${{ github.action_path }}
