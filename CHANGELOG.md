@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file
 
-## Unreleased
+## Version 1.6.0 - 2025-10-21
 
 ### Removed
 
