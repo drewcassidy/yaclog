@@ -9,7 +9,8 @@ jobs:
     name: Test action
     runs-on: ubuntu-24.04
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v5
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@v5
 
       - name: Get Changelog Information
         uses: ./
@@ -93,7 +94,10 @@ jobs:
       - test-action
     runs-on: ubuntu-24.04
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v5
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Get Changelog Information
         id: yaclog-show
