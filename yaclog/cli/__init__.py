@@ -34,7 +34,7 @@ from yaclog.changelog import Changelog
 )
 @click.version_option()
 @click.pass_context
-def cli(ctx, path):
+def main(ctx, path):
     """Manipulate markdown changelog files."""
     if not (ctx.invoked_subcommand == "init") and not os.path.exists(path):
         # file does not exist and this isn't the init command
@@ -45,7 +45,7 @@ def cli(ctx, path):
     ctx.obj = yaclog.read(path)
 
 
-@cli.command()
+@main.command()
 @click.pass_obj
 def init(obj: Changelog):
     """Create a new changelog file."""
@@ -60,7 +60,7 @@ def init(obj: Changelog):
     click.echo(f"Created new changelog file at {obj.path}")
 
 
-@cli.command("format")  # don't accidentally hide the `format` python builtin
+@main.command("format")  # don't accidentally hide the `format` python builtin
 @click.pass_obj
 def reformat(obj: Changelog):
     """Reformat the changelog file."""
@@ -69,7 +69,7 @@ def reformat(obj: Changelog):
 
 
 # noinspection PyShadowingNames
-@cli.command(short_help="Show changes from the changelog file")
+@main.command(short_help="Show changes from the changelog file")
 @click.option(
     "--all", "-a", "all_versions", is_flag=True, help="Show the entire changelog."
 )
@@ -164,7 +164,7 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
     click.echo(sep.join([str_func(v, kwargs) for v in versions]))
 
 
-@cli.command(short_help="Modify version tags")
+@main.command(short_help="Modify version tags")
 @click.option(
     "--add/--delete", "-a/-d", default=True, is_flag=True, help="Add or delete tags"
 )
@@ -201,7 +201,7 @@ def tag(obj: Changelog, add, tag_name: str, version_name: str):
     obj.write()
 
 
-@cli.command(short_help="Add entries to the changelog.")
+@main.command(short_help="Add entries to the changelog.")
 @click.option(
     "--bullet",
     "-b",
@@ -260,7 +260,7 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     click.echo(message)
 
 
-@cli.command(short_help="Release versions.")
+@main.command(short_help="Release versions.")
 @click.option(
     "-M",
     "--major",

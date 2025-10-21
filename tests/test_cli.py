@@ -6,7 +6,7 @@ import git
 from click.testing import CliRunner
 
 import yaclog.changelog
-from yaclog.cli.__main__ import cli
+from yaclog.cli import main
 
 
 def check_result(runner, result, success: bool = True):
@@ -26,7 +26,7 @@ class TestCreation(unittest.TestCase):
         err_str = "THIS FILE WILL BE OVERWRITTEN"
 
         with runner.isolated_filesystem():
-            result = runner.invoke(cli, ["init"])
+            result = runner.invoke(main, ["init"])
             check_result(self, result)
             self.assertTrue(
                 os.path.exists(os.path.abspath(location)),
@@ -49,7 +49,7 @@ class TestCreation(unittest.TestCase):
             with open(location, "w") as fp:
                 fp.write(err_str)
 
-            result = runner.invoke(cli, ["init"], input="y\n")
+            result = runner.invoke(main, ["init"], input="y\n")
             check_result(self, result)
             self.assertTrue(
                 os.path.exists(os.path.abspath(location)),
@@ -70,7 +70,7 @@ class TestCreation(unittest.TestCase):
         location = "A different file.md"
 
         with runner.isolated_filesystem():
-            result = runner.invoke(cli, ["--path", location, "init"])
+            result = runner.invoke(main, ["--path", location, "init"])
             check_result(self, result)
             self.assertTrue(
                 os.path.exists(os.path.abspath(location)),
@@ -87,7 +87,7 @@ class TestCreation(unittest.TestCase):
         runner = CliRunner()
 
         with runner.isolated_filesystem():
-            result = runner.invoke(cli, ["show"])
+            result = runner.invoke(main, ["show"])
             check_result(self, result, False)
             self.assertIn("does not exist", result.output)
 
@@ -109,17 +109,17 @@ class TestTagging(unittest.TestCase):
             in_log.versions[1].name = "0.9.0"
             in_log.write()
 
-            result = runner.invoke(cli, ["tag", "tag1"])
+            result = runner.invoke(main, ["tag", "tag1"])
             check_result(self, result)
 
-            result = runner.invoke(cli, ["tag", "tag2", "0.9.0"])
+            result = runner.invoke(main, ["tag", "tag2", "0.9.0"])
             check_result(self, result)
 
             out_log = yaclog.read(location)
             self.assertEqual(out_log.versions[0].tags, ["TAG1"])
             self.assertEqual(out_log.versions[1].tags, ["TAG2"])
 
-            result = runner.invoke(cli, ["tag", "tag3", "0.8.0"])
+            result = runner.invoke(main, ["tag", "tag3", "0.8.0"])
             check_result(self, result, False)
 
     def test_tag_deletion(self):
@@ -142,20 +142,20 @@ class TestTagging(unittest.TestCase):
             in_log.versions[1].tags = ["TAG2"]
             in_log.write()
 
-            result = runner.invoke(cli, ["tag", "-d", "tag2", "0.8.0"])
+            result = runner.invoke(main, ["tag", "-d", "tag2", "0.8.0"])
             check_result(self, result, False)
 
-            result = runner.invoke(cli, ["tag", "-d", "tag3", "0.9.0"])
+            result = runner.invoke(main, ["tag", "-d", "tag3", "0.9.0"])
             check_result(self, result, False)
 
-            result = runner.invoke(cli, ["tag", "-d", "tag1"])
+            result = runner.invoke(main, ["tag", "-d", "tag1"])
             check_result(self, result)
 
             out_log = yaclog.read(location)
             self.assertEqual(out_log.versions[0].tags, [])
             self.assertEqual(out_log.versions[1].tags, ["TAG2"])
 
-            result = runner.invoke(cli, ["tag", "-d", "tag2", "0.9.0"])
+            result = runner.invoke(main, ["tag", "-d", "tag2", "0.9.0"])
             check_result(self, result)
 
             out_log = yaclog.read(location)
@@ -170,68 +170,68 @@ class TestRelease(unittest.TestCase):
         location = "CHANGELOG.md"
 
         with runner.isolated_filesystem():
-            runner.invoke(cli, ["init"])  # create the changelog
-            runner.invoke(cli, ["entry", "-b", "entry number 1"])
+            runner.invoke(main, ["init"])  # create the changelog
+            runner.invoke(main, ["entry", "-b", "entry number 1"])
 
-            result = runner.invoke(cli, ["release", "1.0.0"])
+            result = runner.invoke(main, ["release", "1.0.0"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "1.0.0")
             self.assertIn("1.0.0", result.output)
 
-            runner.invoke(cli, ["entry", "-b", "entry number 2"])
+            runner.invoke(main, ["entry", "-b", "entry number 2"])
 
-            result = runner.invoke(cli, ["release", "-p"])
+            result = runner.invoke(main, ["release", "-p"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "1.0.1")
             self.assertIn("1.0.1", result.output)
 
-            result = runner.invoke(cli, ["release", "-y", "-s", 2])
+            result = runner.invoke(main, ["release", "-y", "-s", 2])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "1.0.2")
             self.assertIn("1.0.2", result.output)
 
-            runner.invoke(cli, ["entry", "-b", "entry number 3"])
+            runner.invoke(main, ["entry", "-b", "entry number 3"])
 
-            result = runner.invoke(cli, ["release", "-m"])
+            result = runner.invoke(main, ["release", "-m"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "1.1.0")
             self.assertIn("1.1.0", result.output)
 
-            runner.invoke(cli, ["entry", "-b", "entry number 4"])
+            runner.invoke(main, ["entry", "-b", "entry number 4"])
 
-            result = runner.invoke(cli, ["release", "-M"])
+            result = runner.invoke(main, ["release", "-M"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "2.0.0")
             self.assertIn("2.0.0", result.output)
 
-            runner.invoke(cli, ["entry", "-b", "entry number 5"])
+            runner.invoke(main, ["entry", "-b", "entry number 5"])
 
-            result = runner.invoke(cli, ["release", "-Ma"])
+            result = runner.invoke(main, ["release", "-Ma"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "3.0.0a1")
             self.assertIn("3.0.0a1", result.output)
 
-            result = runner.invoke(cli, ["release", "-b"])
+            result = runner.invoke(main, ["release", "-b"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "3.0.0b1")
             self.assertIn("3.0.0b1", result.output)
 
-            result = runner.invoke(cli, ["release", "-r"])
+            result = runner.invoke(main, ["release", "-r"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "3.0.0rc1")
             self.assertIn("3.0.0rc1", result.output)
 
-            result = runner.invoke(cli, ["release", "-r"])
+            result = runner.invoke(main, ["release", "-r"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "3.0.0rc2")
             self.assertIn("3.0.0rc1", result.output)
 
-            result = runner.invoke(cli, ["release", "-f"])
+            result = runner.invoke(main, ["release", "-f"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "3.0.0")
             self.assertIn("3.0.0", result.output)
 
-            result = runner.invoke(cli, ["release", "-p", "-n"])
+            result = runner.invoke(main, ["release", "-p", "-n"])
             check_result(self, result)
             self.assertEqual(yaclog.read(location).versions[0].name, "3.0.1")
             self.assertEqual(yaclog.read(location).versions[1].name, "3.0.0")
@@ -250,10 +250,10 @@ class TestRelease(unittest.TestCase):
                 cw.set_value("user", "email", "unit-tester@example.com")
                 cw.set_value("user", "name", "unit-tester")
 
-            runner.invoke(cli, ["init"])  # create the changelog
-            runner.invoke(cli, ["entry", "-b", "entry number 1"])
+            runner.invoke(main, ["init"])  # create the changelog
+            runner.invoke(main, ["entry", "-b", "entry number 1"])
 
-            result = runner.invoke(cli, ["release", "Version 1.0.0", "-c"], input="y\n")
+            result = runner.invoke(main, ["release", "Version 1.0.0", "-c"], input="y\n")
             check_result(self, result)
             self.assertIn("Created commit", result.output)
             self.assertIn("Created tag", result.output)
@@ -277,10 +277,10 @@ class TestRelease(unittest.TestCase):
                     )
                 )
 
-            runner.invoke(cli, ["init"])  # create the changelog
-            runner.invoke(cli, ["entry", "-b", "entry number 1"])
+            runner.invoke(main, ["init"])  # create the changelog
+            runner.invoke(main, ["entry", "-b", "entry number 1"])
 
-            result = runner.invoke(cli, ["release", "Version 1.0.0", "-C"])
+            result = runner.invoke(main, ["release", "Version 1.0.0", "-C"])
             check_result(self, result)
 
             with open("Cargo.toml", "r") as fp:
@@ -322,7 +322,7 @@ class TestShow(unittest.TestCase):
             for mode, t in self.modes.items():
                 with self.subTest(mode, flags=t[0]):
                     check_result(
-                        self, result := self.runner.invoke(cli, ["show", "-a"] + t[0])
+                        self, result := self.runner.invoke(main, ["show", "-a"] + t[0])
                     )
                     self.assertEqual(
                         t[2].join([t[1](v, {"md": False}) for v in self.log.versions]),
@@ -331,7 +331,7 @@ class TestShow(unittest.TestCase):
                     )
 
                     check_result(
-                        self, result := self.runner.invoke(cli, ["show", "-am"] + t[0])
+                        self, result := self.runner.invoke(main, ["show", "-am"] + t[0])
                     )
                     self.assertEqual(
                         t[2].join([t[1](v, {"md": True}) for v in self.log.versions]),
@@ -349,7 +349,7 @@ class TestShow(unittest.TestCase):
                         check_result(
                             self,
                             result := self.runner.invoke(
-                                cli, ["show", version.name] + t[0]
+                                main, ["show", version.name] + t[0]
                             ),
                         )
                         self.assertEqual(
@@ -361,7 +361,7 @@ class TestShow(unittest.TestCase):
                         check_result(
                             self,
                             result := self.runner.invoke(
-                                cli, ["show", version.name[-5:]] + t[0]
+                                main, ["show", version.name[-5:]] + t[0]
                             ),
                         )
                         self.assertEqual(
@@ -373,7 +373,7 @@ class TestShow(unittest.TestCase):
                         check_result(
                             self,
                             result := self.runner.invoke(
-                                cli, ["show", version.name, "-m"] + t[0]
+                                main, ["show", version.name, "-m"] + t[0]
                             ),
                         )
                         self.assertEqual(
@@ -385,7 +385,7 @@ class TestShow(unittest.TestCase):
                         check_result(
                             self,
                             result := self.runner.invoke(
-                                cli, ["show", version.name[-5:], "-m"] + t[0]
+                                main, ["show", version.name[-5:], "-m"] + t[0]
                             ),
                         )
                         self.assertEqual(
