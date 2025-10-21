@@ -159,8 +159,8 @@ jobs:
         if: forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')
         run: >
           tea releases create 
-          --repo ${{ forge.repository }}
-          --tag ${{ forge.ref_name }} 
-          --title ${{ steps.yaclog-show.outputs.name }}
-          --note-file ${{ steps.yaclog-show.outputs.body-file }}
-          --asset dist/*.whl
+          --repo "${{ forge.repository }}"
+          --title "${{ steps.yaclog-show.outputs.name }}"
+          --note-file "${{ steps.yaclog-show.outputs.body-file }}"
+          --asset "dist/*.whl"
+          ${{ forge.ref_name }}
