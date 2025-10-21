@@ -47,7 +47,7 @@ Create a new changelog:
 $ yaclog init
 ```
 
-Add some new entries to the "Added" section of the current unreleased version:
+Add some new entries to the current unreleased version:
 ```shell
 $ yaclog entry -b 'Introduced some more bugs'
 $ yaclog entry -b 'Introduced some more features'
