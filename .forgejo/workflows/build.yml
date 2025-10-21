@@ -144,12 +144,12 @@ jobs:
           compression-level: 0 # already compressed
 
       - name: Upload to PyPI
-        run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' }}
+        run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' || ''}}
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
       - name: Upload to Forgejo
-        run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' }}
+        run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' || ''}}
         env:
           UV_PUBLISH_USERNAME: ${{ forge.repository_owner }}
           UV_PUBLISH_PASSWORD: ${{ secrets.FORGEJO_TOKEN }}
