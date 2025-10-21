@@ -3,7 +3,7 @@
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-
+from datetime import datetime
 from importlib.metadata import version
 
 # -- Path setup --------------------------------------------------------------
@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "Yaclog"
-copyright = "2021, Andrew Cassidy"
+copyright = f"{datetime.now().year}, Andrew Cassidy"
 author = "Andrew Cassidy"
 release = version("yaclog")
 version = ".".join(release.split(".")[:3])
