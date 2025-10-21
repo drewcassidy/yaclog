@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from yaclog.cli.__main__ import cli
+from yaclog.cli import cli
 
-if __name__ == "__main__":
-    cli()
+cli()
