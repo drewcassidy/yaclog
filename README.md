@@ -12,10 +12,16 @@ Yaclog is a python library and command line tool to make it easier to keep track
 
 ## Installation
 
-Install and update using [pip](https://pip.pypa.io/en/stable/quickstart/):
+Install and update with [pip](https://pip.pypa.io/en/stable/getting-started/):
 
 ```shell
 $ pip install -U yaclog
+```
+
+Or with [uv](https://docs.astral.sh/uv/getting-started/):
+
+```shell
+$ uv tool install yaclog
 ```
 
 ## Usage
