@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Fixed
+
+- Fixed CI action on Forgejo runner when `markdown` is false
+
+
 ## Version 1.6.1 - 2025-10-22
 
 ### Changed

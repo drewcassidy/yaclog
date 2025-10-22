@@ -68,8 +68,8 @@ runs:
       id: yaclog-show
       shell: bash
       run: >
-        uv run -m yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) }} 
-        show ---gh-actions ${{ inputs.markdown && '--markdown' }} | tee -a "$GITHUB_OUTPUT"
+        uv run -m yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) || '' }} 
+        show ---gh-actions ${{ inputs.markdown && '--markdown' || ''}} | tee -a "$GITHUB_OUTPUT"
       env:
         UV_PROJECT: ${{ github.action_path }}
         UV_LINK_MODE: copy
