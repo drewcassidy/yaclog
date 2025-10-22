@@ -259,6 +259,7 @@ class TestRelease(unittest.TestCase):
             self.assertIn("Created tag", result.output)
             self.assertIn(repo.head.commit.hexsha[0:7], result.output)
             self.assertEqual(repo.tags[0].name, "1.0.0")
+            self.assertEqual(repo.tags[0].tag.message, "Version 1.0.0\n- entry number 1")
 
     def test_cargo(self):
         """Test updating cargo.toml files"""

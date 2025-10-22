@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Changed
+
+- `yaclog release -c` now adds the version name to the generated tag's annotation
+
+
 ## Version 1.6.0 - 2025-10-21
 
 ### Removed
