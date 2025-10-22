@@ -65,3 +65,6 @@ fallback_version = "0.0.0"
 
 [tool.setuptools.packages.find]
 include = ["yaclog*"]
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { git = { commit = true } }]
