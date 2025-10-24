@@ -2,7 +2,7 @@
 
 Yaclog makes an action available for Forgejo Actions and compatible CI systems like Gitea and Github actions.
 
-```{gha:action}
+```{gha:action} yaclog
 :path: .
 ```
 
