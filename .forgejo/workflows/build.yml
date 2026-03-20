@@ -82,6 +82,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Python
+        uses: https://code.forgejo.org/actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
       - name: Get Changelog Information
         id: yaclog-show
         uses: ./ # self-hosting!
