@@ -168,6 +168,6 @@ jobs:
         run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' || ''}}
         env:
           UV_PUBLISH_USERNAME: ${{ forge.repository_owner }}
-          UV_PUBLISH_PASSWORD: ${{ secrets.FORGEJO_TOKEN }}
+          UV_PUBLISH_PASSWORD: ${{ secrets.FORGEJO_DEPLOY_TOKEN }}
           UV_PUBLISH_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_owner }}/pypi
           UV_PUBLISH_CHECK_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_owner }}/pypi
