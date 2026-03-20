@@ -51,8 +51,6 @@ jobs:
     strategy:
       matrix:
         python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
-    env:
-      UV_LINK_MODE: copy
 
     steps:
       - name: Checkout
@@ -63,29 +61,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Setup uv
-        shell: bash
-        run: | 
-          if ! command -v uv >/dev/null 2>&1; then
-            curl -LsSf https://astral.sh/uv/install.sh | sh
-          else
-            echo "uv already installed"
-          fi
-        env:
-          UV_UNMANAGED_INSTALL: /usr/local/bin
+      - name: Set up project
+        run: pip install .[dev]
 
-      - name: Lint with ruff
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          uvx ruff check --select=E9,F63,F7,F82
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          uvx ruff check --exit-zero
+      - name: Lint
+        run: just lint
 
       - name: Run unit tests
-        run: |
-          uv venv
-          uv pip install .[test]
-          uv run -m pytest --verbose
+        run: just test --verbose
 
   publish:
     name: Build and Publish
@@ -102,17 +85,6 @@ jobs:
       - name: Get Changelog Information
         id: yaclog-show
         uses: ./ # self-hosting!
-
-      - name: Setup uv
-        shell: bash
-        run: |
-          if ! command -v uv >/dev/null 2>&1; then
-            curl -LsSf https://astral.sh/uv/install.sh | sh
-          else
-            echo "uv already installed"
-          fi
-        env:
-          UV_UNMANAGED_INSTALL: /usr/local/bin
 
       - name: Setup tea
         shell: bash
@@ -135,7 +107,9 @@ jobs:
           tea login add --url ${{ forge.server_url }} --token ${{ secrets.FORGEJO_TOKEN }}
 
       - name: Build
-        run: uv build
+        run: |
+          pip install build
+          python -m build
 
       - uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
@@ -160,14 +134,15 @@ jobs:
           "${{ forge.ref_name }}" dist/*
 
       - name: Upload to PyPI
-        run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' || ''}}
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        run: twine upload --skip-existing dist/*
         env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
       - name: Upload to Forgejo
-        run: uv publish ${{ !(forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')) && '--dry-run' || ''}}
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        run: twine upload dist/*
         env:
-          UV_PUBLISH_USERNAME: ${{ forge.repository_owner }}
-          UV_PUBLISH_PASSWORD: ${{ secrets.FORGEJO_DEPLOY_TOKEN }}
-          UV_PUBLISH_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_owner }}/pypi
-          UV_PUBLISH_CHECK_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_owner }}/pypi
+          TWINE_USERNAME: ${{ forge.repository_owner }}
+          TWINE_PASSWORD: ${{ secrets.FORGEJO_DEPLOY_TOKEN }}
+          TWINE_REPOSITORY_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_owner }}/pypi
