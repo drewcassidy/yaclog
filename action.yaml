@@ -43,34 +43,36 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup uv
+    - name: Setup Python
+      id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        update-environment: 'false'
+
+    - name: Setup Yaclog
       shell: bash
-      run: | 
-        if ! command -v uv >/dev/null 2>&1; then
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-        else
-          echo "uv already installed"
-        fi
-      env:
-        UV_UNMANAGED_INSTALL: /usr/local/bin
+      id: setup-yaclog
+      run: |
+        cd ${{ github.action_path }}
+        mkdir -p site-packages
+        ${{ steps.setup-python.outputs.python-path }} -m pip install . --target site-packages
 
     - name: Create New Release
       shell: bash
       if: ${{ inputs.release }}
       run: >
-        uv run -m yaclog release --yes --commit ${{ inputs.release }}
+        ${{ steps.setup-python.outputs.python-path }} -m yaclog.cli
+        release --yes --commit ${{ inputs.release }}
       env:
-        UV_PROJECT: ${{ github.action_path }}
-        UV_LINK_MODE: copy
-        UV_FROZEN: true
+        PYTHON_HOME: ${{ github.action_path }}/site-packages
 
     - name: Get Changelog Information
       id: yaclog-show
       shell: bash
       run: >
-        uv run -m yaclog ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) || '' }} 
-        show ---gh-actions ${{ inputs.markdown && '--markdown' || ''}} | tee -a "$GITHUB_OUTPUT"
+        ${{ steps.setup-python.outputs.python-path }} -m yaclog.cli
+        ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) || '' }} 
+        show ---gh-actions ${{ inputs.markdown && '--markdown' || '' }} | tee -a "$GITHUB_OUTPUT"
       env:
-        UV_PROJECT: ${{ github.action_path }}
-        UV_LINK_MODE: copy
-        UV_FROZEN: true
+        PYTHON_HOME: ${{ github.action_path }}/site-packages
