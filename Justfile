@@ -13,6 +13,3 @@ format:
 test *args:
     {{ python }} -m pytest {{ args }}
 
-build:
-    {{ python }} -m build --wheel
-    {{ python }} -m
