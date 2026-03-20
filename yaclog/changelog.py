@@ -76,12 +76,12 @@ class VersionEntry:
         """The version's link ID, uses the version name by default when writing"""
 
         self.line_no: Optional[int] = line_no
-        """What line the version occurs at in the file, or `None` if the version was not read from a file. 
-        This is not guaranteed to be correct after the changelog has been modified, 
+        """What line the version occurs at in the file, or `None` if the version was not read from a file.
+        This is not guaranteed to be correct after the changelog has been modified,
         and it has no effect on the written file"""
 
         self.sections: Dict[str, List[str]] = {"": []}
-        """The dictionary of change entries in the version, organized by section. 
+        """The dictionary of change entries in the version, organized by section.
         Uncategorized changes have a section of an empty string."""
 
     @classmethod
@@ -245,7 +245,7 @@ class Changelog:
 
         self.preamble: str = preamble
         """Any text at the top of the changelog before any version information, including the title.
-        It can contain the title, an explanation of the file's purpose, as well as any general machine-readable 
+        It can contain the title, an explanation of the file's purpose, as well as any general machine-readable
         information for use with other tools."""
 
         self.versions: List[VersionEntry] = []

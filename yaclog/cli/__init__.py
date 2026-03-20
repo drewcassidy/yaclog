@@ -464,6 +464,8 @@ def release(obj: Changelog, version_name, rel_seg, pre_seg, commit, cargo, yes, 
 
         # noinspection PyTypeChecker
         repo_tag = repo.create_tag(
-            short_version, ref=commit, message=cur_version.name + "\n" + cur_version.body(False)
+            short_version,
+            ref=commit,
+            message=cur_version.name + "\n" + cur_version.body(False),
         )
         click.echo(f"Created tag {click.style(repo_tag.name, fg='green')}.")

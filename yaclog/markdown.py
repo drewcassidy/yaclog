@@ -156,9 +156,9 @@ def tokenize(text: str):
 
         elif block:
             # this is a line to be added to a paragraph or list item
-            assert block == tokens[-1].kind, (
-                f"block state variable in invalid state! {block} != {tokens[-1].kind}"
-            )
+            assert (
+                block == tokens[-1].kind
+            ), f"block state variable in invalid state! {block} != {tokens[-1].kind}"
             tokens[-1].lines.append(line)
 
         else:
