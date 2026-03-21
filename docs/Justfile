@@ -1,0 +1,10 @@
+#!/usr/bin/env just --justfile
+
+python := "python"
+
+[env("CUSTOM_COMPILE_COMMAND", "just docs lock")]
+lock:
+    {{ python }} -m piptools compile \
+      --allow-unsafe --strip-extras --extra=docs \
+      --output-file=requirements.txt \
+      ../pyproject.toml
