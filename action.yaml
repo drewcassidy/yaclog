@@ -50,9 +50,17 @@ runs:
         python-version: '3.13'
         update-environment: 'false'
 
+    - name: Get cached Yaclog
+      id: cache-yaclog
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.action_path }}/site-packages
+        key: yaclog-${{ github.action_ref }}-${{ runner.os }}-${{ runner.arch }}
+
     - name: Setup Yaclog
       shell: bash
       id: setup-yaclog
+      if: steps.cache-yaclog.outputs.cache-hit != 'true'
       run: |
         cd ${{ github.action_path }}
         mkdir -p site-packages
