@@ -16,7 +16,7 @@ click==8.3.1
     # via
     #   sphinx-click
     #   yaclog (../pyproject.toml)
-docutils==0.22.4
+docutils==0.21.2
     # via
     #   myst-parser
     #   sphinx
@@ -61,6 +61,8 @@ pyyaml==6.0.3
 requests==2.32.5
     # via sphinx
 roman-numerals==4.1.0
+    # via roman-numerals-py
+roman-numerals-py==4.1.0
     # via sphinx
 ruamel-yaml==0.19.1
     # via sphinx-gha
@@ -68,7 +70,7 @@ smmap==5.0.3
     # via gitdb
 snowballstemmer==3.0.1
     # via sphinx
-sphinx==9.1.0
+sphinx==8.2.3
     # via
     #   myst-parser
     #   sphinx-click
