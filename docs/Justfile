@@ -8,3 +8,6 @@ lock:
       --allow-unsafe --strip-extras --extra=docs \
       --output-file=requirements.txt \
       ../pyproject.toml
+
+build:
+    python -m sphinx . _build
