@@ -125,15 +125,15 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
 
     str_func = functions[mode]
     kwargs = {"md": markdown, "color": stdout.isatty()}
-    latest_version = str(obj.versions[0].version)
+    latest_version = obj.current_version(new_version=True)
 
     try:
         if all_versions:
             versions = obj.versions
         elif len(version_names) == 0:
             versions = [obj.current_version()]
-            if ((mode == "version") or gh_actions) and versions[0].name == "Unreleased":
-                latest = obj.current_version(released=True).version
+            if ((mode == "version") or gh_actions) and not latest_version.numbered:
+                latest = obj.current_version(numbered=True).version
                 inferred = yaclog.version.increment_version(str(latest), 2, "")
                 latest_version = inferred
         else:
@@ -233,13 +233,14 @@ def entry(obj: Changelog, bullets, paragraphs, section_name, version_name):
     SECTION is the name of the section to append to. If not given, entries will be uncategorized.
 
     VERSION is the name of the version to append to. If not given, the most recent version will be used,
-    or a new 'Unreleased' version will be added if the most recent version has been released.
+    or a new 'Unreleased' version will be added if the most recent version has been released. If the version
+    is not found, a new one with the given name will be added at the top of the changelog.
     """
 
     section_name = section_name.title()
     try:
         if version_name:
-            version = obj.get_version(version_name)
+            version = obj.get_version(version_name, new_version=True)
         else:
             version = obj.current_version(released=False, new_version=True)
     except KeyError as k:

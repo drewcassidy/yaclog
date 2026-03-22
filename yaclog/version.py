@@ -122,3 +122,15 @@ def is_release(version_str: str) -> bool:
         return not (v.is_devrelease or v.is_prerelease)
     else:
         return False
+
+
+def is_numbered(version_str: str) -> bool:
+    """
+    Check if a version string has a PEP440 version number.
+    If it doesn't it generally is considered a "pending" release
+
+    :param version_str: the input string to check
+    :return: True if the input contains a :pep:`440` version
+    """
+    v, *span = extract_version(version_str)
+    return v is not None

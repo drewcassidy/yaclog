@@ -7,10 +7,12 @@ All notable changes to this project will be documented in this file
 ### Fixed
 
 - Fixed broken command docs
+- Fixed error running `yaclog show` with an empty changelog file
 
 ### Changed
 
 - Changed action to use pip instead of uv, due to uv's [imminent enshittification](https://astral.sh/blog/openai).
+- Yaclog now makes a distinction between *released* and *numbered* versions. When `yaclog show --version` is run, and the latest version is not a numbered version (e.g. "Unreleased"), it will attempt to increment the latest numbered version's patch level.
 
 
 ## Version 1.6.2 - 2025-10-22

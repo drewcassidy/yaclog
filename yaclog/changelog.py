@@ -216,6 +216,10 @@ class VersionEntry:
         return yaclog.version.is_release(self.name)
 
     @property
+    def numbered(self) -> bool:
+        return yaclog.version.is_numbered(self.name)
+
+    @property
     def version(self):
         """Returns the PEP440 version number from the version name, or `None` if none is found"""
         return yaclog.version.extract_version(self.name)[0]
@@ -364,6 +368,7 @@ class Changelog:
     def current_version(
         self,
         released: Optional[bool] = None,
+        numbered: Optional[bool] = None,
         new_version: bool = False,
         new_version_name: str = "Unreleased",
     ) -> VersionEntry:
@@ -381,7 +386,9 @@ class Changelog:
 
         # return the first version that matches `released`
         for version in self.versions:
-            if version.released == released or released is None:
+            if (version.numbered == numbered or numbered is None) and (
+                version.released == released or released is None
+            ):
                 return version
 
         # fallback if none are found
@@ -395,18 +402,25 @@ class Changelog:
             else:
                 raise ValueError("Changelog has no current version")
 
-    def get_version(self, name: Optional[str] = None) -> VersionEntry:
+    def get_version(
+        self,
+        name: Optional[str] = None,
+        new_version: bool = False,
+    ) -> VersionEntry:
         """
         Get a version from the changelog by name.
 
         :param name: The name of the version to get, or `None` to return the most recent.
             The first version with this value in its name is returned.
+        :param new_version: if a new version should be created with the given name if it isn't found.
         :return: The first version with the selected name
         """
 
         for version in self.versions:
             if name in version.name or name is None:
                 return version
+        if new_version:
+            return self.add_version(name=name)
         raise KeyError(f"Version {name} not found in changelog")
 
     def __getitem__(self, item: str) -> VersionEntry:
