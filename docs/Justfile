@@ -8,6 +8,7 @@ python := "python"
 [arg("args", help="Arguments passed to pip-compile")]
 [env("CUSTOM_COMPILE_COMMAND", "just docs lock")]
 lock *args:
+    {{ python }} -m piptools compile \
     --strip-extras --extra=docs \
     --output-file=requirements.txt \
     {{ args }} \
