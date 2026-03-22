@@ -54,7 +54,8 @@ runs:
       shell: bash
       id: setup-venv
       run: |
-        ${{ steps.setup-python.outputs.python-path }} -m ${{ github.action_path }}/venv .venv
+        cd ${{ github.action_path }}
+        ${{ steps.setup-python.outputs.python-path }} -m venv .venv
         source .venv/bin/activate
         cat "python-path=$(which python)" | tee -a "$GITHUB_OUTPUT"
 
