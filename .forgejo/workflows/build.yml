@@ -108,7 +108,7 @@ jobs:
       - name: Upload artifacts
         uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
-          name: python-distribution.zip
+          name: python-distribution
           path: dist/
           compression-level: 0 # already compressed
 
