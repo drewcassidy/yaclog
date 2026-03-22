@@ -61,18 +61,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Get cached virtualenv
-        uses: https://code.forgejo.org/actions/cache@v4
-        with:
-          path: .venv/
-          key: venv-python${{ matrix.python-version }}-${{ hashfiles('pyproject.toml') }}
-
       - name: Set up project
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          python -m pip install --upgrade -e .[dev]
-          echo "${{ forge.workspace }}/.venv/bin:$PATH\;" >> $FORGEJO_PATH
+          pip install -e .[dev]
 
       - name: Lint
         run: just lint
