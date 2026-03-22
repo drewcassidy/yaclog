@@ -133,12 +133,6 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
             versions = obj.versions
         elif len(version_names) == 0:
             versions = [obj.current_version()]
-            if ((mode == "version") or gh_actions) and not obj.current_version(
-                new_version=True
-            ).numbered:
-                latest = latest_version
-                inferred = yaclog.version.increment_version(str(latest), 2, "")
-                latest_version = inferred
         else:
             versions = [obj.get_version(name) for name in version_names]
     except KeyError as k:

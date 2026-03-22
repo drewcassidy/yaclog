@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "Action self-test failed!"
           echo "yaclog-show:\n ${{ toJSON(steps.yaclog-show.outputs) }}"
-          echo "yaclog-show-unreleased:\n${{ toJSON(steps.yaclog-show.outputs) }}"
+          echo "yaclog-show-unreleased:\n${{ toJSON(steps.yaclog-show-unreleased.outputs) }}"
           echo "${{ hashFiles('body.md') }}"
           false
 
