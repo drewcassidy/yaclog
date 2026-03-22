@@ -1,13 +1,24 @@
 #!/usr/bin/env just --justfile
 
+set fallback := true
+
 python := "python"
 
+# Lock documentation dependencies for running in CI.
+[arg("args", help="Arguments passed to pip-compile")]
 [env("CUSTOM_COMPILE_COMMAND", "just docs lock")]
-lock:
-    {{ python }} -m piptools compile \
-      --allow-unsafe --strip-extras --extra=docs \
-      --output-file=requirements.txt \
-      ../pyproject.toml
+lock *args:
+    --strip-extras --extra=docs \
+    --output-file=requirements.txt \
+    {{ args }} \
+    ../pyproject.toml
 
-build:
-    python -m sphinx . _build
+# Build documentation.
+[arg("args", help="Arguments passed to sphinx")]
+build *args:
+    {{ python }} -m sphinx . _build {{ args }}
+
+# Format documentation source files
+format:
+    {{ python }} -m black conf.py
+    just --fmt --unstable
