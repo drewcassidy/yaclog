@@ -47,32 +47,34 @@ runs:
       id: setup-python
       uses: actions/setup-python@v5
       with:
-        python-version: '>= 3.10'
+        python-version-file: ${{ github.action_path }}/pyproject.toml
         update-environment: 'false'
 
-    - name: Setup Yaclog
+    - name: Setup Virtualenv
+      shell: bash
+      id: setup-venv
+      run: |
+        ${{ steps.setup-python.outputs.python-path }} -m ${{ github.action_path }}/venv .venv
+        source .venv/bin/activate
+        cat "python-path=$(which python)" | tee -a "$GITHUB_OUTPUT"
+
+    - name: Install yaclog
       shell: bash
       id: setup-yaclog
       run: |
-        cd ${{ github.action_path }}
-        mkdir -p site-packages
-        ${{ steps.setup-python.outputs.python-path }} -m pip install . --target site-packages
+        ${{ steps.setup-venv.outputs.python-path }} -m pip install ${{ github.action_path }}
 
     - name: Create New Release
       shell: bash
       if: ${{ inputs.release }}
       run: >
-        ${{ steps.setup-python.outputs.python-path }} -m yaclog.cli
+        ${{ steps.setup-venv.outputs.python-path }} -m yaclog.cli
         release --yes --commit ${{ inputs.release }}
-      env:
-        PYTHON_HOME: ${{ github.action_path }}/site-packages
 
     - name: Get Changelog Information
-      id: yaclog-show
       shell: bash
+      id: yaclog-show
       run: >
-        ${{ steps.setup-python.outputs.python-path }} -m yaclog.cli
+        ${{ steps.setup-venv.outputs.python-path }} -m yaclog.cli
         ${{ inputs.changelog-path && format('--path {0}', inputs.changelog-path) || '' }} 
         show ---gh-actions ${{ inputs.markdown && '--markdown' || '' }} | tee -a "$GITHUB_OUTPUT"
-      env:
-        PYTHON_HOME: ${{ github.action_path }}/site-packages
