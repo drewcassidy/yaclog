@@ -71,7 +71,7 @@ jobs:
         run: |
           python -m venv .venv
           source .venv/bin/activate
-          python -m pip install --upgrade sphinx${{ matrix.sphinx-version }} -e .[dev]
+          python -m pip install --upgrade -e .[dev]
           echo "${{ forge.workspace }}/.venv/bin:$PATH\;" >> $FORGEJO_PATH
 
       - name: Lint
@@ -134,4 +134,4 @@ jobs:
         env:
           TWINE_USERNAME: ${{ forge.repository_owner }}
           TWINE_PASSWORD: ${{ secrets.FORGEJO_DEPLOY_TOKEN }}
-          TWINE_REPOSITORY_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_
+          TWINE_REPOSITORY_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_owner }}/pypi
