@@ -120,20 +120,20 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
         "name": (lambda v, k: v.name),
         "body": (lambda v, k: v.body(**k)),
         "header": (lambda v, k: v.header(**k)),
-        "version": (lambda v, k: latest_version),
+        "version": (lambda v, k: str(latest_version)),
     }
 
     str_func = functions[mode]
     kwargs = {"md": markdown, "color": stdout.isatty()}
-    latest_version = obj.current_version(new_version=True)
+    latest_version = obj.current_version(new_version=True).version
 
     try:
         if all_versions:
             versions = obj.versions
         elif len(version_names) == 0:
             versions = [obj.current_version()]
-            if ((mode == "version") or gh_actions) and not latest_version.numbered:
-                latest = obj.current_version(numbered=True).version
+            if ((mode == "version") or gh_actions) and not obj.current_version(new_version=True).numbered:
+                latest = latest_version
                 inferred = yaclog.version.increment_version(str(latest), 2, "")
                 latest_version = inferred
         else:
@@ -149,10 +149,10 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
         import tempfile
 
         kwargs["color"] = False
-        all_modes = ["name", "header", "version"]
+        output_funcs = ["name", "header", "version"]
         outputs = [
-            f"{mode}={sep.join([functions[mode](v, kwargs) for v in versions])}"
-            for mode in all_modes
+            f"{func}={sep.join([functions[func](v, kwargs) for v in versions])}"
+            for func in output_funcs
         ]
         click.echo("\n".join(outputs))
         body_fd, body_file = tempfile.mkstemp(text=True)
