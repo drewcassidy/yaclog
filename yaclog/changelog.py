@@ -348,7 +348,7 @@ class Changelog:
 
         segments += [f"[{link_id}]: {link}" for link_id, link in v_links.items()]
 
-        text = markdown.join(segments)
+        text = markdown.join(segments) + "\n"
 
         with open(path, "w") as fp:
             fp.write(text)
