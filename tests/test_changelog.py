@@ -53,7 +53,7 @@ class TestWriter(unittest.TestCase):
             with open(cls.path) as fd:
                 cls.log_text = fd.read()
                 cls.log_segments = [
-                    line.lstrip("\n") for line in cls.log_text.split("\n\n") if line
+                    line.strip("\n") for line in cls.log_text.split("\n\n") if line
                 ]
 
     def test_preamble(self):
