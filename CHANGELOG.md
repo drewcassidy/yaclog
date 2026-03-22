@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file
 
 - Fixed broken command docs
 
+### Changed
+
+- Changed action to use pip instead of uv, due to uv's [imminent enshittification](https://astral.sh/blog/openai).
+
 
 ## Version 1.6.2 - 2025-10-22
 
