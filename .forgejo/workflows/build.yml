@@ -61,8 +61,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Get cached virtualenv
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: .venv/
+          key: venv-python${{ matrix.python-version }}-${{ hashfiles('pyproject.toml') }}
+
       - name: Set up project
-        run: pip install .[dev]
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade sphinx${{ matrix.sphinx-version }} -e .[dev]
+          echo "${{ forge.workspace }}/.venv/bin:$PATH\;" >> $FORGEJO_PATH
 
       - name: Lint
         run: just lint
@@ -91,63 +101,37 @@ jobs:
         id: yaclog-show
         uses: ./ # self-hosting!
 
-      - name: Setup tea
-        shell: bash
-        run: |
-          set -u
-          if ! command tea 2>/dev/null; then
-            TEA_BIN=/usr/local/bin/tea
-            TEA_VERSION=0.11.0
-            case $RUNNER_ARCH in
-              ARM64)
-                ARCH=arm64
-              ;;
-              X64)
-                ARCH=amd64
-              ;;
-            esac
-            curl -sL https://dl.gitea.io/tea/$TEA_VERSION/tea-$TEA_VERSION-linux-$ARCH -o $TEA_BIN
-            chmod +x $TEA_BIN
-          fi
-          tea login add --url ${{ forge.server_url }} --token ${{ secrets.FORGEJO_TOKEN }}
-
       - name: Build
         run: |
-          python -m pip install build
-          python -m build
+          pipx run build
 
-      - uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+      - name: Upload artifacts
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
           name: python-distribution.zip
           path: dist/
           compression-level: 0 # already compressed
 
       - name: Create release
-        if: forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')
-        run: >
-          tea release create 
-          --repo "${{ forge.repository }}"
-          --title "${{ steps.yaclog-show.outputs.name }}"
-          --note-file "${{ steps.yaclog-show.outputs.body-file }}"
-          "${{ forge.ref_name }}"
-
-      - name: Upload artifacts to release
-        if: forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')
-        run: >
-          tea release assets create 
-          --repo "${{ forge.repository }}"
-          "${{ forge.ref_name }}" dist/*
+        uses: https://code.forgejo.org/actions/forgejo-release@v2.11.1
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        with:
+          direction: upload
+          token: ${{ secrets.FORGEJO_TOKEN }}
+          release-dir: dist
+          title: ${{ steps.yaclog-show.outputs.name }}
+          release-notes-file: ${{ steps.yaclog-show.outputs.body-file }}
 
       - name: Upload to PyPI
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        run: twine upload --skip-existing dist/*
+        run: pipx run twine upload --skip-existing dist/*
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
       - name: Upload to Forgejo
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        run: twine upload dist/*
+        run: pipx run twine upload dist/*
         env:
           TWINE_USERNAME: ${{ forge.repository_owner }}
           TWINE_PASSWORD: ${{ secrets.FORGEJO_DEPLOY_TOKEN }}
-          TWINE_REPOSITORY_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_owner }}/pypi
+          TWINE_REPOSITORY_URL: ${{ forge.server_url }}/api/packages/${{ forge.repository_
