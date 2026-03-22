@@ -57,7 +57,7 @@ runs:
         cd ${{ github.action_path }}
         ${{ steps.setup-python.outputs.python-path }} -m venv .venv
         source .venv/bin/activate
-        cat "python-path=$(which python)" | tee -a "$GITHUB_OUTPUT"
+        echo "python-path=$(which python)" | tee -a "$GITHUB_OUTPUT"
 
     - name: Install yaclog
       shell: bash
