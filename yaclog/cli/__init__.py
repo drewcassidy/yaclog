@@ -120,19 +120,22 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
         "name": (lambda v, k: v.name),
         "body": (lambda v, k: v.body(**k)),
         "header": (lambda v, k: v.header(**k)),
-        "version": (lambda v, k: str(latest_version)),
+        "version": (lambda v, k: str(v.version or latest_version)),
     }
 
     str_func = functions[mode]
     kwargs = {"md": markdown, "color": stdout.isatty()}
-    latest_version = obj.current_version(new_version=True).version
+    latest = obj.current_version(numbered=True, new_version=True).version
+    latest_version = yaclog.version.increment_version(str(latest), 2, "")
 
     try:
         if all_versions:
             versions = obj.versions
         elif len(version_names) == 0:
             versions = [obj.current_version()]
-            if ((mode == "version") or gh_actions) and not obj.current_version(new_version=True).numbered:
+            if ((mode == "version") or gh_actions) and not obj.current_version(
+                new_version=True
+            ).numbered:
                 latest = latest_version
                 inferred = yaclog.version.increment_version(str(latest), 2, "")
                 latest_version = inferred
