@@ -54,14 +54,15 @@ runs:
       shell: bash
       id: get-action-version
       run: |
-        echo "action-version=$(git -C ${{ github.action_path }} rev-parse HEAD)"
+        echo "action-version=$(git -C ${{ github.action_path }} rev-parse HEAD)" | tee -a "$GITHUB_OUTPUT"
 
     - name: Restore cache
       id: restore-cache
+      if: steps.get-action-version.action-version != ''
       uses: actions/cache@v4
       with:
         path: ${{ github.action_path }}/.venv
-        key: yaclog-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ steps.get-action-version.outputs.action-version}}
+        key: yaclog-${{ runner.os }}-${{ runner.arch }}-${{ steps.setup-python.outputs.python-version }}-${{ steps.get-action-version.outputs.action-version}}
 
     - name: Setup Virtualenv
       shell: bash
