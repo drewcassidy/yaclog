@@ -54,7 +54,7 @@ runs:
       shell: bash
       id: get-action-version
       run: |
-        echo "action-version=$(git -c ${{ github.action_path }} rev-parse HEAD)"
+        echo "action-version=$(git -C ${{ github.action_path }} rev-parse HEAD)"
 
     - name: Restore cache
       id: restore-cache
