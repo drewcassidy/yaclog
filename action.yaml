@@ -76,7 +76,7 @@ runs:
     - name: Install yaclog
       shell: bash
       id: setup-yaclog
-      if: steps.restore-cache.cache-hit != 'true'
+      if: steps.restore-cache.outputs.cache-hit != 'true'
       run: |
         ${{ steps.setup-venv.outputs.python-path }} -m pip install ${{ github.action_path }}
 
