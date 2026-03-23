@@ -50,18 +50,32 @@ runs:
         python-version-file: ${{ github.action_path }}/pyproject.toml
         update-environment: 'false'
 
+    - name: Get action version
+      shell: bash
+      id: get-action-version
+      run: |
+        echo "action-version=$(git -c ${{ github.action_path }} rev-parse HEAD)"
+
+    - name: Restore cache
+      id: restore-cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.action_path }}/.venv
+        key: yaclog-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ steps.get-action-version.outputs.action-version}}
+
     - name: Setup Virtualenv
       shell: bash
       id: setup-venv
       run: |
         cd ${{ github.action_path }}
-        ${{ steps.setup-python.outputs.python-path }} -m venv .venv
+        [ -d foo ] || ${{ steps.setup-python.outputs.python-path }} -m venv .venv
         source .venv/bin/activate
         echo "python-path=$(which python)" | tee -a "$GITHUB_OUTPUT"
 
     - name: Install yaclog
       shell: bash
       id: setup-yaclog
+      if: steps.restore-cache.cache-hit != 'true'
       run: |
         ${{ steps.setup-venv.outputs.python-path }} -m pip install ${{ github.action_path }}
 
