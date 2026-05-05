@@ -39,7 +39,7 @@ def main(ctx, path):
     """Manipulate markdown changelog files."""
     if not (ctx.invoked_subcommand == "init") and not os.path.exists(path):
         # file does not exist and this isn't the init command
-        raise click.FileError(
+        raise click.FileError(path,
             f"Changelog file {path} does not exist. Create it by running yaclog init."
         )
 
@@ -120,7 +120,7 @@ def show(obj: Changelog, all_versions, markdown, mode, version_names, gh_actions
         "name": (lambda v, k: v.name),
         "body": (lambda v, k: v.body(**k)),
         "header": (lambda v, k: v.header(**k)),
-        "version": (lambda v, k: str(v.version or latest_version)),
+        "version": (lambda v, k: str(v.version or latest_version or "0.0.0")),
     }
 
     str_func = functions[mode]

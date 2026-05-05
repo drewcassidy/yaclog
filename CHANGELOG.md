@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file
 
+## Unreleased
+
+### Fixed
+
+- Fixed error when running show command with empty changelog file
+
+### Changed
+
+- Improved error message when no changelog file exists
+
+
 ## Version 1.7.1 - 2026-03-23
 
 ### Fixed

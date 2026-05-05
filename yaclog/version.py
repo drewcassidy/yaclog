@@ -40,7 +40,7 @@ def extract_version(version_str: str) -> Tuple[Optional[Version], int, int]:
 
 def increment_version(
     version_str: str, rel_seg: int = None, pre_seg: str = None
-) -> str:
+) -> str | None:
     """
     Increment the :pep:`440` version number in a string
 
@@ -50,6 +50,8 @@ def increment_version(
     :return: The original string with the version number incremented
     """
     v, *span = extract_version(version_str)
+    if v is None:
+        return None
     epoch = v.epoch
     release = v.release
     pre = v.pre
