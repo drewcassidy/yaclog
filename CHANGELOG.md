@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file
 
-## Unreleased
+## Version 1.7.2 - 2026-05-05
 
 ### Fixed
 
