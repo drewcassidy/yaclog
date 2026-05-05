@@ -39,8 +39,9 @@ def main(ctx, path):
     """Manipulate markdown changelog files."""
     if not (ctx.invoked_subcommand == "init") and not os.path.exists(path):
         # file does not exist and this isn't the init command
-        raise click.FileError(path,
-            f"Changelog file {path} does not exist. Create it by running yaclog init."
+        raise click.FileError(
+            path,
+            f"Changelog file {path} does not exist. Create it by running yaclog init.",
         )
 
     ctx.obj = yaclog.read(path)

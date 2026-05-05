@@ -1,6 +1,6 @@
 #!/usr/bin/env just --justfile
 
-set fallback := true
+set fallback
 
 python := "python"
 
