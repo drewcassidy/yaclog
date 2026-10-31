@@ -2,24 +2,22 @@
 
 set fallback
 
-python := "python"
-
-# Lock documentation dependencies for running in CI.
-[arg("args", help="Arguments passed to pip-compile")]
-[env("CUSTOM_COMPILE_COMMAND", "just docs lock")]
-lock *args:
-    {{ python }} -m piptools compile \
-    --strip-extras --extra=docs \
-    --output-file=requirements.txt \
-    {{ args }} \
-    ../pyproject.toml
-
-# Build documentation.
-[arg("args", help="Arguments passed to sphinx")]
-build *args:
-    {{ python }} -m sphinx . _build {{ args }}
+sphinx_module := "sphinx"
 
 # Format documentation source files
 format:
-    {{ python }} -m black conf.py
-    just --fmt --unstable
+    black conf.py
+    '{{ just_executable() }}' --fmt --unstable
+
+# Build documentation.
+build *args:
+    python -m {{ sphinx_module }} --doctree-dir=_doctrees {{ args }}  . _build
+
+# Push documentation version
+# the prefix "docs/" is dropped from version names
+push *args:
+    docput version push _build {{ args }}
+
+# Update root files for the documentation site
+update-root *args:
+    docput upload --merge _root . {{ args }}

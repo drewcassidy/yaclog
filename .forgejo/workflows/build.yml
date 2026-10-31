@@ -71,6 +71,41 @@ jobs:
       - name: Run unit tests
         run: just test --verbose
 
+  document:
+    name: Document
+    runs-on: ubuntu-26.04
+    container:
+      env:
+        DOCPUT_REMOTE: git-pages+https://drewcassidy.me/docput
+        GIT_PAGES_PASSWORD: ${{ secrets.DREWCASSIDY_ME_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@v5
+
+      - name: Set up Python
+        uses: https://code.forgejo.org/actions/setup-python@v6
+        with:
+          python-version-file: pyproject.toml
+
+      - name: Install documentation dependencies
+        run: pip install -g docs
+
+      - name: Drop docs/ from git reference
+        run: | 
+          REF="$(echo '${{ forge.ref_name }}' | sed -e 's/^docs\///' )" # drop docs/ from refs
+          echo "REF='$REF'" >> $FORGEJO_ENV
+
+      - name: Build docs
+        run: just -v docs build -D ref="$REF"
+
+      - name: Push docs
+        if: forge.event_name == 'push' #skip for PRs
+        run: just -v docs push "$REF" ${{ startsWith(forge.ref, 'refs/tags') && '--latest --visible' || '' }}
+
+      - name: Upload root files
+        if: forge.ref == 'refs/heads/main' # follow main branch
+        run: just -v docs update-root
+
   publish:
     name: Build and Publish
     needs:
