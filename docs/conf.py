@@ -4,7 +4,8 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 from datetime import datetime
-from importlib.metadata import version
+import importlib.metadata
+import docput
 
 # -- Path setup --------------------------------------------------------------
 
@@ -16,6 +17,11 @@ import os
 import sys
 from pathlib import Path
 
+def include(file_path):
+    docs_root = Path(__file__).parent.absolute()
+    with open(docs_root / file_path, "r") as fp:
+        return fp.read()
+
 sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
@@ -23,9 +29,9 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "Yaclog"
 copyright = f"{datetime.now().year}, Andrew Cassidy"
 author = "Andrew Cassidy"
-release = version("yaclog")
+release = importlib.metadata.version("yaclog")
 version = ".".join(release.split(".")[:3])
-ref = version if len(release.split(".")) == 3 else "main"
+ref = "main"  # overwritten when building docs in CI with ref
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,9 +39,9 @@ ref = version if len(release.split(".")) == 3 else "main"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "docput",
     "myst_parser",
     "sphinx_click",
-    "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx_gha",
@@ -46,7 +52,7 @@ myst_heading_anchors = 2
 myst_enable_extensions = ["colon_fence"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = [docput.sphinx_templates, "_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -60,15 +66,44 @@ default_role = "py:obj"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 html_logo = "docs_logo.png"
 html_favicon = "favicon.ico"
+html_title = f"{project} {version} documentation"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_css_files = []
+html_css_files = ["css/custom.css"]
+html_sidebars = {
+    "**": [
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/version-switch.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/scroll-end.html",
+    ]
+}
+html_theme_options = {
+    "source_edit_link": "https://git.offworld.city/drewcassidy/yaclog/_edit/main/docs/{filename}",
+    "source_view_link": "https://git.offworld.city/drewcassidy/yaclog/src/branch/main/docs/{filename}?display=source",
+    "footer_icons": [
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/yaclog",
+            "html": include(Path("_include", "pypi-hover.svg")),
+            "class": "",
+        },
+        {
+            "name": "Source",
+            "url": "https://git.offworld.city/drewcassidy/yaclog",
+            "html": include(Path("_include", "forgejo-hover.svg")),
+            "class": "",
+        },
+    ],
+}
 
 # -- Options for Autodoc -----------------------------------------------------
 
@@ -92,6 +127,7 @@ intersphinx_mapping = {
     "packaging": ("https://packaging.pypa.io/en/latest/", None),
 }
 
+# -- Jinja global variables --------------------------------------------------
 jinja_globals = {
     "version": version,
     "release": release,
@@ -101,4 +137,8 @@ jinja_globals = {
 # -- Options for sphinx-gha --------------------------------------------------
 
 sphinx_gha_repo_root = str(Path(__file__).parent.parent.absolute())  # docs/..
-sphinx_gha_repo_slug = "https://git.offworldcolonies.nexus/drewcassidy/yaclog"
+sphinx_gha_repo_slug = "https://git.offworld.city/drewcassidy/yaclog"
+sphinx_gha_repo_ref = ref
+
+# -- Options for sphinx-copybutton -------------------------------------------
+copybutton_prompt_text = "$"

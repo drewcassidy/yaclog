@@ -1,4 +1,5 @@
-{% extends "!layout.html" %}
+{% extends "!page.html" %}
+
 {% block extrahead %}
     <link rel="icon" type="image/png" sizes="16x16" href="/_static/icon-16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/_static/icon-32.png">
@@ -6,5 +7,11 @@
     <link rel="icon" type="image/png" sizes="64x64" href="/_static/icon-64.png">
     <link rel="icon" type="image/png" sizes="128x128" href="/_static/icon-128.png">
     <link rel="icon" type="image/png" sizes="256x256" href="/_static/icon-256.png">
+    {{ super() }}
+{% endblock %}
+
+{% block site_meta %}
+    <link rel="vcs-git" href="https://git.offworld.city/drewcassidy/yaclog.git"/>
+    <link rel="canonical" href="https://drewcassidy.me/yaclog/latest/{{ pagename }}{{ file_suffix }}"/>
     {{ super() }}
 {% endblock %}

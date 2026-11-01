@@ -5,7 +5,7 @@
 ```{toctree}
 ---
 maxdepth: 2
-caption: Contents
+hidden: True
 ---
 
 handbook/index
@@ -15,14 +15,10 @@ reference/index
 ```{toctree}
 ---
 maxdepth: 1
+caption: Project
+hidden: True
 ---
 
 Changelog <changelog>
-License <license>
+Source <https://git.offworld.city/drewcassidy/yaclog>
 ```
-
-## Indices and tables
-
-* {ref}`genindex`
-* {ref}`modindex`
-* {ref}`search`
