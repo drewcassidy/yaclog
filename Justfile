@@ -16,6 +16,5 @@ format: && docs::format
     just --fmt --unstable
 
 # Run tests
-[arg("args", help="Arguments passed to pytest")]
 test *args:
     {{ python }} -m pytest {{ args }}
