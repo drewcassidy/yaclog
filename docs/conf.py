@@ -31,7 +31,7 @@ copyright = f"{datetime.now().year}, Andrew Cassidy"
 author = "Andrew Cassidy"
 release = importlib.metadata.version("yaclog")
 version = ".".join(release.split(".")[:3])
-ref = "main"  # overwritten when building docs in CI with ref
+ref = os.environ.get("YACLOG_GIT_REF", "main") # overwritten when building docs in CI
 
 # -- General configuration ---------------------------------------------------
 
