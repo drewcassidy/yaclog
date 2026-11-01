@@ -1,6 +1,3 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-
 name: build
 on: [ push, pull_request ]
 concurrency:
@@ -94,7 +91,7 @@ jobs:
         run: pip install -e . --group docs
 
       - name: Drop docs/ from git reference
-        run: | 
+        run: |
           YACLOG_GIT_REF="$(echo '${{ forge.ref_name }}' | sed -e 's/^docs\///' )" # drop docs/ from refs
           echo "YACLOG_GIT_REF=$YACLOG_GIT_REF" >> $FORGEJO_ENV
 
@@ -110,7 +107,8 @@ jobs:
         run: just -v docs update-root
 
   publish:
-    name: Build and Publish
+    name: Publish
+    if: forge.event_name == 'push' && startsWith(forge.ref, 'refs/tags')
     needs:
       - test
       - test-action
@@ -134,16 +132,8 @@ jobs:
         run: |
           pipx run build
 
-      - name: Upload artifacts
-        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
-        with:
-          name: python-distribution
-          path: dist/
-          compression-level: 0 # already compressed
-
       - name: Create release
         uses: https://code.forgejo.org/actions/forgejo-release@v2.11.1
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         with:
           direction: upload
           token: ${{ secrets.FORGEJO_TOKEN }}
@@ -152,13 +142,11 @@ jobs:
           release-notes-file: ${{ steps.yaclog-show.outputs.body-file }}
 
       - name: Upload to PyPI
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         run: pipx run twine upload --skip-existing dist/*
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
       - name: Upload to Forgejo
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         run: pipx run twine upload dist/*
         env:
           TWINE_USERNAME: ${{ forge.repository_owner }}
