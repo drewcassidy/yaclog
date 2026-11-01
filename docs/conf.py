@@ -4,7 +4,6 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 from datetime import datetime
-import importlib.metadata
 import docput
 
 # -- Path setup --------------------------------------------------------------
@@ -29,8 +28,6 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "Yaclog"
 copyright = f"{datetime.now().year}, Andrew Cassidy"
 author = "Andrew Cassidy"
-release = importlib.metadata.version("yaclog")
-version = ".".join(release.split(".")[:3])
 ref = os.environ.get("YACLOG_GIT_REF", "main") # overwritten when building docs in CI
 
 # -- General configuration ---------------------------------------------------
@@ -69,7 +66,7 @@ default_role = "py:obj"
 html_theme = "furo"
 html_logo = "docs_logo.png"
 html_favicon = "favicon.ico"
-html_title = f"{project} {version} documentation"
+html_title = f"{project} documentation"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
