@@ -38,18 +38,23 @@ dependencies = [
 ]
 dynamic = ["version"]
 
-[project.optional-dependencies]
-docs = [
-    "Sphinx >= 8.1",
-    "sphinx-click >= 2.7",
-    "sphinx-rtd-theme",
-    "myst-parser >= 0.14",
-    "sphinx-gha",
-    "sphinx-copybutton",
+[dependency-groups]
+dev = [
+    "pytest ~= 9.0.2",
+    "black ~= 26.3.1",
+    "flake8 ~= 7.3.0",
+    "Flake8-pyproject",
+    "flake8-black",
+    "pip-tools ~= 7.5.3",
 ]
-
-test = [
-    "pytest"
+docs = [
+    "Sphinx ~= 9.1",
+    "furo == 2025.12.19",
+    "sphinx-click ~= 6.2",
+    "myst-parser ~= 5.1",
+    "sphinx-gha ~= 1.0.0",
+    "sphinx-copybutton",
+    "docput ~= 1.0.2"
 ]
 
 [project.scripts]

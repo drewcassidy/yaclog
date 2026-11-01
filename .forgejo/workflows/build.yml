@@ -3,11 +3,14 @@
 
 name: build
 on: [ push, pull_request ]
+concurrency:
+  group: drewcassidy.me/yaclog
+  cancel-in-progress: false
 
 jobs:
   test-action:
     name: Test action
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@v5
@@ -47,7 +50,7 @@ jobs:
 
   test:
     name: Test on Python ${{ matrix.python-version }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
@@ -84,15 +87,50 @@ jobs:
       - name: Run unit tests
         run: |
           uv venv
-          uv pip install .[test]
+          uv pip install . --group dev
           uv run -m pytest --verbose
+
+  document:
+    name: Document
+    runs-on: ubuntu-26.04
+    container:
+      env:
+        DOCPUT_REMOTE: git-pages+https://drewcassidy.me/yaclog
+        GIT_PAGES_PASSWORD: ${{ secrets.DREWCASSIDY_ME_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@v5
+
+      - name: Set up Python
+        uses: https://code.forgejo.org/actions/setup-python@v6
+        with:
+          python-version-file: pyproject.toml
+
+      - name: Install documentation dependencies
+        run: pip install -e . --group docs
+
+      - name: Drop docs/ from git reference
+        run: | 
+          YACLOG_GIT_REF="$(echo '${{ forge.ref_name }}' | sed -e 's/^docs\///' )" # drop docs/ from refs
+          echo "YACLOG_GIT_REF=$YACLOG_GIT_REF" >> $FORGEJO_ENV
+
+      - name: Build docs
+        run: just -v docs build -D ref="$YACLOG_GIT_REF"
+
+      - name: Push docs
+        if: forge.event_name == 'push' #skip for PRs
+        run: just -v docs push "$YACLOG_GIT_REF" ${{ startsWith(forge.ref, 'refs/tags') && '--latest --visible' || '' }}
+
+      - name: Upload root files
+        if: forge.ref == 'refs/heads/main' # follow main branch
+        run: just -v docs update-root
 
   publish:
     name: Build and Publish
     needs:
       - test
       - test-action
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@v5
