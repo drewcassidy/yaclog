@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-26.04
     container:
       env:
-        DOCPUT_REMOTE: git-pages+https://drewcassidy.me/docput
+        DOCPUT_REMOTE: git-pages+https://drewcassidy.me/yaclog
         GIT_PAGES_PASSWORD: ${{ secrets.DREWCASSIDY_ME_PASSWORD }}
     steps:
       - name: Checkout
