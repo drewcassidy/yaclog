@@ -7,6 +7,7 @@ sphinx_module := "sphinx"
 # Format documentation source files
 format:
     black conf.py
+    mdformat .
     '{{ just_executable() }}' --fmt --unstable
 
 # Build documentation.

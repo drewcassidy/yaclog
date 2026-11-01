@@ -40,12 +40,16 @@ dynamic = ["version"]
 
 [dependency-groups]
 dev = [
+    # format
+    "black == 26.3.1",
+    "mdformat ~= 1.0.0",
+    "mdformat-config",
+    "mdformat-black",
+    "mdformat-myst",
+    # lint
+    "pyflakes ~= 3.4",
+    # test
     "pytest ~= 9.0.2",
-    "black ~= 26.3.1",
-    "flake8 ~= 7.3.0",
-    "Flake8-pyproject",
-    "flake8-black",
-    "pip-tools ~= 7.5.3",
 ]
 docs = [
     "Sphinx ~= 9.1",
@@ -56,8 +60,6 @@ docs = [
     "sphinx-copybutton",
     "docput ~= 1.0.2"
 ]
-
-
 
 [project.scripts]
 yaclog = "yaclog.cli.__main__:cli"
@@ -72,6 +74,3 @@ fallback_version = "0.0.0"
 
 [tool.setuptools.packages.find]
 include = ["yaclog*"]
-
-[tool.flake8]
-extend-ignore = ["E203","E501"]

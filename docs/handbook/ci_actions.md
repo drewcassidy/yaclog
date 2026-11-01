@@ -43,7 +43,7 @@ jobs:
 ### Workflow to make a new release
 
 If you want to be able to create a new release for your project directly from the Github UI, you can make a new workflow
-you can dispatch directly. 
+you can dispatch directly.
 
 Please note that this workflow does NOT create any releases in Github or any package managers. Instead, your normal build workflow should do this when it detects a push to a tag.
 

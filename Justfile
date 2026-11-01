@@ -3,18 +3,34 @@
 # Actions relating to documentation
 mod docs
 
-python := "python"
+source_dirs := "yaclog/ tests/"
 
 # Lint python source code
 lint:
-    {{ python }} -m flake8 yaclog/
+    pyflakes {{ source_dirs }}
+    black --check {{ source_dirs }}
+    zuban check {{ source_dirs }}
 
 # Format python source code and other support files
 format: && docs::format
-    {{ python }} -m black yaclog/
-    {{ python }} -m yaclog format
-    just --fmt --unstable
+    black {{ source_dirs }}
+    mdformat README.md
+    yaclog format
+    '{{ just_executable() }}' --fmt --unstable
 
 # Run tests
 test *args:
-    {{ python }} -m pytest {{ args }}
+    pytest {{ args }}
+
+# Build distribution
+build:
+    pipx run build
+
+pre-commit := f"""
+  #!/bin/sh
+  PATH={{ `dirname "$(which python)"` }}:$PATH just lint test"""
+
+# Install recommended git hooks. Do this after activating your virtual environment
+install-hooks:
+    echo '{{ pre-commit }}' > .git/hooks/pre-commit
+    chmod +x .git/hooks/pre-commit

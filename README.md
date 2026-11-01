@@ -25,6 +25,7 @@ $ uv tool install yaclog
 ## Usage
 
 For usage from the command line, yaclog provides the `yaclog` command:
+
 ```
 Usage: yaclog [OPTIONS] COMMAND [ARGS]...
 
@@ -47,11 +48,13 @@ Commands:
 ### Example workflow
 
 Create a new changelog:
+
 ```shell
 $ yaclog init
 ```
 
 Add some new entries to the current unreleased version:
+
 ```shell
 $ yaclog entry -b 'Introduced some more bugs'
 $ yaclog entry -b 'Introduced some more features'
@@ -62,6 +65,7 @@ Show the current version:
 ```shell
 $ yaclog show
 ```
+
 ```
 Unreleased
 
@@ -74,6 +78,7 @@ Release the current version and make a git tag for it
 ```shell
 $ yaclog release 0.0.1 -c
 ```
+
 ```
 Renamed version "Unreleased" to "0.0.1".
 Commit and create tag for version 0.0.1? [y/N]: y

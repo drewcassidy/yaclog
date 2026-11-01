@@ -16,10 +16,12 @@ import os
 import sys
 from pathlib import Path
 
+
 def include(file_path):
     docs_root = Path(__file__).parent.absolute()
     with open(docs_root / file_path, "r") as fp:
         return fp.read()
+
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -28,7 +30,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "Yaclog"
 copyright = f"{datetime.now().year}, Andrew Cassidy"
 author = "Andrew Cassidy"
-ref = os.environ.get("YACLOG_GIT_REF", "main") # overwritten when building docs in CI
+ref = os.environ.get("YACLOG_GIT_REF", "main")  # overwritten when building docs in CI
 
 # -- General configuration ---------------------------------------------------
 

@@ -253,13 +253,17 @@ class TestRelease(unittest.TestCase):
             runner.invoke(main, ["init"])  # create the changelog
             runner.invoke(main, ["entry", "-b", "entry number 1"])
 
-            result = runner.invoke(main, ["release", "Version 1.0.0", "-c"], input="y\n")
+            result = runner.invoke(
+                main, ["release", "Version 1.0.0", "-c"], input="y\n"
+            )
             check_result(self, result)
             self.assertIn("Created commit", result.output)
             self.assertIn("Created tag", result.output)
             self.assertIn(repo.head.commit.hexsha[0:7], result.output)
             self.assertEqual(repo.tags[0].name, "1.0.0")
-            self.assertEqual(repo.tags[0].tag.message, "Version 1.0.0\n- entry number 1")
+            self.assertEqual(
+                repo.tags[0].tag.message, "Version 1.0.0\n- entry number 1"
+            )
 
     def test_cargo(self):
         """Test updating cargo.toml files"""
