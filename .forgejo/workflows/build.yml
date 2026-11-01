@@ -84,8 +84,6 @@ jobs:
     steps:
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@v5
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: https://code.forgejo.org/actions/setup-python@v6
