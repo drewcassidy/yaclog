@@ -3,6 +3,9 @@
 
 name: build
 on: [ push, pull_request ]
+concurrency:
+  group: drewcassidy.me/yaclog
+  cancel-in-progress: false
 
 jobs:
   test-action:
@@ -63,7 +66,7 @@ jobs:
 
       - name: Set up project
         run: |
-          pip install -e .[dev]
+          pip install -e . --group dev
 
       - name: Lint
         run: just lint
@@ -88,7 +91,7 @@ jobs:
           python-version-file: pyproject.toml
 
       - name: Install documentation dependencies
-        run: pip install -g docs
+        run: pip install -e . --group docs
 
       - name: Drop docs/ from git reference
         run: | 
