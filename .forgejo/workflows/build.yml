@@ -47,10 +47,10 @@ jobs:
 
   test:
     name: Test on Python ${{ matrix.python-version }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
-        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14", "3.15" ]
 
     steps:
       - name: Checkout
@@ -76,7 +76,7 @@ jobs:
     needs:
       - test
       - test-action
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@v5
