@@ -124,13 +124,6 @@ intersphinx_mapping = {
     "packaging": ("https://packaging.pypa.io/en/latest/", None),
 }
 
-# -- Jinja global variables --------------------------------------------------
-jinja_globals = {
-    "version": version,
-    "release": release,
-    "ref": ref,
-}
-
 # -- Options for sphinx-gha --------------------------------------------------
 
 sphinx_gha_repo_root = str(Path(__file__).parent.parent.absolute())  # docs/..
