@@ -1,11 +1,11 @@
-```{include} ../README.md
-:end-before: ![a yak
-```
+# Yaclog
+
+Yaclog is a python library and command line tool to make it easier to keep track of changes to your projects. It includes commands for appending new changes to a markdown changelog file, as well as releasing new versions for deployment via git tags.
 
 ```{toctree}
 ---
 maxdepth: 2
-caption: Contents
+hidden: True
 ---
 
 handbook/index
@@ -15,14 +15,10 @@ reference/index
 ```{toctree}
 ---
 maxdepth: 1
+caption: Project
+hidden: True
 ---
 
 Changelog <changelog>
-License <license>
+Source <https://git.offworld.city/drewcassidy/yaclog>
 ```
-
-## Indices and tables
-
-* {ref}`genindex`
-* {ref}`modindex`
-* {ref}`search`
