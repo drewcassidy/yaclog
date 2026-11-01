@@ -1,6 +1,6 @@
-```{include} ../README.md
-:end-before: ![a yak
-```
+# Yaclog
+
+Yaclog is a python library and command line tool to make it easier to keep track of changes to your projects. It includes commands for appending new changes to a markdown changelog file, as well as releasing new versions for deployment via git tags.
 
 ```{toctree}
 ---
