@@ -95,15 +95,15 @@ jobs:
 
       - name: Drop docs/ from git reference
         run: | 
-          REF="$(echo '${{ forge.ref_name }}' | sed -e 's/^docs\///' )" # drop docs/ from refs
-          echo "REF='$REF'" >> $FORGEJO_ENV
+          YACLOG_GIT_REF="$(echo '${{ forge.ref_name }}' | sed -e 's/^docs\///' )" # drop docs/ from refs
+          echo "YACLOG_GIT_REF='$YACLOG_GIT_REF'" >> $FORGEJO_ENV
 
       - name: Build docs
-        run: just -v docs build -D ref="$REF"
+        run: just -v docs build -D ref="$YACLOG_GIT_REF"
 
       - name: Push docs
         if: forge.event_name == 'push' #skip for PRs
-        run: just -v docs push "$REF" ${{ startsWith(forge.ref, 'refs/tags') && '--latest --visible' || '' }}
+        run: just -v docs push "$YACLOG_GIT_REF" ${{ startsWith(forge.ref, 'refs/tags') && '--latest --visible' || '' }}
 
       - name: Upload root files
         if: forge.ref == 'refs/heads/main' # follow main branch
