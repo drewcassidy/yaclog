@@ -96,7 +96,7 @@ jobs:
       - name: Drop docs/ from git reference
         run: | 
           YACLOG_GIT_REF="$(echo '${{ forge.ref_name }}' | sed -e 's/^docs\///' )" # drop docs/ from refs
-          echo "YACLOG_GIT_REF='$YACLOG_GIT_REF'" >> $FORGEJO_ENV
+          echo "YACLOG_GIT_REF=$YACLOG_GIT_REF" >> $FORGEJO_ENV
 
       - name: Build docs
         run: just -v docs build -D ref="$YACLOG_GIT_REF"
