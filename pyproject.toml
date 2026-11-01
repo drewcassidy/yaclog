@@ -67,7 +67,7 @@ yaclog = "yaclog.cli.__main__:cli"
 [project.urls]
 Source = "https://git.offworld.city/drewcassidy/yaclog"
 Changelog = "https://yaclog.readthedocs.io/en/stable/changelog.html"
-Docs = "https://yaclog.readthedocs.io/"
+Docs = "https://drewcassidy.me/yaclog/latest/"
 
 [tool.setuptools_scm]
 fallback_version = "0.0.0"
