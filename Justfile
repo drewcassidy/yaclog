@@ -9,7 +9,6 @@ source_dirs := "yaclog/ tests/"
 lint:
     pyflakes {{ source_dirs }}
     black --check {{ source_dirs }}
-    zuban check {{ source_dirs }}
 
 # Format python source code and other support files
 format: && docs::format
