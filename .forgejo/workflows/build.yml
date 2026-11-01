@@ -96,7 +96,7 @@ jobs:
           echo "YACLOG_GIT_REF=$YACLOG_GIT_REF" >> $FORGEJO_ENV
 
       - name: Build docs
-        run: just -v docs build -D ref="$YACLOG_GIT_REF"
+        run: just -v docs build
 
       - name: Push docs
         if: forge.event_name == 'push' #skip for PRs

@@ -74,3 +74,6 @@ fallback_version = "0.0.0"
 
 [tool.setuptools.packages.find]
 include = ["yaclog*"]
+
+[tool.black]
+target-version = ["py311"]

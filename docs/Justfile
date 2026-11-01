@@ -12,7 +12,7 @@ format:
 
 # Build documentation.
 build *args:
-    python -m {{ sphinx_module }} --doctree-dir=_doctrees {{ args }}  . _build
+    python -m {{ sphinx_module }} --doctree-dir=_doctrees {{ args }} . _build
 
 # Push documentation version
 # the prefix "docs/" is dropped from version names
