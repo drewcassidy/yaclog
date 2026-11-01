@@ -1,0 +1,27 @@
+.bottom-of-page .icons img, .bottom-of-page .icons svg {
+    height: 2rem;
+    width: 2rem;
+}
+
+#sidebar-version-switch {
+    padding-left: 16px;
+    margin-bottom: 8px;
+
+    version-switch {
+        select {
+            color: inherit;
+            border: 0;
+            display: inline-block;
+            background: none;
+            box-shadow: none;
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        &:hover, &:active, &:focus {
+            background: var(--color-background-primary);
+        }
+    }
+}

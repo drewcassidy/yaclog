@@ -1,12 +1,10 @@
 # Yaclog: Yet Another Commandline Changelog Tool
 
-[![Documentation Status](https://readthedocs.org/projects/yaclog/badge/?version=latest)](https://yaclog.readthedocs.io/en/)
-[![CI Status](https://git.offworldcolonies.nexus/drewcassidy/yaclog/badges/workflows/build.yml/badge.svg?branch=main&label=build)](https://git.offworldcolonies.nexus/drewcassidy/yaclog/actions)
-[![PyPI version](https://img.shields.io/pypi/v/yaclog)](https://pypi.org/project/yaclog/)
+[source] • [documentation] • [pypi]
 
 Yaclog is a python library and command line tool to make it easier to keep track of changes to your projects. It includes commands for appending new changes to a markdown changelog file, as well as releasing new versions for deployment via git tags.
 
-![a yak who is a log](https://git.offworldcolonies.nexus/drewcassidy/yaclog/raw/branch/main/logo.png)
+![a yak who is a log](https://git.offworld.city/drewcassidy/yaclog/raw/branch/main/logo.png)
 
 *Logo by Erin Cassidy*
 
@@ -82,3 +80,7 @@ Commit and create tag for version 0.0.1? [y/N]: y
 Created commit a7b6789
 Created tag "0.0.1".
 ```
+
+[documentation]: https://drewcassidy.me/yaclog/latest/
+[pypi]: https://pypi.org/project/yaclog
+[source]: https://git.offworld.city/drewcassidy/yaclog
