@@ -58,7 +58,7 @@ docs = [
     "myst-parser ~= 5.1",
     "sphinx-gha ~= 1.0.0",
     "sphinx-copybutton",
-    "docput ~= 1.0.2"
+    "docput ~= 1.1"
 ]
 
 [project.scripts]
